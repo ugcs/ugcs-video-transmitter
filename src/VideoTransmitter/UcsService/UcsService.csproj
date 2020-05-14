@@ -55,6 +55,7 @@
   <ItemGroup>
     <Compile Include="ConnectionService.cs" />
     <Compile Include="DTO\ClientVehicleDTO.cs" />
+    <Compile Include="Enums\ModificationTypeDTO.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Exceptions\LoginException.cs" />
     <Compile Include="LicenseService.cs" />

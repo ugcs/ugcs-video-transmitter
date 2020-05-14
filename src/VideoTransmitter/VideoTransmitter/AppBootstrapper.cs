@@ -39,6 +39,8 @@ namespace VideoTransmitter
             Kernel.Bind<IWindowManager>().To<WindowManager>().InSingletonScope();
             Kernel.Bind<IEventAggregator>().To<EventAggregator>().InSingletonScope();
             Kernel.Bind<MainViewModel>().ToSelf().InSingletonScope();
+            Kernel.Bind<VehicleListener>().ToSelf().InSingletonScope();
+            Kernel.Bind<VehicleService>().ToSelf().InSingletonScope();
 
             _isInitialized = true;
         }

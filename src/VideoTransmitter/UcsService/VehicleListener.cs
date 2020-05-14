@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using UcsService.DTO;
+using UcsService.Enums;
 using UGCS.Sdk.Protocol;
 using UGCS.Sdk.Protocol.Encoding;
 
@@ -38,7 +39,7 @@ namespace UcsService
             _eventSubscriptionWrapper = new EventSubscriptionWrapper();
         }
 
-        public void SubscribeVehicle(System.Action<ClientVehicleDTO> callBack)
+        public void SubscribeVehicle(System.Action<ClientVehicleDTO, ModificationTypeDTO> callBack)
         {
             var subscription = new ObjectModificationSubscription();
             subscription.ObjectType = "Vehicle";
@@ -61,15 +62,19 @@ namespace UcsService
             SubscriptionToken st = new SubscriptionToken(subscribeEventResponse.SubscriptionId, _getObjectNotificationHandler<Vehicle>(
                 (token, exception, vehicle) =>
                 {
-                    if (token == ModificationType.MT_UPDATE || token == ModificationType.MT_CREATE)
+                    var newCvd = new ClientVehicleDTO()
                     {
-                        var newCvd = new ClientVehicleDTO()
-                        {
-                            VehicleId = vehicle.Id,
-                            Name = vehicle.Name,
-                            TailNumber = vehicle.SerialNumber
-                        };
-                        _messageReceived(callBack, newCvd);
+                        VehicleId = vehicle.Id,
+                        Name = vehicle.Name,
+                        TailNumber = vehicle.SerialNumber
+                    };
+                    if (token == ModificationType.MT_UPDATE || token == ModificationType.MT_CREATE)
+                    {                        
+                        _messageReceived(callBack, newCvd, ModificationTypeDTO.UPDATED);
+                    }
+                    else
+                    {
+                        _messageReceived(callBack, newCvd, ModificationTypeDTO.DELETED);
                     }
                 }), _eventSubscriptionWrapper);
             _connectionService.NotificationListener.AddSubscription(st);
@@ -81,9 +86,9 @@ namespace UcsService
             tokens.ForEach(x => _connectionService.NotificationListener.RemoveSubscription(x, out bool removedLastForId));
         }
 
-        private void _messageReceived(System.Action<ClientVehicleDTO> callback, ClientVehicleDTO vehicle)
+        private void _messageReceived(System.Action<ClientVehicleDTO, ModificationTypeDTO> callback, ClientVehicleDTO vehicle, ModificationTypeDTO mtd)
         {
-            callback(vehicle);
+            callback(vehicle, mtd);
         }
     }
 }

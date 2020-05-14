@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using UcsService.DTO;
+using UcsService.Enums;
 using UGCS.Sdk.Protocol;
 using UGCS.Sdk.Protocol.Encoding;
 
@@ -70,7 +71,21 @@ namespace UcsService
                 _logger.Error("Error occured.", err);
             }
         }
+        public List<ClientVehicleDTO> GetVehicles()
+        {
+            List<ClientVehicleDTO> ret = new List<ClientVehicleDTO>();
+            foreach (var vehicle in _vehicles)
+            {
+                ret.Add(new ClientVehicleDTO()
+                {
+                    VehicleId = vehicle.Value.VehicleId,
+                    Name = vehicle.Value.Name,
+                    TailNumber = vehicle.Value.TailNumber
+                });
+            }
+            return ret;
 
+        }
         private void updateAvailableVehicles()
         {
             ConcurrentDictionary<int, ClientVehicleDTO> res = new ConcurrentDictionary<int, ClientVehicleDTO>();
@@ -120,7 +135,7 @@ namespace UcsService
         }
 
 
-        private void refreshVehicle(ClientVehicleDTO vehicle)
+        private void refreshVehicle(ClientVehicleDTO vehicle, ModificationTypeDTO mtd)
         {
             bool update = false;
             if (!_vehicles.ContainsKey(vehicle.VehicleId))

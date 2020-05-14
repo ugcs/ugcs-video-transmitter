@@ -6,6 +6,14 @@
         xmlns:local="clr-namespace:VideoTransmitter.Views"
         mc:Ignorable="d"
         Title="MainView" Height="450" Width="800">
+    <Window.Resources>
+        <Style x:Key="HiddenHeader" TargetType="{x:Type GridViewColumnHeader}">
+            <Setter Property="Visibility" Value="Collapsed" />
+        </Style>
+        <ControlTemplate x:Key="EmptyListBoxTemplate">
+            <TextBlock Text="No Vehicles found" Foreground="White" FontSize="20" />
+        </ControlTemplate>
+    </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -15,11 +23,27 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="UCS:" Margin="0 0 5 0" />
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <ComboBox ItemsSource="{Binding Path=VehicleList}" 
+                          Width="200" 
+                          Height="30" 
+                          DisplayMemberPath="Name" 
+                          SelectedValuePath="VehicleId"                           
+                          SelectedItem="{Binding SelectedVehicle}"
+                          SelectedValue="{Binding Path=ClientVehicleId}">
+                    <ComboBox.ItemContainerStyle>
+                        <Style TargetType="ComboBoxItem">
+                            <Setter Property="Height" Value="30" />
+                            <Setter Property="VerticalContentAlignment" Value="Center" />
+                        </Style>
+                    </ComboBox.ItemContainerStyle>
+                </ComboBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="UCS:" Margin="20 0 5 0" />
                 <TextBlock Text="{Binding UcsConnection}"/>
             </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="20 0 10 0">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20 0 10 0">
                 <TextBlock Text="VideoServer:" Margin="0 0 5 0" />
                 <TextBlock Text="{Binding VideoServerConnection}" />
             </StackPanel>

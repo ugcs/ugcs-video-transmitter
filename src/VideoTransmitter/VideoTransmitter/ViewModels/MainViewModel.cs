@@ -1,8 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using Caliburn.Micro;
 using SSDPDiscoveryService;
 using UcsService;
+using UcsService.DTO;
+using UcsService.Enums;
 
 namespace VideoTransmitter.ViewModels
 {
@@ -16,15 +22,18 @@ namespace VideoTransmitter.ViewModels
         public const string UGCS_VIDEOSERVER_URTP_ST = "ugcs:video-server:input:urtp";
         private IDiscoveryService discoveryService;
         private ConnectionService ucsConnectionService;
-        public MainViewModel(DiscoveryService ds, ConnectionService cs)
+        private VehicleListener _vehicleListener;
+        private VehicleService _vehicleService;
+        public MainViewModel(DiscoveryService ds, ConnectionService cs, VehicleListener vl, VehicleService vs)
         {
+            _vehicleService = vs;
+            _vehicleListener = vl;
             ucsConnectionService = cs;
             discoveryService = ds;
 
             ucsConnectionService.Connected += ucsConnection_onConnected;
             ucsConnectionService.Disconnected += ucsConnection_onDisconnected;
             discoveryService.StartListen();
-
 
             Task.Run(() => startDiscoveringUcsAsync(onUcsServiceDiscovered));
             Task.Run(() => startDiscoveringURTPVideoserverAsync(onVideoServiceDiscovered));
@@ -80,6 +89,13 @@ namespace VideoTransmitter.ViewModels
         {
             var cs = sender as ConnectionService;
             UcsConnection = string.Format("Connected. client ID: {0}", cs.ClientId);
+            updateVehicleList(() =>
+            {
+                Task.Factory.StartNew(() =>
+                {
+                    _vehicleListener.SubscribeVehicle(updateVehicle);
+                });
+            });
         }
 
         private string ucsConnection = "Disconnected";
@@ -109,5 +125,121 @@ namespace VideoTransmitter.ViewModels
                 NotifyOfPropertyChange(() => VideoServerConnection);
             }
         }
+
+        private ObservableCollection<ClientVehicleDTO> _vehicleList = new ObservableCollection<ClientVehicleDTO>();
+        public ObservableCollection<ClientVehicleDTO> VehicleList
+        {
+            get
+            {
+                return _vehicleList;
+            }
+            set
+            {
+                _vehicleList = value;
+            }
+        }
+        private Object vehicleUpdateLocked = new Object();
+        private void updateVehicle(ClientVehicleDTO vehicle, ModificationTypeDTO modType)
+        {
+            Execute.OnUIThreadAsync(() =>
+            {
+                bool mod = false;
+                lock (vehicleUpdateLocked)
+                {
+                    switch (modType)
+                    {
+                        case ModificationTypeDTO.CREATED:
+                            if (!_vehicleList.Any(v => v.VehicleId == vehicle.VehicleId))
+                            {
+                                _vehicleList.Add(vehicle);
+                             //   _telemetryListener.AddVehicleIdTolistener(vehicle.Id, TelemetryCallBack);
+                            }
+                            mod = true;
+                            break;
+                        case ModificationTypeDTO.DELETED:
+                            foreach (var vInList in _vehicleList.ToList())
+                            {
+                                if (vehicle.VehicleId == vInList.VehicleId)
+                                {
+                                    _vehicleList.Remove(vInList);
+                                }
+                            }
+                            mod = true;
+                            break;
+                    }
+                }
+                if (mod)
+                {
+                    NotifyOfPropertyChange(() => VehicleList);
+                }
+            });
+        }
+
+        private void updateVehicleList(System.Action callback = null)
+        {
+            Task.Factory.StartNew(() =>
+            {
+                var vehicleList = _vehicleService.GetVehicles();
+                Execute.OnUIThreadAsync(() =>
+                {
+                    bool setActiveVehicle = false;
+                    if (_vehicleList.Count == 0)
+                    {
+                        setActiveVehicle = true;
+                    }
+                    var list = new List<int>();
+                    foreach (var vInList in vehicleList)
+                    {
+                        if (!_vehicleList.Any(v => v.VehicleId == vInList.VehicleId))
+                        {
+                            _vehicleList.Add(vInList);
+                            //_telemetryListener.AddVehicleIdTolistener(vInList.Id, TelemetryCallBack);
+                        }
+                        list.Add(vInList.VehicleId);
+                    }
+
+                    foreach (var vInList in _vehicleList.ToList())
+                    {
+                        if (!list.Any(l => l == vInList.VehicleId))
+                        {
+                            _vehicleList.Remove(vInList);
+                        }
+                    }
+                    if (_vehicleList.Count > 0 && setActiveVehicle && SelectedVehicle == null)
+                    {
+                        SelectedVehicle = _vehicleList.First();
+                    }
+                    if (_vehicleList.Count == 0)
+                    {
+                        SelectedVehicle = null;
+                    }
+                    NotifyOfPropertyChange(() => VehicleList);
+                    if (callback != null)
+                    {
+                        callback();
+                    }
+                });
+            });
+        }
+
+        private ClientVehicleDTO _selectedVehicle;
+        public ClientVehicleDTO SelectedVehicle
+        {
+            get
+            {
+                return _selectedVehicle;
+            }
+            set
+            {
+                if (_selectedVehicle != null && value != null && _selectedVehicle.VehicleId == value.VehicleId)
+                {
+                    return;
+                }
+                _selectedVehicle = value;
+                NotifyOfPropertyChange(() => SelectedVehicle);
+            }
+        }
+
+
     }
 }
