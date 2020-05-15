@@ -6,14 +6,15 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{C0201FE6-BE1D-4975-827E-922FAEB8E676}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>VideoEncoder</RootNamespace>
-    <AssemblyName>VideoEncoder</AssemblyName>
+    <RootNamespace>VideoTransmitter</RootNamespace>
+    <AssemblyName>VideoTransmitter</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -26,7 +27,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -39,6 +39,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -80,6 +81,12 @@
     <Reference Include="Caliburn.Micro.Platform.Core, Version=3.2.0.0, Culture=neutral, PublicKeyToken=8e5891231f2ed21f, processorArchitecture=MSIL">
       <HintPath>..\packages\Caliburn.Micro.3.2.0\lib\net45\Caliburn.Micro.Platform.Core.dll</HintPath>
     </Reference>
+    <Reference Include="ffme.win, Version=4.2.330.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\FFME.Windows.4.2.330\lib\net472\ffme.win.dll</HintPath>
+    </Reference>
+    <Reference Include="FFmpeg.AutoGen, Version=4.2.0.0, Culture=neutral, PublicKeyToken=9b7632533a381715, processorArchitecture=MSIL">
+      <HintPath>..\packages\FFmpeg.AutoGen.4.2.0\lib\net45\FFmpeg.AutoGen.dll</HintPath>
+    </Reference>
     <Reference Include="Ninject, Version=3.3.4.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
       <HintPath>..\packages\Ninject.3.3.4\lib\net45\Ninject.dll</HintPath>
     </Reference>
@@ -91,6 +98,8 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Caliburn.Micro.3.2.0\lib\net45\System.Windows.Interactivity.dll</HintPath>
     </Reference>
@@ -117,6 +126,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AppBootstrapper.cs" />
+    <Compile Include="Helpers\NullToVisibilityConverter.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="Views\MainView.xaml.cs">
       <DependentUpon>MainView.xaml</DependentUpon>
@@ -175,6 +185,10 @@
     <ProjectReference Include="..\UcsService\UcsService.csproj">
       <Project>{90334ff5-4a29-40e5-8e59-0966eda3ef3f}</Project>
       <Name>UcsService</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\VideoSources\VideoSources.csproj">
+      <Project>{0a378d8f-03bf-448a-ad4f-c04198ce2e35}</Project>
+      <Name>VideoSources</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

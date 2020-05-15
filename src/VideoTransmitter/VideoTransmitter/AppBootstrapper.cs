@@ -8,6 +8,7 @@ using VideoTransmitter;
 using VideoTransmitter.Properties;
 using VideoTransmitter.ViewModels;
 using UcsService;
+using VideoSources;
 
 namespace VideoTransmitter
 {
@@ -41,6 +42,7 @@ namespace VideoTransmitter
             Kernel.Bind<MainViewModel>().ToSelf().InSingletonScope();
             Kernel.Bind<VehicleListener>().ToSelf().InSingletonScope();
             Kernel.Bind<VehicleService>().ToSelf().InSingletonScope();
+            Kernel.Bind<VideoSourcesService>().ToSelf().InSingletonScope();
 
             _isInitialized = true;
         }

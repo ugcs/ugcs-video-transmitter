@@ -5,10 +5,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using Caliburn.Micro;
+using FFmpeg.AutoGen;
 using SSDPDiscoveryService;
 using UcsService;
 using UcsService.DTO;
 using UcsService.Enums;
+using VideoSources;
+using VideoSources.DTO;
 
 namespace VideoTransmitter.ViewModels
 {
@@ -20,23 +23,30 @@ namespace VideoTransmitter.ViewModels
 
         public const string UGCS_VIDEOSERVER_UDP_ST = "ugcs:video-server:input:udp";
         public const string UGCS_VIDEOSERVER_URTP_ST = "ugcs:video-server:input:urtp";
-        private IDiscoveryService discoveryService;
-        private ConnectionService ucsConnectionService;
+        private IDiscoveryService _discoveryService;
+        private ConnectionService _ucsConnectionService;
         private VehicleListener _vehicleListener;
         private VehicleService _vehicleService;
-        public MainViewModel(DiscoveryService ds, ConnectionService cs, VehicleListener vl, VehicleService vs)
+        private VideoSourcesService _videoSourcesService;
+        public unsafe MainViewModel(DiscoveryService ds, ConnectionService cs, VehicleListener vl, VehicleService vs, VideoSourcesService vss)
         {
+            _videoSourcesService = vss;
             _vehicleService = vs;
             _vehicleListener = vl;
-            ucsConnectionService = cs;
-            discoveryService = ds;
-
-            ucsConnectionService.Connected += ucsConnection_onConnected;
-            ucsConnectionService.Disconnected += ucsConnection_onDisconnected;
-            discoveryService.StartListen();
+            _ucsConnectionService = cs;
+            _discoveryService = ds;
+            lock (videoSourcesListLocker)
+            {
+                VideoSourcesList = new ObservableCollection<VideoSourceDTO>(_videoSourcesService.GetVideoSources());
+            }
+            _ucsConnectionService.Connected += ucsConnection_onConnected;
+            _ucsConnectionService.Disconnected += ucsConnection_onDisconnected;
+            _videoSourcesService.SourcesChanged += videoSources_onChanged;
+            _discoveryService.StartListen();
 
             Task.Run(() => startDiscoveringUcsAsync(onUcsServiceDiscovered));
-            Task.Run(() => startDiscoveringURTPVideoserverAsync(onVideoServiceDiscovered));
+            Task.Run(() => startDiscoveringURTPVideoserverAsync(onVideoServiceDiscovered));            
+             
         }
         private void onVideoServiceDiscovered(Uri videoServer, string viseoserverSt)
         {
@@ -61,23 +71,23 @@ namespace VideoTransmitter.ViewModels
         }
         private async Task startDiscoveringUcsAsync(Action<Uri> onDiscovered)
         {
-            Uri videoServerUrl = await discoveryService.TryFoundAsync(UCS_SERVER_TYPE);
+            Uri videoServerUrl = await _discoveryService.TryFoundAsync(UCS_SERVER_TYPE);
             onDiscovered(videoServerUrl);
         }
         private async Task startDiscoveringURTPVideoserverAsync(Action<Uri, string> onDiscovered)
         {
-            Uri videoServerUrl = await discoveryService.TryFoundAsync(UGCS_VIDEOSERVER_UDP_ST);
+            Uri videoServerUrl = await _discoveryService.TryFoundAsync(UGCS_VIDEOSERVER_UDP_ST);
             onDiscovered(videoServerUrl, UGCS_VIDEOSERVER_UDP_ST);
         }
         private async Task startDiscoveringUDPVideoserverAsync(Action<Uri, string> onDiscovered)
         {
-            Uri videoServerUrl = await discoveryService.TryFoundAsync(UGCS_VIDEOSERVER_UDP_ST);
+            Uri videoServerUrl = await _discoveryService.TryFoundAsync(UGCS_VIDEOSERVER_UDP_ST);
             onDiscovered(videoServerUrl, UGCS_VIDEOSERVER_UDP_ST);
         }
 
         public void ConnectAsync(Uri address)
         {
-            Task.Run(() => ucsConnectionService.ConnectAsync(address, new UcsCredentials(string.Empty, string.Empty)));
+            Task.Run(() => _ucsConnectionService.ConnectAsync(address, new UcsCredentials(string.Empty, string.Empty)));
         }
         private void ucsConnection_onDisconnected(object sender, EventArgs e)
         {
@@ -95,6 +105,39 @@ namespace VideoTransmitter.ViewModels
                 {
                     _vehicleListener.SubscribeVehicle(updateVehicle);
                 });
+            });
+        }
+
+        private void videoSources_onChanged(object sender, EventArgs e)
+        {
+            List<VideoSourceDTO> sources = sender as List<VideoSourceDTO>;
+            Execute.OnUIThreadAsync(() =>
+            {
+                bool mod = false;
+                lock (videoSourcesListLocker)
+                {
+                    foreach (var source in sources)
+                    {
+                        if (!VideoSourcesList.Any(v => v.Name == source.Name))
+                        {
+                            VideoSourcesList.Add(source);
+                            mod = true;
+                        }
+                    }
+                    foreach (var source in _videoSourcesList)
+                    {
+                        if (!sources.Any(v => v.Name == source.Name))
+                        {
+                            VideoSourcesList.Remove(source);
+                            mod = true;
+                        }
+                    }
+                }
+                   
+                if (mod)
+                {
+                    NotifyOfPropertyChange(() => VideoSourcesList);
+                }
             });
         }
 
@@ -138,6 +181,23 @@ namespace VideoTransmitter.ViewModels
                 _vehicleList = value;
             }
         }
+
+        private object videoSourcesListLocker = new object();
+        private ObservableCollection<VideoSourceDTO> _videoSourcesList = new ObservableCollection<VideoSourceDTO>();
+        public ObservableCollection<VideoSourceDTO> VideoSourcesList
+        {
+            get
+            {
+                return _videoSourcesList;
+            }
+            set
+            {
+                _videoSourcesList = value;
+                NotifyOfPropertyChange(() => VideoSourcesList);
+            }
+        }
+
+
         private Object vehicleUpdateLocked = new Object();
         private void updateVehicle(ClientVehicleDTO vehicle, ModificationTypeDTO modType)
         {
@@ -205,10 +265,6 @@ namespace VideoTransmitter.ViewModels
                             _vehicleList.Remove(vInList);
                         }
                     }
-                    if (_vehicleList.Count > 0 && setActiveVehicle && SelectedVehicle == null)
-                    {
-                        SelectedVehicle = _vehicleList.First();
-                    }
                     if (_vehicleList.Count == 0)
                     {
                         SelectedVehicle = null;
@@ -239,6 +295,26 @@ namespace VideoTransmitter.ViewModels
                 NotifyOfPropertyChange(() => SelectedVehicle);
             }
         }
+
+        private VideoSourceDTO _selectedVideoSource;
+        public VideoSourceDTO SelectedVideoSource
+        {
+            get
+            {
+                return _selectedVideoSource;
+            }
+            set
+            {
+                if (_selectedVideoSource != null && value != null && _selectedVehicle.Name == value.Name)
+                {
+                    return;
+                }
+                _selectedVideoSource = value;
+                NotifyOfPropertyChange(() => SelectedVideoSource);
+            }
+        }
+
+        
 
 
     }

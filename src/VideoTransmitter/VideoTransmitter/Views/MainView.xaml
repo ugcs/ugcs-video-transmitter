@@ -4,8 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VideoTransmitter.Views"
+        xmlns:helpers="clr-namespace:VideoTransmitter.Helpers"
         mc:Ignorable="d"
-        Title="MainView" Height="450" Width="800">
+        Title="MainView" Height="720" Width="1280">
     <Window.Resources>
         <Style x:Key="HiddenHeader" TargetType="{x:Type GridViewColumnHeader}">
             <Setter Property="Visibility" Value="Collapsed" />
@@ -13,6 +14,7 @@
         <ControlTemplate x:Key="EmptyListBoxTemplate">
             <TextBlock Text="No Vehicles found" Foreground="White" FontSize="20" />
         </ControlTemplate>
+        <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -23,21 +25,57 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                <ComboBox ItemsSource="{Binding Path=VehicleList}" 
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20 0 5 0">
+                <Grid>
+                    <ComboBox ItemsSource="{Binding Path=VideoSourcesList}" 
                           Width="200" 
                           Height="30" 
+                          x:Name="SelectedVideoSourceElement"
                           DisplayMemberPath="Name" 
-                          SelectedValuePath="VehicleId"                           
-                          SelectedItem="{Binding SelectedVehicle}"
-                          SelectedValue="{Binding Path=ClientVehicleId}">
-                    <ComboBox.ItemContainerStyle>
-                        <Style TargetType="ComboBoxItem">
-                            <Setter Property="Height" Value="30" />
-                            <Setter Property="VerticalContentAlignment" Value="Center" />
-                        </Style>
-                    </ComboBox.ItemContainerStyle>
-                </ComboBox>
+                          SelectedValuePath="Name"                           
+                          SelectedItem="{Binding SelectedVideoSource}"
+                          SelectedValue="{Binding Path=Name}">
+                        <ComboBox.ItemContainerStyle>
+                            <Style TargetType="ComboBoxItem">
+                                <Setter Property="Height" Value="30" />
+                                <Setter Property="VerticalContentAlignment" Value="Center" />
+                            </Style>
+                        </ComboBox.ItemContainerStyle>
+                    </ComboBox>
+                    <TextBlock
+                        Margin="5 0 0 0"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Left"
+                        Visibility="{Binding SelectedItem, ElementName=SelectedVideoSourceElement, Converter={StaticResource NullToVisibilityConverter}}"
+                        IsHitTestVisible="False"
+                        Text="Select video source...  " />
+                </Grid>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20 0 5 0">
+                <Grid>
+                    <ComboBox ItemsSource="{Binding Path=VehicleList}" 
+                              x:Name="SelectedVehicleElement"
+                              Width="200" 
+                              Height="30" 
+                              DisplayMemberPath="Name" 
+                              SelectedValuePath="VehicleId"                           
+                              SelectedItem="{Binding SelectedVehicle}"
+                              SelectedValue="{Binding Path=VehicleId}">
+                        <ComboBox.ItemContainerStyle>
+                            <Style TargetType="ComboBoxItem">
+                                <Setter Property="Height" Value="30" />
+                                <Setter Property="VerticalContentAlignment" Value="Center" />
+                            </Style>
+                        </ComboBox.ItemContainerStyle>
+                    </ComboBox>
+                    <TextBlock
+                            Margin="5 0 0 0"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Left"
+                            Visibility="{Binding SelectedItem, ElementName=SelectedVehicleElement, Converter={StaticResource NullToVisibilityConverter}}"
+                            IsHitTestVisible="False"
+                            Text="Select vehicle...  " />
+                </Grid>
             </StackPanel>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBlock Text="UCS:" Margin="20 0 5 0" />
