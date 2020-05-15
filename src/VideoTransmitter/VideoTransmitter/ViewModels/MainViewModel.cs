@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -31,9 +32,16 @@ namespace VideoTransmitter.ViewModels
         private VehicleService _vehicleService;
         private VideoSourcesService _videoSourcesService;
         private Unosquare.FFME.MediaElement m_MediaElement;
+        private IWindowManager _iWindowManager;
 
-        public unsafe MainViewModel(DiscoveryService ds, ConnectionService cs, VehicleListener vl, VehicleService vs, VideoSourcesService vss)
+        public unsafe MainViewModel(DiscoveryService ds, 
+            ConnectionService cs, 
+            VehicleListener vl, 
+            VehicleService vs, 
+            VideoSourcesService vss, 
+            IWindowManager manager)
         {
+            _iWindowManager = manager;
             _videoSourcesService = vss;
             _vehicleService = vs;
             _vehicleListener = vl;
@@ -352,7 +360,22 @@ namespace VideoTransmitter.ViewModels
 
         public void ViewLoaded()
         {
-            // onview loaded events if any
+            MediaElement.PacketRead += packedRead;
+        }
+        private unsafe void packedRead(object sender, Unosquare.FFME.Common.PacketReadEventArgs e)
+        {
+            // Capture stream here
+            Debug.WriteLine(e.Packet->size);
+        }
+        public void SettingsWindows()
+        {
+            _iWindowManager.ShowDialog(new SettingsViewModel(onSettingsSaved));
+        }
+
+        public void onSettingsSaved()
+        {
+            int x = 1;
+            //Some action on settings saved;
         }
     }
 }

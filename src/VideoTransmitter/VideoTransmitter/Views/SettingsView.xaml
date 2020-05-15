@@ -1,0 +1,56 @@
+﻿<Window x:Class="VideoTransmitter.Views.SettingsView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:VideoTransmitter.Views"        
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"          
+	    xmlns:cal="clr-namespace:Caliburn.Micro;assembly=Caliburn.Micro.Platform"  
+        mc:Ignorable="d"
+        x:Name="SettingsWindow"
+        Title="Settings" Height="320" Width="400"
+        Loaded="Window_Loaded">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"></RowDefinition>
+            <RowDefinition Height="50"></RowDefinition>
+            <RowDefinition Height="50"></RowDefinition>
+            <RowDefinition Height="50"></RowDefinition>
+            <RowDefinition Height="50"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" VerticalAlignment="Center" Margin="10 0 10 0">
+            <TextBox Text="{Binding TailNumber}"></TextBox>
+        </StackPanel>
+        <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="10 0 10 0" Orientation="Horizontal">
+            <RadioButton GroupName="UgcsConnection" Content="UgCS Automatic discovery" IsChecked="{Binding UgcsAutomatic}" />
+            <RadioButton GroupName="UgcsConnection" Content="UgCS Direct IP" Margin="10 0 10 0" IsChecked="{Binding UgcsDirectConnection}" />
+        </StackPanel>
+        <StackPanel Grid.Row="2" VerticalAlignment="Center" Margin="10 0 10 0" Orientation="Horizontal">
+            <TextBox Text="{Binding UcgsAddress}" Width="200" IsEnabled="{Binding UgcsDirectConnection}"></TextBox>
+            <TextBlock>:</TextBlock>
+            <TextBox Text="{Binding UcgsPort}" Width="50" IsEnabled="{Binding UgcsDirectConnection}"></TextBox>
+        </StackPanel>
+        <StackPanel Grid.Row="3" VerticalAlignment="Center" Margin="10 0 10 0" Orientation="Horizontal">
+            <RadioButton GroupName="VideoServerConnection" Content="VideoServer Automatic discovery" IsChecked="{Binding VideoServerAutomatic}" />
+            <RadioButton GroupName="VideoServerConnection" Content="VideoServer Direct IP" Margin="10 0 10 0" IsChecked="{Binding VideoServerDirectConnection}" />
+        </StackPanel>
+        <StackPanel Grid.Row="4" VerticalAlignment="Center" Margin="10 0 10 0" Orientation="Horizontal">
+            <TextBox Text="{Binding VideoServerAddress}" Width="200" IsEnabled="{Binding VideoServerDirectConnection}"></TextBox>
+            <TextBlock>:</TextBlock>
+            <TextBox Text="{Binding VideoServerPort}" Width="50" IsEnabled="{Binding VideoServerDirectConnection}"></TextBox>
+        </StackPanel>
+        <StackPanel Grid.Row="5" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10 0 10 0" Orientation="Horizontal">
+            <Button Content="Apply" Margin="10 0 10 0">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="Click">
+                        <cal:ActionMessage MethodName="SaveSettings">
+                            <cal:Parameter Value="{Binding ElementName=SettingsWindow}" />
+                        </cal:ActionMessage>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </Button>
+            <Button Content="Cancel" Click="Close_Click"></Button>
+        </StackPanel>
+    </Grid>
+</Window>
