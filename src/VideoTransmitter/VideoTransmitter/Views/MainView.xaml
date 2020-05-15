@@ -5,8 +5,17 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VideoTransmitter.Views"
         xmlns:helpers="clr-namespace:VideoTransmitter.Helpers"
+        xmlns:ffme="clr-namespace:Unosquare.FFME;assembly=ffme.win"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"          
+	    xmlns:cal="clr-namespace:Caliburn.Micro;assembly=Caliburn.Micro.Platform"  
         mc:Ignorable="d"
         Title="MainView" Height="720" Width="1280">
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <cal:ActionMessage MethodName="ViewLoaded">
+            </cal:ActionMessage>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
     <Window.Resources>
         <Style x:Key="HiddenHeader" TargetType="{x:Type GridViewColumnHeader}">
             <Setter Property="Visibility" Value="Collapsed" />
@@ -77,6 +86,19 @@
                             Text="Select vehicle...  " />
                 </Grid>
             </StackPanel>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20 0 5 0">
+                <Button Content="Start streaming >" Width="150" Height="30">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Click">
+                            <cal:ActionMessage MethodName="StartStreaming">
+                            </cal:ActionMessage>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </Button>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20 0 5 0">
+                <Button Content="Settings" Width="150" Height="30"></Button>
+            </StackPanel>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBlock Text="UCS:" Margin="20 0 5 0" />
                 <TextBlock Text="{Binding UcsConnection}"/>
@@ -85,6 +107,13 @@
                 <TextBlock Text="VideoServer:" Margin="0 0 5 0" />
                 <TextBlock Text="{Binding VideoServerConnection}" />
             </StackPanel>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="1">
+            <Grid>
+                <ffme:MediaElement Grid.Row="0" x:Name="Media" LoadedBehavior="Play" UnloadedBehavior="Manual" MediaOpening="Media_MediaOpening"/>
+                <TextBlock Text="Loading video" VerticalAlignment="Center" x:Name="LoadingVideo" Visibility="Hidden" />
+            </Grid>
         </StackPanel>
     </Grid>
 </Window>

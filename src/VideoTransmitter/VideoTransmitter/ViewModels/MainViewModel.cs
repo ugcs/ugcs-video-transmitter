@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using Caliburn.Micro;
 using FFmpeg.AutoGen;
 using SSDPDiscoveryService;
@@ -12,6 +13,7 @@ using UcsService.DTO;
 using UcsService.Enums;
 using VideoSources;
 using VideoSources.DTO;
+using VideoTransmitter.Views;
 
 namespace VideoTransmitter.ViewModels
 {
@@ -28,6 +30,8 @@ namespace VideoTransmitter.ViewModels
         private VehicleListener _vehicleListener;
         private VehicleService _vehicleService;
         private VideoSourcesService _videoSourcesService;
+        private Unosquare.FFME.MediaElement m_MediaElement;
+
         public unsafe MainViewModel(DiscoveryService ds, ConnectionService cs, VehicleListener vl, VehicleService vs, VideoSourcesService vss)
         {
             _videoSourcesService = vss;
@@ -45,7 +49,7 @@ namespace VideoTransmitter.ViewModels
             _discoveryService.StartListen();
 
             Task.Run(() => startDiscoveringUcsAsync(onUcsServiceDiscovered));
-            Task.Run(() => startDiscoveringURTPVideoserverAsync(onVideoServiceDiscovered));            
+            Task.Run(() => startDiscoveringURTPVideoserverAsync(onVideoServiceDiscovered));
              
         }
         private void onVideoServiceDiscovered(Uri videoServer, string viseoserverSt)
@@ -314,8 +318,41 @@ namespace VideoTransmitter.ViewModels
             }
         }
 
-        
+        public Unosquare.FFME.MediaElement MediaElement
+        {
+            get
+            {
+                if (m_MediaElement == null)
+                    m_MediaElement = (Application.Current.MainWindow as MainView)?.Media;
 
+                return m_MediaElement;
+            }
+        }
 
+        public async void StartStreaming()
+        {
+            if (MediaElement == null)
+            {
+                MessageBox.Show("Media element is null");
+                return;
+            }
+            if (SelectedVideoSource == null)
+            {
+                MessageBox.Show("Please select video source");
+                return;
+            }
+            if (MediaElement != null)
+            {
+                if (!await MediaElement.Open(new Uri($"device://dshow/?video={SelectedVideoSource.Name}")))
+                {
+                    MessageBox.Show($"Can't open video from {SelectedVideoSource.Name}.");
+                }
+            }
+        }
+
+        public void ViewLoaded()
+        {
+            // onview loaded events if any
+        }
     }
 }

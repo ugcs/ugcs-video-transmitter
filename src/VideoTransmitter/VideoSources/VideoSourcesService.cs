@@ -18,7 +18,7 @@ namespace VideoSources
         {
             _videoSourceList.Add(new VideoSourceDTO()
             {
-                Name = "Test video source"
+                Name = "Webcam C170"
             });
         }
 
