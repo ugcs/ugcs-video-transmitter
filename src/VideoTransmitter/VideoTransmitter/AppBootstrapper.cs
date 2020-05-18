@@ -41,6 +41,7 @@ namespace VideoTransmitter
             Kernel.Bind<IEventAggregator>().To<EventAggregator>().InSingletonScope();
             Kernel.Bind<MainViewModel>().ToSelf().InSingletonScope();
             Kernel.Bind<VehicleListener>().ToSelf().InSingletonScope();
+            Kernel.Bind<TelemetryListener>().ToSelf().InSingletonScope();
             Kernel.Bind<VehicleService>().ToSelf().InSingletonScope();
             Kernel.Bind<VideoSourcesService>().ToSelf().InSingletonScope();
 

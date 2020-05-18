@@ -177,7 +177,7 @@ namespace VideoTransmitter.ViewModels
                 Settings.Default.VideoServerAutomatic = VideoServerAutomatic;
                 changed.Add("VideoServerAutomatic");
             }
-            if (VideoServerAddress != Settings.Default.VideoServerAddress || UcgsPort != Settings.Default.VideoServerPort)
+            if (VideoServerAddress != Settings.Default.VideoServerAddress || VideoServerPort != Settings.Default.VideoServerPort)
             {
                 Settings.Default.VideoServerAddress = VideoServerAddress;
                 Settings.Default.VideoServerPort = VideoServerPort;

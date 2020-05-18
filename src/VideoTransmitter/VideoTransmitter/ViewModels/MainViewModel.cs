@@ -23,6 +23,7 @@ namespace VideoTransmitter.ViewModels
 {
     public partial class MainViewModel : Caliburn.Micro.PropertyChangedBase
     {
+        private Timer telemetryTimer;
 
         private Timer ucsConnectionTimer;
         private Timer videoServerConnectionTimer;
@@ -35,6 +36,7 @@ namespace VideoTransmitter.ViewModels
         private IDiscoveryService _discoveryService;
         private ConnectionService _ucsConnectionService;
         private VehicleListener _vehicleListener;
+        private TelemetryListener _telemetryListener;
         private VehicleService _vehicleService;
         private VideoSourcesService _videoSourcesService;
         private Unosquare.FFME.MediaElement m_MediaElement;
@@ -43,6 +45,7 @@ namespace VideoTransmitter.ViewModels
         public unsafe MainViewModel(DiscoveryService ds,
             ConnectionService cs,
             VehicleListener vl,
+            TelemetryListener tl,
             VehicleService vs,
             VideoSourcesService vss,
             IWindowManager manager)
@@ -51,6 +54,7 @@ namespace VideoTransmitter.ViewModels
             _videoSourcesService = vss;
             _vehicleService = vs;
             _vehicleListener = vl;
+            _telemetryListener = tl;
             _ucsConnectionService = cs;
             _discoveryService = ds;
             lock (videoSourcesListLocker)
@@ -72,13 +76,21 @@ namespace VideoTransmitter.ViewModels
             videoServerConnectionTimer.AutoReset = true;
             videoServerConnectionTimer.Enabled = true;
 
+            telemetryTimer = new Timer(1000);
+            telemetryTimer.Elapsed += OnTelemetryTimer;
+            telemetryTimer.AutoReset = true;
+            telemetryTimer.Enabled = true;
+
 
         }
+        private bool isConnecting = false;
         private void OnUcsConnection(Object source, ElapsedEventArgs e)
         {
-            if (!_ucsConnectionService.IsConnected)
+            if (!_ucsConnectionService.IsConnected && !isConnecting)
             {
+                isConnecting = true;
                 startUcsConnection();
+                isConnecting = false;
             }
         }
         private void OnVideoServerConnection(Object source, ElapsedEventArgs e)
@@ -106,6 +118,14 @@ namespace VideoTransmitter.ViewModels
                     urtpServer = new Uri("urtp+connect://" + Settings.Default.VideoServerAddress + ":" + Settings.Default.VideoServerPort);
                     VideoServerConnection = Settings.Default.VideoServerAddress + ":" + Settings.Default.VideoServerPort;
                 }
+            }
+        }
+        private void OnTelemetryTimer(Object source, ElapsedEventArgs e)
+        {
+            if (SelectedVehicle != null)
+            {
+                var telemetry = _telemetryListener.GetTelemetryById(SelectedVehicle.VehicleId);
+                //TODO: send misp telemetry
             }
         }
 
@@ -167,6 +187,7 @@ namespace VideoTransmitter.ViewModels
                 Task.Factory.StartNew(() =>
                 {
                     _vehicleListener.SubscribeVehicle(updateVehicle);
+                    _telemetryListener.SubscribeTelemtry();
                 });
             });
         }
@@ -438,5 +459,6 @@ namespace VideoTransmitter.ViewModels
                 VideoServerConnection = "Not found";
             }
         }
+
     }
 }
