@@ -25,13 +25,13 @@ namespace VideoTransmitter.ViewModels
     {
 
         private Timer ucsConnectionTimer;
+        private Timer videoServerConnectionTimer;
 
         private const string UCS_SERVER_TYPE = "ugcs:hci-server";
-        private Uri urtpServer = null;
-        private Uri udpServer = null;
 
-        public const string UGCS_VIDEOSERVER_UDP_ST = "ugcs:video-server:input:udp";
+        private Uri urtpServer = null;
         public const string UGCS_VIDEOSERVER_URTP_ST = "ugcs:video-server:input:urtp";
+
         private IDiscoveryService _discoveryService;
         private ConnectionService _ucsConnectionService;
         private VehicleListener _vehicleListener;
@@ -66,7 +66,12 @@ namespace VideoTransmitter.ViewModels
             ucsConnectionTimer.Elapsed += OnUcsConnection;
             ucsConnectionTimer.AutoReset = true;
             ucsConnectionTimer.Enabled = true;
-            Task.Run(() => startDiscoveringURTPVideoserverAsync(onVideoServiceDiscovered));
+
+            videoServerConnectionTimer = new Timer(500);
+            videoServerConnectionTimer.Elapsed += OnVideoServerConnection;
+            videoServerConnectionTimer.AutoReset = true;
+            videoServerConnectionTimer.Enabled = true;
+
 
         }
         private void OnUcsConnection(Object source, ElapsedEventArgs e)
@@ -76,34 +81,32 @@ namespace VideoTransmitter.ViewModels
                 startUcsConnection();
             }
         }
-
-        private void onVideoServiceDiscovered(Uri videoServer, string viseoserverSt)
+        private void OnVideoServerConnection(Object source, ElapsedEventArgs e)
         {
-            switch (viseoserverSt)
+            if (urtpServer == null)
             {
-                case UGCS_VIDEOSERVER_UDP_ST:
-                    udpServer = videoServer;
-                    break;
-                case UGCS_VIDEOSERVER_URTP_ST:
-                    urtpServer = videoServer;
-                    break;
+                if (Settings.Default.VideoServerAutomatic)
+                {
+                    if (!searhing)
+                    {
+                        searhing = true;
+                        _discoveryService.TryFound(UGCS_VIDEOSERVER_URTP_ST, (location) =>
+                        {
+                            if (Settings.Default.VideoServerAutomatic)
+                            {
+                                urtpServer = location;
+                                VideoServerConnection = urtpServer.Host + ":" + urtpServer.Port;
+                            }
+                            searhing = false;
+                        });
+                    }
+                }
+                else
+                {
+                    urtpServer = new Uri("urtp+connect://" + Settings.Default.VideoServerAddress + ":" + Settings.Default.VideoServerPort);
+                    VideoServerConnection = Settings.Default.VideoServerAddress + ":" + Settings.Default.VideoServerPort;
+                }
             }
-            if (udpServer != null || urtpServer != null)
-            {
-                //TODO: selector between URT & UDP
-                VideoServerConnection = videoServer.Host + ":" + videoServer.Port;
-            }
-        }
-        
-        private async Task startDiscoveringURTPVideoserverAsync(Action<Uri, string> onDiscovered)
-        {
-            Uri videoServerUrl = await _discoveryService.TryFoundAsync(UGCS_VIDEOSERVER_UDP_ST);
-            onDiscovered(videoServerUrl, UGCS_VIDEOSERVER_UDP_ST);
-        }
-        private async Task startDiscoveringUDPVideoserverAsync(Action<Uri, string> onDiscovered)
-        {
-            Uri videoServerUrl = await _discoveryService.TryFoundAsync(UGCS_VIDEOSERVER_UDP_ST);
-            onDiscovered(videoServerUrl, UGCS_VIDEOSERVER_UDP_ST);
         }
 
         public void Connect(Uri address)
@@ -215,7 +218,7 @@ namespace VideoTransmitter.ViewModels
             }
         }
 
-        private string videoServerConnection = "Not Found";
+        private string videoServerConnection = "Not found";
         public string VideoServerConnection
         {
             get
@@ -427,6 +430,12 @@ namespace VideoTransmitter.ViewModels
                 {
                     _ucsConnectionService.Disconnect();
                 }
+            }
+
+            if (changed.Contains("VideoServerAutomatic") || changed.Contains("VideoServerAddress"))
+            {
+                urtpServer = null;
+                VideoServerConnection = "Not found";
             }
         }
     }
