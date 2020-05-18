@@ -10,19 +10,19 @@ namespace VideoTransmitter.ViewModels
 {
     public class SettingsViewModel : Caliburn.Micro.PropertyChangedBase
     {
-        private Action onSave;
-        public SettingsViewModel(Action onSave)
+        private Action<HashSet<string>> onSave;
+        public SettingsViewModel(Action<HashSet<string>> onSave)
         {
             this.onSave = onSave;
             TailNumber = Settings.Default.TailNumber;
 
             UgcsAutomatic = Settings.Default.UgcsAutomatic;
-            UgcsDirectConnection = Settings.Default.UgcsDirectConnection;
+            UgcsDirectConnection = !Settings.Default.UgcsAutomatic;
             UcgsAddress = Settings.Default.UcgsAddress;
             UcgsPort = Settings.Default.UcgsPort;
 
             VideoServerAutomatic = Settings.Default.VideoServerAutomatic;
-            VideoServerDirectConnection = Settings.Default.VideoServerDirectConnection;
+            VideoServerDirectConnection = !Settings.Default.VideoServerAutomatic;
             VideoServerAddress = Settings.Default.VideoServerAddress;
             VideoServerPort = Settings.Default.VideoServerPort;
         }        
@@ -155,20 +155,37 @@ namespace VideoTransmitter.ViewModels
 
         public void SaveSettings(Window wnd)
         {
-            Settings.Default.TailNumber = TailNumber;
-
-            Settings.Default.UgcsAutomatic = UgcsAutomatic;
-            Settings.Default.UgcsDirectConnection = UgcsDirectConnection;
-            Settings.Default.UcgsAddress = UcgsAddress;
-            Settings.Default.UcgsPort = UcgsPort;
-
-            Settings.Default.VideoServerAutomatic = VideoServerAutomatic;
-            Settings.Default.VideoServerDirectConnection = VideoServerDirectConnection;
-            Settings.Default.VideoServerAddress = VideoServerAddress;
-            Settings.Default.VideoServerPort = VideoServerPort;
+            HashSet<string> changed = new HashSet<string>();
+            if (TailNumber != Settings.Default.TailNumber)
+            {
+                Settings.Default.TailNumber = TailNumber;
+                changed.Add("TailNumber");
+            }
+            if (UgcsAutomatic != Settings.Default.UgcsAutomatic)
+            {
+                Settings.Default.UgcsAutomatic = UgcsAutomatic;
+                changed.Add("UgcsAutomatic");
+            }
+            if (UcgsAddress != Settings.Default.UcgsAddress || UcgsPort != Settings.Default.UcgsPort)
+            {
+                Settings.Default.UcgsAddress = UcgsAddress;
+                Settings.Default.UcgsPort = UcgsPort;
+                changed.Add("UcgsAddress");
+            }
+            if (VideoServerAutomatic != Settings.Default.VideoServerAutomatic)
+            {
+                Settings.Default.VideoServerAutomatic = VideoServerAutomatic;
+                changed.Add("VideoServerAutomatic");
+            }
+            if (VideoServerAddress != Settings.Default.VideoServerAddress || UcgsPort != Settings.Default.VideoServerPort)
+            {
+                Settings.Default.VideoServerAddress = VideoServerAddress;
+                Settings.Default.VideoServerPort = VideoServerPort;
+                changed.Add("VideoServerAddress");
+            }
 
             Settings.Default.Save();
-            onSave?.Invoke();
+            onSave?.Invoke(changed);
             wnd.Close();
         }
     }

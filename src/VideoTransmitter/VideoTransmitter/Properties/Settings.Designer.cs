@@ -37,18 +37,6 @@ namespace VideoTransmitter.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool UgcsDirectConnection {
-            get {
-                return ((bool)(this["UgcsDirectConnection"]));
-            }
-            set {
-                this["UgcsDirectConnection"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string UcgsAddress {
             get {
@@ -80,18 +68,6 @@ namespace VideoTransmitter.Properties {
             }
             set {
                 this["VideoServerAutomatic"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool VideoServerDirectConnection {
-            get {
-                return ((bool)(this["VideoServerDirectConnection"]));
-            }
-            set {
-                this["VideoServerDirectConnection"] = value;
             }
         }
         

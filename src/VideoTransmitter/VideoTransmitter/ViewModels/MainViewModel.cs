@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using Caliburn.Micro;
@@ -14,12 +15,17 @@ using UcsService.DTO;
 using UcsService.Enums;
 using VideoSources;
 using VideoSources.DTO;
+using VideoTransmitter.Properties;
 using VideoTransmitter.Views;
+
 
 namespace VideoTransmitter.ViewModels
 {
     public partial class MainViewModel : Caliburn.Micro.PropertyChangedBase
     {
+
+        private Timer ucsConnectionTimer;
+
         private const string UCS_SERVER_TYPE = "ugcs:hci-server";
         private Uri urtpServer = null;
         private Uri udpServer = null;
@@ -34,11 +40,11 @@ namespace VideoTransmitter.ViewModels
         private Unosquare.FFME.MediaElement m_MediaElement;
         private IWindowManager _iWindowManager;
 
-        public unsafe MainViewModel(DiscoveryService ds, 
-            ConnectionService cs, 
-            VehicleListener vl, 
-            VehicleService vs, 
-            VideoSourcesService vss, 
+        public unsafe MainViewModel(DiscoveryService ds,
+            ConnectionService cs,
+            VehicleListener vl,
+            VehicleService vs,
+            VideoSourcesService vss,
             IWindowManager manager)
         {
             _iWindowManager = manager;
@@ -56,10 +62,21 @@ namespace VideoTransmitter.ViewModels
             _videoSourcesService.SourcesChanged += videoSources_onChanged;
             _discoveryService.StartListen();
 
-            Task.Run(() => startDiscoveringUcsAsync(onUcsServiceDiscovered));
+            ucsConnectionTimer = new Timer(500);
+            ucsConnectionTimer.Elapsed += OnUcsConnection;
+            ucsConnectionTimer.AutoReset = true;
+            ucsConnectionTimer.Enabled = true;
             Task.Run(() => startDiscoveringURTPVideoserverAsync(onVideoServiceDiscovered));
-             
+
         }
+        private void OnUcsConnection(Object source, ElapsedEventArgs e)
+        {
+            if (!_ucsConnectionService.IsConnected)
+            {
+                startUcsConnection();
+            }
+        }
+
         private void onVideoServiceDiscovered(Uri videoServer, string viseoserverSt)
         {
             switch (viseoserverSt)
@@ -77,15 +94,7 @@ namespace VideoTransmitter.ViewModels
                 VideoServerConnection = videoServer.Host + ":" + videoServer.Port;
             }
         }
-        private void onUcsServiceDiscovered(Uri ucsService)
-        {
-            ConnectAsync(ucsService);
-        }
-        private async Task startDiscoveringUcsAsync(Action<Uri> onDiscovered)
-        {
-            Uri videoServerUrl = await _discoveryService.TryFoundAsync(UCS_SERVER_TYPE);
-            onDiscovered(videoServerUrl);
-        }
+        
         private async Task startDiscoveringURTPVideoserverAsync(Action<Uri, string> onDiscovered)
         {
             Uri videoServerUrl = await _discoveryService.TryFoundAsync(UGCS_VIDEOSERVER_UDP_ST);
@@ -97,14 +106,53 @@ namespace VideoTransmitter.ViewModels
             onDiscovered(videoServerUrl, UGCS_VIDEOSERVER_UDP_ST);
         }
 
-        public void ConnectAsync(Uri address)
+        public void Connect(Uri address)
         {
-            Task.Run(() => _ucsConnectionService.ConnectAsync(address, new UcsCredentials(string.Empty, string.Empty)));
+            try
+            {
+                _ucsConnectionService.Connect(address, new UcsCredentials(string.Empty, string.Empty));
+            }
+            catch
+            {
+                ucsConnection_onDisconnected(null, null);
+            }
         }
         private void ucsConnection_onDisconnected(object sender, EventArgs e)
         {
+            Execute.OnUIThreadAsync(() =>
+            {
+                lock (vehicleUpdateLocked)
+                {
+                    _vehicleList.Clear();
+
+                }
+                NotifyOfPropertyChange(() => VehicleList);
+            });
             UcsConnection = "Disconnected";
-            Task.Run(() => startDiscoveringUcsAsync(onUcsServiceDiscovered));
+        }
+
+        private bool searhing = false;
+        private void startUcsConnection()
+        {
+            if (Settings.Default.UgcsAutomatic)
+            {
+                if (!searhing)
+                {
+                    searhing = true;
+                    _discoveryService.TryFound(UCS_SERVER_TYPE, (location) =>
+                    {
+                        if (Settings.Default.UgcsAutomatic)
+                        {
+                            Connect(location);
+                        }
+                        searhing = false;
+                    });
+                }
+            }
+            else
+            {
+                Connect(new Uri("tcp://"+Settings.Default.UcgsAddress+":"+ Settings.Default.UcgsPort));
+            }
         }
 
         private void ucsConnection_onConnected(object sender, EventArgs args)
@@ -145,7 +193,7 @@ namespace VideoTransmitter.ViewModels
                         }
                     }
                 }
-                   
+
                 if (mod)
                 {
                     NotifyOfPropertyChange(() => VideoSourcesList);
@@ -224,7 +272,7 @@ namespace VideoTransmitter.ViewModels
                             if (!_vehicleList.Any(v => v.VehicleId == vehicle.VehicleId))
                             {
                                 _vehicleList.Add(vehicle);
-                             //   _telemetryListener.AddVehicleIdTolistener(vehicle.Id, TelemetryCallBack);
+                                //   _telemetryListener.AddVehicleIdTolistener(vehicle.Id, TelemetryCallBack);
                             }
                             mod = true;
                             break;
@@ -372,10 +420,14 @@ namespace VideoTransmitter.ViewModels
             _iWindowManager.ShowDialog(new SettingsViewModel(onSettingsSaved));
         }
 
-        public void onSettingsSaved()
+        public void onSettingsSaved(HashSet<String> changed)
         {
-            int x = 1;
-            //Some action on settings saved;
+            if (changed.Contains("UgcsAutomatic") || changed.Contains("UcgsAddress")) {
+                if (_ucsConnectionService.IsConnected)
+                {
+                    _ucsConnectionService.Disconnect();
+                }
+            }
         }
     }
 }

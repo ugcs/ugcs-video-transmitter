@@ -5,9 +5,6 @@
     <Setting Name="UgcsAutomatic" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="UgcsDirectConnection" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
     <Setting Name="UcgsAddress" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
@@ -16,9 +13,6 @@
     </Setting>
     <Setting Name="VideoServerAutomatic" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
-    </Setting>
-    <Setting Name="VideoServerDirectConnection" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="VideoServerAddress" Type="System.String" Scope="User">
       <Value Profile="(Default)" />

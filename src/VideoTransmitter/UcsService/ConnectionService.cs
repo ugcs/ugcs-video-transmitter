@@ -166,7 +166,6 @@ namespace UcsService
                         _log.Debug($"[address: {address}] Connection failed.", e);
                     _tcpClient.Close();
                     releaseState();
-
                     throw;
                 }
             }

@@ -7,7 +7,6 @@ namespace VideoTransmitter.Helpers
 {
     public class NullToVisibilityConverter : IValueConverter
     {
-        #region Implementation of IValueConverter
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -19,6 +18,5 @@ namespace VideoTransmitter.Helpers
             throw new NotImplementedException();
         }
 
-        #endregion
     }
 }
