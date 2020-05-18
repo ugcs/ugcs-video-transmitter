@@ -125,18 +125,19 @@ namespace VideoTransmitter.ViewModels
             if (SelectedVehicle != null)
             {
                 var telemetry = _telemetryListener.GetTelemetryById(SelectedVehicle.VehicleId);
+                double? altitude = telemetry.AltitudeAMSL;
+                double? longitude = telemetry.Longitude;
+                double? latitude = telemetry.Latitude;
+                string platformDesignation = SelectedVehicle.Name;
+                double? heading = telemetry.Heading;
+                double? pitch = telemetry.Pitch;
+                double? roll = telemetry.Roll;
+                double? sensorRelativeAzimuth = telemetry.PayloadHeading;
+                double? sensorRelativeElevation = telemetry.PayloadPitch;
+                double? sensorRelativeRoll = telemetry.PayloadRoll;
                 //TODO: send misp telemetry
                 /*
-                 * tlm.latitude = mediaStreamerContainer.getLatitude();
-        tlm.longitude = mediaStreamerContainer.getLongitude();
-        tlm.platformDesignation = mediaStreamerContainer.getDesignationNumber();
-        tlm.heading = mediaStreamerContainer.getHeading();
-        tlm.pitch = mediaStreamerContainer.getPitch();
-        tlm.roll = mediaStreamerContainer.getRoll();
         tlm.sensorHorizontalFov = mediaStreamerContainer.getSensorHorizontalFov();
-        tlm.sensorRelativeAzimuth = mediaStreamerContainer.getSensorRelativeAzimuth();
-        tlm.sensorRelativeElevation = mediaStreamerContainer.getSensorRelativeElevation();
-        tlm.sensorRelativeRoll = mediaStreamerContainer.getSensorRelativeRoll();
         tlm.sensorVerticalFov = mediaStreamerContainer.getSensorVerticalFov();
         tlm.slantRange = mediaStreamerContainer.getSlantRange();
         */
