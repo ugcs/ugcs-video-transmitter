@@ -155,6 +155,26 @@ namespace UcsService
                     {
                         _telemetryDTOList[vehicleId].ServiceTelemetryDTO.Heading = GetValueOrDefault<float>(t.Value);
                     }
+                    if (t.TelemetryField.Code == "pitch" && t.TelemetryField.Semantic == Semantic.S_PITCH && t.TelemetryField.Subsystem == Subsystem.S_FLIGHT_CONTROLLER)
+                    {
+                        _telemetryDTOList[vehicleId].ServiceTelemetryDTO.Pitch = GetValueOrDefault<float>(t.Value);
+                    }
+                    if (t.TelemetryField.Code == "roll" && t.TelemetryField.Semantic == Semantic.S_ROLL && t.TelemetryField.Subsystem == Subsystem.S_FLIGHT_CONTROLLER)
+                    {
+                        _telemetryDTOList[vehicleId].ServiceTelemetryDTO.Roll = GetValueOrDefault<float>(t.Value);
+                    }
+                    if (t.TelemetryField.Code == "heading" && t.TelemetryField.Semantic == Semantic.S_HEADING && t.TelemetryField.Subsystem == Subsystem.S_GIMBAL)
+                    {
+                        _telemetryDTOList[vehicleId].ServiceTelemetryDTO.PayloadHeading = GetValueOrDefault<double>(t.Value);
+                    }
+                    if (t.TelemetryField.Code == "pitch" && t.TelemetryField.Semantic == Semantic.S_PITCH && t.TelemetryField.Subsystem == Subsystem.S_GIMBAL)
+                    {
+                        _telemetryDTOList[vehicleId].ServiceTelemetryDTO.PayloadPitch = GetValueOrDefault<double>(t.Value);
+                    }
+                    if (t.TelemetryField.Code == "roll" && t.TelemetryField.Semantic == Semantic.S_ROLL && t.TelemetryField.Subsystem == Subsystem.S_GIMBAL)
+                    {
+                        _telemetryDTOList[vehicleId].ServiceTelemetryDTO.PayloadRoll = GetValueOrDefault<double>(t.Value);
+                    }
 
                 }
             }

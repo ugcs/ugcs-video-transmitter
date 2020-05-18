@@ -13,6 +13,9 @@ namespace UcsService.DTO
         public double? AltitudeAMSL { get; set; }
         public float? Heading { get; set; }
         public float? Pitch { get; set; }
-        public float? Yaw { get; set; }
+        public float? Roll { get; set; }
+        public double? PayloadHeading { get; set; }
+        public double? PayloadPitch { get; set; }
+        public double? PayloadRoll { get; set; }
     }
 }
