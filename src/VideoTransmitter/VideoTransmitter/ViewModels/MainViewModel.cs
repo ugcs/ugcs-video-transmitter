@@ -16,6 +16,7 @@ using UcsService.Enums;
 using Unosquare.FFME.Common;
 using VideoSources;
 using VideoSources.DTO;
+using VideoTransmitter.Enums;
 using VideoTransmitter.Properties;
 using VideoTransmitter.Views;
 
@@ -258,10 +259,11 @@ namespace VideoTransmitter.ViewModels
             {
                 ucsConnection = value;
                 NotifyOfPropertyChange(() => UcsConnection);
+                NotifyOfPropertyChange(() => TelemetryStatus);
             }
         }
 
-        private string videoServerConnection = "Not found";
+        private string videoServerConnection = "";
         public string VideoServerConnection
         {
             get
@@ -272,6 +274,9 @@ namespace VideoTransmitter.ViewModels
             {
                 videoServerConnection = value;
                 NotifyOfPropertyChange(() => VideoServerConnection);
+                NotifyOfPropertyChange(() => VideoServerStatus);
+                NotifyOfPropertyChange(() => TelemetryStatus);
+                
             }
         }
 
@@ -392,6 +397,7 @@ namespace VideoTransmitter.ViewModels
                 }
                 _selectedVehicle = value;
                 NotifyOfPropertyChange(() => SelectedVehicle);
+                NotifyOfPropertyChange(() => TelemetryStatus);
             }
         }
 
@@ -411,6 +417,8 @@ namespace VideoTransmitter.ViewModels
                 _selectedVideoSource = value;                
                 Settings.Default.LastCapureDevice = _selectedVideoSource?.Name;
                 Settings.Default.Save();
+                VideoReady = CamVideo.NOT_READY;
+                NotifyOfPropertyChange(() => VideoServerStatus);
                 if (_selectedVideoSource != null && viewLoaded)
                 {
                     StartScreenStreaming();
@@ -448,13 +456,16 @@ namespace VideoTransmitter.ViewModels
                 {
                     VideoMessage = $"Failed to load video from {SelectedVideoSource.Name}";
                     VideoMessageVisibility = Visibility.Visible;
+                    VideoReady = CamVideo.NOT_READY;
+                    NotifyOfPropertyChange(() => VideoServerStatus);
                 }
             }
         }
 
-        public async void StartStreaming()
+        private bool _isStreaming = false;
+        public void StartStreaming()
         {
-            
+            _isStreaming = true;
         }
 
         private bool viewLoaded = false;
@@ -472,6 +483,7 @@ namespace VideoTransmitter.ViewModels
             // Capture stream here
             if (e.Packet != null)
             {
+
                 Debug.WriteLine(e.Packet->size);
             }
         }
@@ -492,7 +504,7 @@ namespace VideoTransmitter.ViewModels
             if (changed.Contains("VideoServerAutomatic") || changed.Contains("VideoServerAddress"))
             {
                 urtpServer = null;
-                VideoServerConnection = "Not found";
+                VideoServerConnection = "";
             }
         }
 
@@ -503,6 +515,8 @@ namespace VideoTransmitter.ViewModels
                 VideoMessage = "Loading video";
                 VideoMessageVisibility = Visibility.Visible;
             });
+            VideoReady = CamVideo.NOT_READY;
+            NotifyOfPropertyChange(() => VideoServerStatus);
         }
         private void OnMediaOpened(object sender, MediaOpenedEventArgs e)
         {
@@ -511,6 +525,8 @@ namespace VideoTransmitter.ViewModels
                 VideoMessage = string.Empty;
                 VideoMessageVisibility = Visibility.Hidden;
             });
+            VideoReady = CamVideo.READY;
+            NotifyOfPropertyChange(() => VideoServerStatus);
         }
         private void OnMediaInitializing(object sender, MediaInitializingEventArgs e)
         {
@@ -519,6 +535,8 @@ namespace VideoTransmitter.ViewModels
                 VideoMessage = "Loading video";
                 VideoMessageVisibility = Visibility.Visible;
             });
+            VideoReady = CamVideo.NOT_READY;
+            NotifyOfPropertyChange(() => VideoServerStatus);
         }
 
         private string _videoMessage = string.Empty;
@@ -548,6 +566,52 @@ namespace VideoTransmitter.ViewModels
                 NotifyOfPropertyChange(() => VideoMessageVisibility);
             }
         }
+
+
+        public TelemetryStatus TelemetryStatus
+        {
+            get
+            {
+                if (SelectedVehicle == null 
+                    || SelectedVideoSource == null 
+                    || string.IsNullOrEmpty(VideoServerConnection)
+                    || !_ucsConnectionService.IsConnected)
+                {
+                    return TelemetryStatus.NOT_READY_TO_STREAM;
+                }
+                else if (_isStreaming)
+                {
+                    return TelemetryStatus.STREAMING;
+                }
+                else
+                {
+                    return TelemetryStatus.READY_TO_STREAM;
+                }
+            }
+        }
+
+        public VideoServerStatus VideoServerStatus
+        {
+            get
+            {
+                if (SelectedVideoSource == null
+                    || string.IsNullOrEmpty(VideoServerConnection)
+                    || VideoReady == CamVideo.NOT_READY)
+                {
+                    return VideoServerStatus.NOT_READY_TO_STREAM;
+                }
+                else if (_isStreaming)
+                {
+                    return VideoServerStatus.STREAMING;
+                }
+                else
+                {
+                    return VideoServerStatus.READY_TO_STREAM;
+                }
+            }
+        }
+
+        public CamVideo VideoReady { get; set; } = CamVideo.NOT_READY;
 
     }
 }
