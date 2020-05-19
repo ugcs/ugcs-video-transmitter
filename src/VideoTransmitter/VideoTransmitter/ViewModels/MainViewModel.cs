@@ -273,6 +273,10 @@ namespace VideoTransmitter.ViewModels
             set
             {
                 videoServerConnection = value;
+                if (string.IsNullOrEmpty(videoServerConnection))
+                {
+                    _isStreaming = false;
+                }
                 NotifyOfPropertyChange(() => VideoServerConnection);
                 NotifyOfPropertyChange(() => VideoServerStatus);
                 NotifyOfPropertyChange(() => TelemetryStatus);
@@ -418,6 +422,7 @@ namespace VideoTransmitter.ViewModels
                 Settings.Default.LastCapureDevice = _selectedVideoSource?.Name;
                 Settings.Default.Save();
                 VideoReady = CamVideo.NOT_READY;
+                _isStreaming = false;
                 NotifyOfPropertyChange(() => VideoServerStatus);
                 if (_selectedVideoSource != null && viewLoaded)
                 {
@@ -457,6 +462,7 @@ namespace VideoTransmitter.ViewModels
                     VideoMessage = $"Failed to load video from {SelectedVideoSource.Name}";
                     VideoMessageVisibility = Visibility.Visible;
                     VideoReady = CamVideo.NOT_READY;
+                    _isStreaming = false;
                     NotifyOfPropertyChange(() => VideoServerStatus);
                 }
             }
@@ -465,7 +471,16 @@ namespace VideoTransmitter.ViewModels
         private bool _isStreaming = false;
         public void StartStreaming()
         {
-            _isStreaming = true;
+            if (!_isStreaming)
+            {
+                _isStreaming = true;
+            }
+            else
+            {
+                _isStreaming = false;
+            }
+            NotifyOfPropertyChange(() => VideoServerStatus);
+            NotifyOfPropertyChange(() => TelemetryStatus);
         }
 
         private bool viewLoaded = false;
@@ -516,6 +531,7 @@ namespace VideoTransmitter.ViewModels
                 VideoMessageVisibility = Visibility.Visible;
             });
             VideoReady = CamVideo.NOT_READY;
+            _isStreaming = false;
             NotifyOfPropertyChange(() => VideoServerStatus);
         }
         private void OnMediaOpened(object sender, MediaOpenedEventArgs e)
@@ -536,6 +552,7 @@ namespace VideoTransmitter.ViewModels
                 VideoMessageVisibility = Visibility.Visible;
             });
             VideoReady = CamVideo.NOT_READY;
+            _isStreaming = false;
             NotifyOfPropertyChange(() => VideoServerStatus);
         }
 
