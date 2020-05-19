@@ -106,5 +106,29 @@ namespace VideoTransmitter.Properties {
                 this["TailNumber"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastCapureDevice {
+            get {
+                return ((string)(this["LastCapureDevice"]));
+            }
+            set {
+                this["LastCapureDevice"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastVehicleName {
+            get {
+                return ((string)(this["LastVehicleName"]));
+            }
+            set {
+                this["LastVehicleName"] = value;
+            }
+        }
     }
 }

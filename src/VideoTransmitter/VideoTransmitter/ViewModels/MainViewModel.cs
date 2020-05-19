@@ -13,6 +13,7 @@ using SSDPDiscoveryService;
 using UcsService;
 using UcsService.DTO;
 using UcsService.Enums;
+using Unosquare.FFME.Common;
 using VideoSources;
 using VideoSources.DTO;
 using VideoTransmitter.Properties;
@@ -59,7 +60,13 @@ namespace VideoTransmitter.ViewModels
             _discoveryService = ds;
             lock (videoSourcesListLocker)
             {
-                VideoSourcesList = new ObservableCollection<VideoSourceDTO>(_videoSourcesService.GetVideoSources());
+                var videoList = _videoSourcesService.GetVideoSources();
+                VideoSourcesList = new ObservableCollection<VideoSourceDTO>(videoList);
+                var defaultVideo = videoList.FirstOrDefault(v => v.Name == Settings.Default.LastCapureDevice);
+                if (defaultVideo != null)
+                {
+                    SelectedVideoSource = defaultVideo;
+                }
             }
             _ucsConnectionService.Connected += ucsConnection_onConnected;
             _ucsConnectionService.Disconnected += ucsConnection_onDisconnected;
@@ -311,7 +318,6 @@ namespace VideoTransmitter.ViewModels
                             if (!_vehicleList.Any(v => v.VehicleId == vehicle.VehicleId))
                             {
                                 _vehicleList.Add(vehicle);
-                                //   _telemetryListener.AddVehicleIdTolistener(vehicle.Id, TelemetryCallBack);
                             }
                             mod = true;
                             break;
@@ -341,18 +347,12 @@ namespace VideoTransmitter.ViewModels
                 var vehicleList = _vehicleService.GetVehicles();
                 Execute.OnUIThreadAsync(() =>
                 {
-                    bool setActiveVehicle = false;
-                    if (_vehicleList.Count == 0)
-                    {
-                        setActiveVehicle = true;
-                    }
                     var list = new List<int>();
                     foreach (var vInList in vehicleList)
                     {
                         if (!_vehicleList.Any(v => v.VehicleId == vInList.VehicleId))
                         {
                             _vehicleList.Add(vInList);
-                            //_telemetryListener.AddVehicleIdTolistener(vInList.Id, TelemetryCallBack);
                         }
                         list.Add(vInList.VehicleId);
                     }
@@ -404,11 +404,17 @@ namespace VideoTransmitter.ViewModels
             }
             set
             {
-                if (_selectedVideoSource != null && value != null && _selectedVehicle.Name == value.Name)
+                if (_selectedVideoSource != null && value != null && _selectedVideoSource.Name == value.Name)
                 {
                     return;
                 }
-                _selectedVideoSource = value;
+                _selectedVideoSource = value;                
+                Settings.Default.LastCapureDevice = _selectedVideoSource?.Name;
+                Settings.Default.Save();
+                if (_selectedVideoSource != null && viewLoaded)
+                {
+                    StartScreenStreaming();
+                }
                 NotifyOfPropertyChange(() => SelectedVideoSource);
             }
         }
@@ -424,7 +430,7 @@ namespace VideoTransmitter.ViewModels
             }
         }
 
-        public async void StartStreaming()
+        private async void StartScreenStreaming()
         {
             if (MediaElement == null)
             {
@@ -440,19 +446,34 @@ namespace VideoTransmitter.ViewModels
             {
                 if (!await MediaElement.Open(new Uri($"device://dshow/?video={SelectedVideoSource.Name}")))
                 {
-                    MessageBox.Show($"Can't open video from {SelectedVideoSource.Name}.");
+                    VideoMessage = $"Failed to load video from {SelectedVideoSource.Name}";
+                    VideoMessageVisibility = Visibility.Visible;
                 }
             }
         }
 
+        public async void StartStreaming()
+        {
+            
+        }
+
+        private bool viewLoaded = false;
         public void ViewLoaded()
         {
+            viewLoaded = true;
             MediaElement.PacketRead += packedRead;
+            MediaElement.MediaInitializing += OnMediaInitializing;
+            MediaElement.MediaOpening += OnMediaOpening;
+            MediaElement.MediaOpened += OnMediaOpened;
+            StartScreenStreaming();
         }
         private unsafe void packedRead(object sender, Unosquare.FFME.Common.PacketReadEventArgs e)
         {
             // Capture stream here
-            Debug.WriteLine(e.Packet->size);
+            if (e.Packet != null)
+            {
+                Debug.WriteLine(e.Packet->size);
+            }
         }
         public void SettingsWindows()
         {
@@ -472,6 +493,59 @@ namespace VideoTransmitter.ViewModels
             {
                 urtpServer = null;
                 VideoServerConnection = "Not found";
+            }
+        }
+
+        private void OnMediaOpening(object sender, MediaOpeningEventArgs e)
+        {
+            Execute.OnUIThreadAsync(() =>
+            {
+                VideoMessage = "Loading video";
+                VideoMessageVisibility = Visibility.Visible;
+            });
+        }
+        private void OnMediaOpened(object sender, MediaOpenedEventArgs e)
+        {
+            Execute.OnUIThreadAsync(() =>
+            {
+                VideoMessage = string.Empty;
+                VideoMessageVisibility = Visibility.Hidden;
+            });
+        }
+        private void OnMediaInitializing(object sender, MediaInitializingEventArgs e)
+        {
+            Execute.OnUIThreadAsync(() =>
+            {
+                VideoMessage = "Loading video";
+                VideoMessageVisibility = Visibility.Visible;
+            });
+        }
+
+        private string _videoMessage = string.Empty;
+        public string VideoMessage
+        {
+            get
+            {
+                return _videoMessage;
+            }
+            set
+            {
+                _videoMessage = value;
+                NotifyOfPropertyChange(() => VideoMessage);
+            }
+        }
+
+        private Visibility _videoMessageVisibility = Visibility.Hidden;
+        public Visibility VideoMessageVisibility
+        {
+            get
+            {
+                return _videoMessageVisibility;
+            }
+            set
+            {
+                _videoMessageVisibility = value;
+                NotifyOfPropertyChange(() => VideoMessageVisibility);
             }
         }
 

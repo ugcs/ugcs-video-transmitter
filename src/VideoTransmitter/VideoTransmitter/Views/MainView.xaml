@@ -36,14 +36,15 @@
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20 0 5 0">
                 <Grid>
-                    <ComboBox ItemsSource="{Binding Path=VideoSourcesList}" 
+                    <ComboBox                               
+                          SelectedItem="{Binding SelectedVideoSource}"
                           Width="200" 
                           Height="30" 
                           x:Name="SelectedVideoSourceElement"
                           DisplayMemberPath="Name" 
-                          SelectedValuePath="Name"                           
-                          SelectedItem="{Binding SelectedVideoSource}"
-                          SelectedValue="{Binding Path=Name}">
+                          SelectedValuePath="Name"                       
+                          SelectedValue="{Binding Path=Name}"
+                          ItemsSource="{Binding Path=VideoSourcesList, Mode=OneWay}" >
                         <ComboBox.ItemContainerStyle>
                             <Style TargetType="ComboBoxItem">
                                 <Setter Property="Height" Value="30" />
@@ -62,14 +63,15 @@
             </StackPanel>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20 0 5 0">
                 <Grid>
-                    <ComboBox ItemsSource="{Binding Path=VehicleList}" 
+                    <ComboBox               
+                              SelectedItem="{Binding SelectedVehicle}"
                               x:Name="SelectedVehicleElement"
                               Width="200" 
                               Height="30" 
                               DisplayMemberPath="Name" 
-                              SelectedValuePath="VehicleId"                           
-                              SelectedItem="{Binding SelectedVehicle}"
-                              SelectedValue="{Binding Path=VehicleId}">
+                              SelectedValuePath="VehicleId"             
+                              SelectedValue="{Binding Path=VehicleId}"
+                              ItemsSource="{Binding Path=VehicleList}" >
                         <ComboBox.ItemContainerStyle>
                             <Style TargetType="ComboBoxItem">
                                 <Setter Property="Height" Value="30" />
@@ -116,11 +118,13 @@
             </StackPanel>
         </StackPanel>
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="1">
-            <Grid>
-                <ffme:MediaElement Grid.Row="0" x:Name="Media" LoadedBehavior="Play" UnloadedBehavior="Manual" MediaOpening="Media_MediaOpening"/>
-                <TextBlock Text="Loading video" VerticalAlignment="Center" x:Name="LoadingVideo" Visibility="Hidden" />
-            </Grid>
-        </StackPanel>
+        <Grid Grid.Row="1">
+            <ffme:MediaElement x:Name="Media" LoadedBehavior="Play" UnloadedBehavior="Manual" MediaOpening="Media_MediaOpening"/>
+            <TextBlock Text="{Binding VideoMessage}" VerticalAlignment="Center" x:Name="LoadingVideo" HorizontalAlignment="Center" Visibility="{Binding VideoMessageVisibility}" />
+            <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" VerticalAlignment="Top" Margin="0 20 50 0">
+                <TextBlock Text="{Binding VideoStreamStatus}" Background="White" Foreground="Black" FontSize="20" VerticalAlignment="Center" x:Name="VideoStatus" HorizontalAlignment="Right" Visibility="Visible" Margin="0 0 10 0" />
+                <TextBlock Text="{Binding TelemetryStreamStatus}" Background="White" Foreground="Black" FontSize="20" VerticalAlignment="Center" x:Name="TelemetryStatus" HorizontalAlignment="Right" Visibility="Visible" />
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>
