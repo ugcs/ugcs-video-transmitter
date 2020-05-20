@@ -128,10 +128,7 @@ namespace VideoTransmitter.ViewModels
                     VideoMessageVisibility = Visibility.Visible;
                     VideoReady = CamVideo.NOT_READY;
                     _isStreaming = false;
-                    NotifyOfPropertyChange(() => VideoServerStatus);
-                    NotifyOfPropertyChange(() => VideoServerStatusText);
-                    NotifyOfPropertyChange(() => TelemetryStatus);
-                    NotifyOfPropertyChange(() => TelemetryStatusText);
+                    updateVideoAndTelemetryStatuses();
                 }
             }
             else if (MediaElement != null && MediaElement.MediaState == MediaPlaybackState.Close)
@@ -155,10 +152,7 @@ namespace VideoTransmitter.ViewModels
                             if (Settings.Default.VideoServerAutomatic)
                             {
                                 urtpServer = location;
-                                NotifyOfPropertyChange(() => VideoServerStatus);
-                                NotifyOfPropertyChange(() => VideoServerStatusText);
-                                NotifyOfPropertyChange(() => TelemetryStatus);
-                                NotifyOfPropertyChange(() => TelemetryStatusText);
+                                updateVideoAndTelemetryStatuses();
                             }
                             searhing = false;
                         });
@@ -167,10 +161,7 @@ namespace VideoTransmitter.ViewModels
                 else
                 {
                     urtpServer = new Uri("urtp+connect://" + Settings.Default.VideoServerAddress + ":" + Settings.Default.VideoServerPort);
-                    NotifyOfPropertyChange(() => VideoServerStatus);
-                    NotifyOfPropertyChange(() => VideoServerStatusText);
-                    NotifyOfPropertyChange(() => TelemetryStatus);
-                    NotifyOfPropertyChange(() => TelemetryStatusText);
+                    updateVideoAndTelemetryStatuses();
                 }
             }
         }
@@ -206,8 +197,7 @@ namespace VideoTransmitter.ViewModels
             try
             {
                 _ucsConnectionService.Connect(address, new UcsCredentials(string.Empty, string.Empty));
-                NotifyOfPropertyChange(() => TelemetryStatus);
-                NotifyOfPropertyChange(() => TelemetryStatusText);
+                updateVideoAndTelemetryStatuses();
             }
             catch
             {
@@ -247,7 +237,7 @@ namespace VideoTransmitter.ViewModels
             }
             else
             {
-                Connect(new Uri("tcp://"+Settings.Default.UcgsAddress+":"+ Settings.Default.UcgsPort));
+                Connect(new Uri("tcp://" + Settings.Default.UcgsAddress + ":" + Settings.Default.UcgsPort));
             }
         }
 
@@ -309,8 +299,7 @@ namespace VideoTransmitter.ViewModels
             {
                 ucsConnection = value;
                 NotifyOfPropertyChange(() => UcsConnection);
-                NotifyOfPropertyChange(() => TelemetryStatus);
-                NotifyOfPropertyChange(() => TelemetryStatusText);
+                updateVideoAndTelemetryStatuses();
             }
         }
 
@@ -373,7 +362,7 @@ namespace VideoTransmitter.ViewModels
                     }
                 }
                 if (mod)
-                {                    
+                {
                     NotifyOfPropertyChange(() => VehicleList);
                 }
             });
@@ -438,8 +427,7 @@ namespace VideoTransmitter.ViewModels
                 Settings.Default.LastVehicleId = _selectedVehicle?.VehicleId.ToString();
                 Settings.Default.Save();
                 NotifyOfPropertyChange(() => SelectedVehicle);
-                NotifyOfPropertyChange(() => TelemetryStatus);
-                NotifyOfPropertyChange(() => TelemetryStatusText);
+                updateVideoAndTelemetryStatuses();
             }
         }
 
@@ -456,12 +444,12 @@ namespace VideoTransmitter.ViewModels
                 {
                     return;
                 }
-                _selectedVideoSource = value;                
+                _selectedVideoSource = value;
                 Settings.Default.LastCapureDevice = _selectedVideoSource?.Name;
                 Settings.Default.Save();
                 VideoReady = CamVideo.NOT_READY;
                 _isStreaming = false;
-                NotifyOfPropertyChange(() => VideoServerStatus);
+                updateVideoAndTelemetryStatuses();
                 if (_selectedVideoSource != null && viewLoaded)
                 {
                     MediaElement.Close();
@@ -492,8 +480,7 @@ namespace VideoTransmitter.ViewModels
                     VideoMessageVisibility = Visibility.Visible;
                     VideoReady = CamVideo.NOT_READY;
                     _isStreaming = false;
-                    NotifyOfPropertyChange(() => VideoServerStatus);
-                    NotifyOfPropertyChange(() => VideoServerStatusText);
+                    updateVideoAndTelemetryStatuses();
                 }
             }
         }
@@ -507,10 +494,7 @@ namespace VideoTransmitter.ViewModels
                 if (!_isStreaming)
                 {
                     videoStreamingStatus = VideoServerStatus.INITIALIZING;
-                    NotifyOfPropertyChange(() => VideoServerStatus);
-                    NotifyOfPropertyChange(() => VideoServerStatusText);
-                    NotifyOfPropertyChange(() => TelemetryStatus);
-                    NotifyOfPropertyChange(() => TelemetryStatusText);
+                    updateVideoAndTelemetryStatuses();
                     System.Threading.Thread.Sleep(1000);
                     _isStreaming = true;
                     videoStreamingStatus = VideoServerStatus.STREAMING;
@@ -520,11 +504,8 @@ namespace VideoTransmitter.ViewModels
                     videoStreamingStatus = VideoServerStatus.FINISHED;
                     _isStreaming = false;
                 }
-                NotifyOfPropertyChange(() => VideoServerStatus);
-                NotifyOfPropertyChange(() => VideoServerStatusText);
-                NotifyOfPropertyChange(() => TelemetryStatus);
-                NotifyOfPropertyChange(() => TelemetryStatusText);
-            });            
+                updateVideoAndTelemetryStatuses();
+            });
         }
 
         private bool viewLoaded = false;
@@ -556,7 +537,8 @@ namespace VideoTransmitter.ViewModels
 
         public void onSettingsSaved(HashSet<String> changed)
         {
-            if (changed.Contains("UgcsAutomatic") || changed.Contains("UcgsAddress")) {
+            if (changed.Contains("UgcsAutomatic") || changed.Contains("UcgsAddress"))
+            {
                 if (_ucsConnectionService.IsConnected)
                 {
                     _ucsConnectionService.Disconnect();
@@ -566,10 +548,7 @@ namespace VideoTransmitter.ViewModels
             if (changed.Contains("VideoServerAutomatic") || changed.Contains("VideoServerAddress"))
             {
                 urtpServer = null;
-                NotifyOfPropertyChange(() => VideoServerStatus);
-                NotifyOfPropertyChange(() => VideoServerStatusText);
-                NotifyOfPropertyChange(() => TelemetryStatus);
-                NotifyOfPropertyChange(() => TelemetryStatusText);
+                updateVideoAndTelemetryStatuses();
 
             }
         }
@@ -583,8 +562,7 @@ namespace VideoTransmitter.ViewModels
             });
             VideoReady = CamVideo.NOT_READY;
             _isStreaming = false;
-            NotifyOfPropertyChange(() => VideoServerStatus);
-            NotifyOfPropertyChange(() => VideoServerStatusText);
+            updateVideoAndTelemetryStatuses();
         }
         private void OnMediaOpened(object sender, MediaOpenedEventArgs e)
         {
@@ -594,8 +572,7 @@ namespace VideoTransmitter.ViewModels
                 VideoMessageVisibility = Visibility.Hidden;
             });
             VideoReady = CamVideo.READY;
-            NotifyOfPropertyChange(() => VideoServerStatus);
-            NotifyOfPropertyChange(() => VideoServerStatusText);
+            updateVideoAndTelemetryStatuses();
         }
         private void OnMediaInitializing(object sender, MediaInitializingEventArgs e)
         {
@@ -606,8 +583,7 @@ namespace VideoTransmitter.ViewModels
             });
             VideoReady = CamVideo.NOT_READY;
             _isStreaming = false;
-            NotifyOfPropertyChange(() => VideoServerStatus);
-            NotifyOfPropertyChange(() => VideoServerStatusText);
+            updateVideoAndTelemetryStatuses();
         }
 
         private string _videoMessage = string.Empty;
@@ -638,13 +614,21 @@ namespace VideoTransmitter.ViewModels
             }
         }
 
+        private void updateVideoAndTelemetryStatuses()
+        {
+            NotifyOfPropertyChange(() => VideoServerStatus);
+            NotifyOfPropertyChange(() => VideoServerStatusText);
+            NotifyOfPropertyChange(() => TelemetryStatus);
+            NotifyOfPropertyChange(() => TelemetryStatusText);
+        }
+
 
         public TelemetryStatus TelemetryStatus
         {
             get
             {
-                if (SelectedVehicle == null 
-                    || SelectedVideoSource == null 
+                if (SelectedVehicle == null
+                    || SelectedVideoSource == null
                     || urtpServer == null
                     || !_ucsConnectionService.IsConnected)
                 {
