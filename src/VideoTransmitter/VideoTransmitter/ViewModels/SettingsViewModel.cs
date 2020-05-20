@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -38,6 +39,7 @@ namespace VideoTransmitter.ViewModels
             {
                 _tailNumber = value;
                 NotifyOfPropertyChange(() => TailNumber);
+                NotifyOfPropertyChange(() => IsApplyEnabled);
             }
         }
 
@@ -52,6 +54,7 @@ namespace VideoTransmitter.ViewModels
             {
                 _ugcsAutomatic = value;
                 NotifyOfPropertyChange(() => UgcsAutomatic);
+                NotifyOfPropertyChange(() => IsApplyEnabled);
             }
         }
 
@@ -66,6 +69,7 @@ namespace VideoTransmitter.ViewModels
             {
                 _ugcsDirectConnection = value;
                 NotifyOfPropertyChange(() => UgcsDirectConnection);
+                NotifyOfPropertyChange(() => IsApplyEnabled);
             }
         }
 
@@ -80,6 +84,7 @@ namespace VideoTransmitter.ViewModels
             {
                 _ugcsAddress = value;
                 NotifyOfPropertyChange(() => UcgsAddress);
+                NotifyOfPropertyChange(() => IsApplyEnabled);
             }
         }
 
@@ -94,6 +99,7 @@ namespace VideoTransmitter.ViewModels
             {
                 _ugcsPort = value;
                 NotifyOfPropertyChange(() => UcgsPort);
+                NotifyOfPropertyChange(() => IsApplyEnabled);
             }
         }
 
@@ -108,6 +114,7 @@ namespace VideoTransmitter.ViewModels
             {
                 _videoServerAutomatic = value;
                 NotifyOfPropertyChange(() => VideoServerAutomatic);
+                NotifyOfPropertyChange(() => IsApplyEnabled);
             }
         }
 
@@ -122,6 +129,7 @@ namespace VideoTransmitter.ViewModels
             {
                 _videoServerDirectConnection = value;
                 NotifyOfPropertyChange(() => VideoServerDirectConnection);
+                NotifyOfPropertyChange(() => IsApplyEnabled);
             }
         }
 
@@ -136,6 +144,7 @@ namespace VideoTransmitter.ViewModels
             {
                 _videoServerAddress = value;
                 NotifyOfPropertyChange(() => VideoServerAddress);
+                NotifyOfPropertyChange(() => IsApplyEnabled);
             }
         }
 
@@ -150,6 +159,50 @@ namespace VideoTransmitter.ViewModels
             {
                 _videoServerPort = value;
                 NotifyOfPropertyChange(() => VideoServerPort);
+                NotifyOfPropertyChange(() => IsApplyEnabled);
+            }
+        }
+
+        public bool IsApplyEnabled
+        {
+            get
+            {
+                bool mod = false;
+                if (TailNumber != Settings.Default.TailNumber)
+                {
+                    mod = true;
+                }
+                if (UgcsAutomatic != Settings.Default.UgcsAutomatic)
+                {
+                    mod = true;
+                }
+                if (UcgsAddress != Settings.Default.UcgsAddress || UcgsPort != Settings.Default.UcgsPort)
+                {
+                    mod = true;
+                }
+                if (VideoServerAutomatic != Settings.Default.VideoServerAutomatic)
+                {
+                    mod = true;
+                }
+                if (VideoServerAddress != Settings.Default.VideoServerAddress || VideoServerPort != Settings.Default.VideoServerPort)
+                {
+                    mod = true;
+                }
+                if (mod && UgcsAutomatic == false)
+                {
+                    if (!IPAddress.TryParse(UcgsAddress, out var ip) || UcgsPort < 1 || UcgsPort > 65535)
+                    {
+                        mod = false;
+                    }
+                }
+                if (mod && VideoServerAutomatic == false)
+                {
+                    if (!IPAddress.TryParse(VideoServerAddress, out var ip) || VideoServerPort < 1 || VideoServerPort > 65535)
+                    {
+                        mod = false;
+                    }
+                }
+                return mod;
             }
         }
 

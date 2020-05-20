@@ -189,4 +189,34 @@
   <data name="Videostoppedfrom" xml:space="preserve">
     <value>Video stopped from {0}</value>
   </data>
+  <data name="Apply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="Autodiscovery" xml:space="preserve">
+    <value>Auto discovery</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="DirectIP" xml:space="preserve">
+    <value>Direct IP</value>
+  </data>
+  <data name="IPAddress" xml:space="preserve">
+    <value>IP Address</value>
+  </data>
+  <data name="Port" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="SettingsWindowTitle" xml:space="preserve">
+    <value>Settings for connecting to VideoServer and UgCS</value>
+  </data>
+  <data name="UgCSServer" xml:space="preserve">
+    <value>UgCS Server</value>
+  </data>
+  <data name="VideoServer" xml:space="preserve">
+    <value>Video Server</value>
+  </data>
+  <data name="Videosourcename" xml:space="preserve">
+    <value>Video source name</value>
+  </data>
 </root>
