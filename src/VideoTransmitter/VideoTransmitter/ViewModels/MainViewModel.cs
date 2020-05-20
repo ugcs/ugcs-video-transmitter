@@ -115,7 +115,10 @@ namespace VideoTransmitter.ViewModels
                             if (Settings.Default.VideoServerAutomatic)
                             {
                                 urtpServer = location;
-                                VideoServerConnection = urtpServer.Host + ":" + urtpServer.Port;
+                                NotifyOfPropertyChange(() => VideoServerStatus);
+                                NotifyOfPropertyChange(() => VideoServerStatusText);
+                                NotifyOfPropertyChange(() => TelemetryStatus);
+                                NotifyOfPropertyChange(() => TelemetryStatusText);
                             }
                             searhing = false;
                         });
@@ -124,7 +127,10 @@ namespace VideoTransmitter.ViewModels
                 else
                 {
                     urtpServer = new Uri("urtp+connect://" + Settings.Default.VideoServerAddress + ":" + Settings.Default.VideoServerPort);
-                    VideoServerConnection = Settings.Default.VideoServerAddress + ":" + Settings.Default.VideoServerPort;
+                    NotifyOfPropertyChange(() => VideoServerStatus);
+                    NotifyOfPropertyChange(() => VideoServerStatusText);
+                    NotifyOfPropertyChange(() => TelemetryStatus);
+                    NotifyOfPropertyChange(() => TelemetryStatusText);
                 }
             }
         }
@@ -260,27 +266,7 @@ namespace VideoTransmitter.ViewModels
                 ucsConnection = value;
                 NotifyOfPropertyChange(() => UcsConnection);
                 NotifyOfPropertyChange(() => TelemetryStatus);
-            }
-        }
-
-        private string videoServerConnection = "";
-        public string VideoServerConnection
-        {
-            get
-            {
-                return videoServerConnection;
-            }
-            set
-            {
-                videoServerConnection = value;
-                if (string.IsNullOrEmpty(videoServerConnection))
-                {
-                    _isStreaming = false;
-                }
-                NotifyOfPropertyChange(() => VideoServerConnection);
-                NotifyOfPropertyChange(() => VideoServerStatus);
-                NotifyOfPropertyChange(() => TelemetryStatus);
-                
+                NotifyOfPropertyChange(() => TelemetryStatusText);
             }
         }
 
@@ -402,6 +388,7 @@ namespace VideoTransmitter.ViewModels
                 _selectedVehicle = value;
                 NotifyOfPropertyChange(() => SelectedVehicle);
                 NotifyOfPropertyChange(() => TelemetryStatus);
+                NotifyOfPropertyChange(() => TelemetryStatusText);
             }
         }
 
@@ -464,6 +451,7 @@ namespace VideoTransmitter.ViewModels
                     VideoReady = CamVideo.NOT_READY;
                     _isStreaming = false;
                     NotifyOfPropertyChange(() => VideoServerStatus);
+                    NotifyOfPropertyChange(() => VideoServerStatusText);
                 }
             }
         }
@@ -480,7 +468,9 @@ namespace VideoTransmitter.ViewModels
                 _isStreaming = false;
             }
             NotifyOfPropertyChange(() => VideoServerStatus);
+            NotifyOfPropertyChange(() => VideoServerStatusText);
             NotifyOfPropertyChange(() => TelemetryStatus);
+            NotifyOfPropertyChange(() => TelemetryStatusText);
         }
 
         private bool viewLoaded = false;
@@ -519,7 +509,11 @@ namespace VideoTransmitter.ViewModels
             if (changed.Contains("VideoServerAutomatic") || changed.Contains("VideoServerAddress"))
             {
                 urtpServer = null;
-                VideoServerConnection = "";
+                NotifyOfPropertyChange(() => VideoServerStatus);
+                NotifyOfPropertyChange(() => VideoServerStatusText);
+                NotifyOfPropertyChange(() => TelemetryStatus);
+                NotifyOfPropertyChange(() => TelemetryStatusText);
+
             }
         }
 
@@ -533,6 +527,7 @@ namespace VideoTransmitter.ViewModels
             VideoReady = CamVideo.NOT_READY;
             _isStreaming = false;
             NotifyOfPropertyChange(() => VideoServerStatus);
+            NotifyOfPropertyChange(() => VideoServerStatusText);
         }
         private void OnMediaOpened(object sender, MediaOpenedEventArgs e)
         {
@@ -543,6 +538,7 @@ namespace VideoTransmitter.ViewModels
             });
             VideoReady = CamVideo.READY;
             NotifyOfPropertyChange(() => VideoServerStatus);
+            NotifyOfPropertyChange(() => VideoServerStatusText);
         }
         private void OnMediaInitializing(object sender, MediaInitializingEventArgs e)
         {
@@ -554,6 +550,7 @@ namespace VideoTransmitter.ViewModels
             VideoReady = CamVideo.NOT_READY;
             _isStreaming = false;
             NotifyOfPropertyChange(() => VideoServerStatus);
+            NotifyOfPropertyChange(() => VideoServerStatusText);
         }
 
         private string _videoMessage = string.Empty;
@@ -591,7 +588,7 @@ namespace VideoTransmitter.ViewModels
             {
                 if (SelectedVehicle == null 
                     || SelectedVideoSource == null 
-                    || string.IsNullOrEmpty(VideoServerConnection)
+                    || urtpServer == null
                     || !_ucsConnectionService.IsConnected)
                 {
                     return TelemetryStatus.NOT_READY_TO_STREAM;
@@ -612,7 +609,7 @@ namespace VideoTransmitter.ViewModels
             get
             {
                 if (SelectedVideoSource == null
-                    || string.IsNullOrEmpty(VideoServerConnection)
+                    || urtpServer == null
                     || VideoReady == CamVideo.NOT_READY)
                 {
                     return VideoServerStatus.NOT_READY_TO_STREAM;
@@ -629,6 +626,49 @@ namespace VideoTransmitter.ViewModels
         }
 
         public CamVideo VideoReady { get; set; } = CamVideo.NOT_READY;
+
+        public string TelemetryStatusText
+        {
+            get
+            {
+                if (urtpServer == null)
+                {
+                    return "VideoServer not discovered";
+                }
+                if (!_ucsConnectionService.IsConnected)
+                {
+                    return "UgCS Server is not connected";
+                }
+                if (SelectedVideoSource == null)
+                {
+                    return "Video source not selected";
+                }
+                if (SelectedVehicle == null)
+                {
+                    return "Vehicle is not selected";
+                }
+                return string.Format("Ready to stream telemetry to VideoServer {0}", urtpServer.Host + ":" + urtpServer.Port);
+            }
+        }
+        public string VideoServerStatusText
+        {
+            get
+            {
+                if (urtpServer == null)
+                {
+                    return "VideoServer not discovered";
+                }
+                if (SelectedVideoSource == null)
+                {
+                    return "Video source is not selected";
+                }
+                if (VideoReady == CamVideo.NOT_READY)
+                {
+                    return "Video source is not streaming video";
+                }
+                return string.Format("Ready to stream to VideoServer {0}", urtpServer.Host + ":" + urtpServer.Port);
+            }
+        }
 
     }
 }

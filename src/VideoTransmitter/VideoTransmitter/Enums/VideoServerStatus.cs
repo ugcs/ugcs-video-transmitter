@@ -12,6 +12,7 @@ namespace VideoTransmitter.Enums
         READY_TO_STREAM,
         STREAMING,
         INITIALIZING,
+        CONNECTION_FAILED,
         FAILED
     }
 }
