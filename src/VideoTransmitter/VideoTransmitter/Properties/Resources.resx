@@ -46,7 +46,7 @@
     
     mimetype: application/x-microsoft.net.object.binary.base64
     value   : The object must be serialized with 
-            : System.Serialization.Formatters.Binary.BinaryFormatter
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
     
     mimetype: application/x-microsoft.net.object.soap.base64
@@ -60,6 +60,7 @@
             : and then encoded with base64 encoding.
     -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
@@ -68,9 +69,10 @@
               <xsd:sequence>
                 <xsd:element name="value" type="xsd:string" minOccurs="0" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" />
+              <xsd:attribute name="name" use="required" type="xsd:string" />
               <xsd:attribute name="type" type="xsd:string" />
               <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="assembly">
@@ -85,9 +87,10 @@
                 <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
                 <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
               <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
               <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
@@ -109,9 +112,81 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Connectionfailed" xml:space="preserve">
+    <value>Connection failed</value>
+  </data>
+  <data name="Failed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="Failedtoloadvideofrom" xml:space="preserve">
+    <value>Failed to load video from {0}</value>
+  </data>
+  <data name="Initializing" xml:space="preserve">
+    <value>Initializing</value>
+  </data>
+  <data name="Notreadytostream" xml:space="preserve">
+    <value>Not ready to stream</value>
+  </data>
+  <data name="NoVehiclesFound" xml:space="preserve">
+    <value>No Vehicles found</value>
+  </data>
+  <data name="Readytostream" xml:space="preserve">
+    <value>Ready to stream</value>
+  </data>
+  <data name="ReadytostreamtoVideoServer" xml:space="preserve">
+    <value>Ready to stream to VideoServer {0}</value>
+  </data>
+  <data name="SelectVehicle" xml:space="preserve">
+    <value>Select vehicle...</value>
+  </data>
+  <data name="SelectVideoSource" xml:space="preserve">
+    <value>Select video source...</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="StartStreaming" xml:space="preserve">
+    <value>Start streaming</value>
+  </data>
+  <data name="StopStreaming" xml:space="preserve">
+    <value>Stop streaming</value>
+  </data>
+  <data name="Streamfinished" xml:space="preserve">
+    <value>Stream finished</value>
+  </data>
+  <data name="Streaming" xml:space="preserve">
+    <value>Streaming</value>
+  </data>
+  <data name="Streaminitializing" xml:space="preserve">
+    <value>Stream initializing</value>
+  </data>
+  <data name="UgCSServerisnotconnected" xml:space="preserve">
+    <value>UgCS Server is not connected</value>
+  </data>
+  <data name="UgCSVideoTransmitter" xml:space="preserve">
+    <value>UgCS Video Transmitter</value>
+  </data>
+  <data name="Vehicleisnotselected" xml:space="preserve">
+    <value>Vehicle is not selected</value>
+  </data>
+  <data name="VideoServernotdiscovered" xml:space="preserve">
+    <value>VideoServer not discovered</value>
+  </data>
+  <data name="Videosourceisnotselected" xml:space="preserve">
+    <value>Video source is not selected</value>
+  </data>
+  <data name="Videosourceisnotstreamingvideo" xml:space="preserve">
+    <value>Video source is not streaming video</value>
+  </data>
+  <data name="Videosourcenotselected" xml:space="preserve">
+    <value>Video source not selected</value>
+  </data>
+  <data name="Videostoppedfrom" xml:space="preserve">
+    <value>Video stopped from {0}</value>
+  </data>
 </root>
