@@ -61,11 +61,47 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Apply.
+        /// </summary>
+        public static string Apply {
+            get {
+                return ResourceManager.GetString("Apply", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Auto discovery.
+        /// </summary>
+        public static string Autodiscovery {
+            get {
+                return ResourceManager.GetString("Autodiscovery", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cancel.
+        /// </summary>
+        public static string Cancel {
+            get {
+                return ResourceManager.GetString("Cancel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Connection failed.
         /// </summary>
         public static string Connectionfailed {
             get {
                 return ResourceManager.GetString("Connectionfailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Direct IP.
+        /// </summary>
+        public static string DirectIP {
+            get {
+                return ResourceManager.GetString("DirectIP", resourceCulture);
             }
         }
         
@@ -97,6 +133,15 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to IP Address.
+        /// </summary>
+        public static string IPAddress {
+            get {
+                return ResourceManager.GetString("IPAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Not ready to stream.
         /// </summary>
         public static string Notreadytostream {
@@ -111,6 +156,15 @@ namespace VideoTransmitter.Properties {
         public static string NoVehiclesFound {
             get {
                 return ResourceManager.GetString("NoVehiclesFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Port.
+        /// </summary>
+        public static string Port {
+            get {
+                return ResourceManager.GetString("Port", resourceCulture);
             }
         }
         
@@ -160,6 +214,15 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Settings for connecting to VideoServer and UgCS.
+        /// </summary>
+        public static string SettingsWindowTitle {
+            get {
+                return ResourceManager.GetString("SettingsWindowTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Start streaming.
         /// </summary>
         public static string StartStreaming {
@@ -205,6 +268,15 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to UgCS Server.
+        /// </summary>
+        public static string UgCSServer {
+            get {
+                return ResourceManager.GetString("UgCSServer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to UgCS Server is not connected.
         /// </summary>
         public static string UgCSServerisnotconnected {
@@ -232,6 +304,15 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Video Server.
+        /// </summary>
+        public static string VideoServer {
+            get {
+                return ResourceManager.GetString("VideoServer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to VideoServer not discovered.
         /// </summary>
         public static string VideoServernotdiscovered {
@@ -255,6 +336,15 @@ namespace VideoTransmitter.Properties {
         public static string Videosourceisnotstreamingvideo {
             get {
                 return ResourceManager.GetString("Videosourceisnotstreamingvideo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Video source name.
+        /// </summary>
+        public static string Videosourcename {
+            get {
+                return ResourceManager.GetString("Videosourcename", resourceCulture);
             }
         }
         
