@@ -163,6 +163,8 @@ namespace VideoTransmitter.ViewModels
             try
             {
                 _ucsConnectionService.Connect(address, new UcsCredentials(string.Empty, string.Empty));
+                NotifyOfPropertyChange(() => TelemetryStatus);
+                NotifyOfPropertyChange(() => TelemetryStatusText);
             }
             catch
             {
@@ -456,21 +458,33 @@ namespace VideoTransmitter.ViewModels
             }
         }
 
+        private VideoServerStatus videoStreamingStatus = VideoServerStatus.NOT_READY_TO_STREAM;
         private bool _isStreaming = false;
         public void StartStreaming()
         {
-            if (!_isStreaming)
+            Task.Factory.StartNew(() =>
             {
-                _isStreaming = true;
-            }
-            else
-            {
-                _isStreaming = false;
-            }
-            NotifyOfPropertyChange(() => VideoServerStatus);
-            NotifyOfPropertyChange(() => VideoServerStatusText);
-            NotifyOfPropertyChange(() => TelemetryStatus);
-            NotifyOfPropertyChange(() => TelemetryStatusText);
+                if (!_isStreaming)
+                {
+                    videoStreamingStatus = VideoServerStatus.INITIALIZING;
+                    NotifyOfPropertyChange(() => VideoServerStatus);
+                    NotifyOfPropertyChange(() => VideoServerStatusText);
+                    NotifyOfPropertyChange(() => TelemetryStatus);
+                    NotifyOfPropertyChange(() => TelemetryStatusText);
+                    System.Threading.Thread.Sleep(1000);
+                    _isStreaming = true;
+                    videoStreamingStatus = VideoServerStatus.STREAMING;
+                }
+                else
+                {
+                    videoStreamingStatus = VideoServerStatus.FINISHED;
+                    _isStreaming = false;
+                }
+                NotifyOfPropertyChange(() => VideoServerStatus);
+                NotifyOfPropertyChange(() => VideoServerStatusText);
+                NotifyOfPropertyChange(() => TelemetryStatus);
+                NotifyOfPropertyChange(() => TelemetryStatusText);
+            });            
         }
 
         private bool viewLoaded = false;
@@ -614,6 +628,14 @@ namespace VideoTransmitter.ViewModels
                 {
                     return VideoServerStatus.NOT_READY_TO_STREAM;
                 }
+                else if (videoStreamingStatus == VideoServerStatus.INITIALIZING)
+                {
+                    return VideoServerStatus.INITIALIZING;
+                }
+                else if (videoStreamingStatus == VideoServerStatus.FINISHED)
+                {
+                    return VideoServerStatus.FINISHED;
+                }
                 else if (_isStreaming)
                 {
                     return VideoServerStatus.STREAMING;
@@ -647,6 +669,10 @@ namespace VideoTransmitter.ViewModels
                 {
                     return "Vehicle is not selected";
                 }
+                if (_isStreaming)
+                {
+                    return "Streaming";
+                }
                 return string.Format("Ready to stream telemetry to VideoServer {0}", urtpServer.Host + ":" + urtpServer.Port);
             }
         }
@@ -666,7 +692,27 @@ namespace VideoTransmitter.ViewModels
                 {
                     return "Video source is not streaming video";
                 }
+                if (videoStreamingStatus == VideoServerStatus.INITIALIZING)
+                {
+                    return "Stream initializing";
+                }
+                if (_isStreaming)
+                {
+                    return "Streaming";
+                }
                 return string.Format("Ready to stream to VideoServer {0}", urtpServer.Host + ":" + urtpServer.Port);
+            }
+        }
+
+        public bool SettingsButtonEnabled
+        {
+            get
+            {
+                if (_isStreaming)
+                {
+                    return false;
+                }
+                return true;
             }
         }
 
