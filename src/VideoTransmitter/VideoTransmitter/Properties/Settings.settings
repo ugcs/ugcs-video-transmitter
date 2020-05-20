@@ -29,5 +29,8 @@
     <Setting Name="LastVehicleId" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="CurrentUICulture" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">en-US</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

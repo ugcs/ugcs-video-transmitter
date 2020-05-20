@@ -124,7 +124,7 @@ namespace VideoTransmitter.ViewModels
                 if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - LastPacketReadTimeout > _lastPacketRead)
                 {
                     await MediaElement.Close();
-                    VideoMessage = $"Video Stopped from {SelectedVideoSource.Name}";
+                    VideoMessage = string.Format(Resources.Videostoppedfrom, SelectedVideoSource.Name);
                     VideoMessageVisibility = Visibility.Visible;
                     VideoReady = CamVideo.NOT_READY;
                     _isStreaming = false;
@@ -214,7 +214,7 @@ namespace VideoTransmitter.ViewModels
                 }
                 NotifyOfPropertyChange(() => VehicleList);
             });
-            UcsConnection = "Disconnected";
+            updateVideoAndTelemetryStatuses();
         }
 
         private bool searhing = false;
@@ -244,7 +244,7 @@ namespace VideoTransmitter.ViewModels
         private void ucsConnection_onConnected(object sender, EventArgs args)
         {
             var cs = sender as ConnectionService;
-            UcsConnection = string.Format("Connected. client ID: {0}", cs.ClientId);
+            updateVideoAndTelemetryStatuses();
             updateVehicleList(() =>
             {
                 Task.Factory.StartNew(() =>
@@ -287,22 +287,7 @@ namespace VideoTransmitter.ViewModels
                 }
             });
         }
-
-        private string ucsConnection = "Disconnected";
-        public string UcsConnection
-        {
-            get
-            {
-                return ucsConnection;
-            }
-            set
-            {
-                ucsConnection = value;
-                NotifyOfPropertyChange(() => UcsConnection);
-                updateVideoAndTelemetryStatuses();
-            }
-        }
-
+        
         private ObservableCollection<ClientVehicleDTO> _vehicleList = new ObservableCollection<ClientVehicleDTO>();
         public ObservableCollection<ClientVehicleDTO> VehicleList
         {
@@ -476,7 +461,7 @@ namespace VideoTransmitter.ViewModels
             {
                 if (!await MediaElement.Open(new Uri($"device://dshow/?video={SelectedVideoSource.Name}")))
                 {
-                    VideoMessage = $"Failed to load video from {SelectedVideoSource.Name}";
+                    VideoMessage = string.Format(Resources.Failedtoloadvideofrom, SelectedVideoSource.Name);
                     VideoMessageVisibility = Visibility.Visible;
                     VideoReady = CamVideo.NOT_READY;
                     _isStreaming = false;
@@ -682,25 +667,25 @@ namespace VideoTransmitter.ViewModels
             {
                 if (urtpServer == null)
                 {
-                    return "VideoServer not discovered";
+                    return Resources.VideoServernotdiscovered;
                 }
                 if (!_ucsConnectionService.IsConnected)
                 {
-                    return "UgCS Server is not connected";
+                    return Resources.UgCSServerisnotconnected;
                 }
                 if (SelectedVideoSource == null)
                 {
-                    return "Video source not selected";
+                    return Resources.Videosourcenotselected;
                 }
                 if (SelectedVehicle == null)
                 {
-                    return "Vehicle is not selected";
+                    return Resources.Vehicleisnotselected;
                 }
                 if (_isStreaming)
                 {
-                    return "Streaming";
+                    return Resources.Streaming;
                 }
-                return string.Format("Ready to stream telemetry to VideoServer {0}", urtpServer.Host + ":" + urtpServer.Port);
+                return string.Format(Resources.ReadytostreamtoVideoServer, urtpServer.Host + ":" + urtpServer.Port);
             }
         }
         public string VideoServerStatusText
@@ -709,25 +694,25 @@ namespace VideoTransmitter.ViewModels
             {
                 if (urtpServer == null)
                 {
-                    return "VideoServer not discovered";
+                    return Resources.VideoServernotdiscovered;
                 }
                 if (SelectedVideoSource == null)
                 {
-                    return "Video source is not selected";
+                    return Resources.Videosourceisnotselected;
                 }
                 if (VideoReady == CamVideo.NOT_READY)
                 {
-                    return "Video source is not streaming video";
+                    return Resources.Videosourceisnotstreamingvideo;
                 }
                 if (videoStreamingStatus == VideoServerStatus.INITIALIZING)
                 {
-                    return "Stream initializing";
+                    return Resources.Streaminitializing;
                 }
                 if (_isStreaming)
                 {
-                    return "Streaming";
+                    return Resources.Streaming;
                 }
-                return string.Format("Ready to stream to VideoServer {0}", urtpServer.Host + ":" + urtpServer.Port);
+                return string.Format(Resources.ReadytostreamtoVideoServer, urtpServer.Host + ":" + urtpServer.Port);
             }
         }
 

@@ -2,13 +2,13 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:VideoTransmitter.Views"        
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"  
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"          
-	    xmlns:cal="clr-namespace:Caliburn.Micro;assembly=Caliburn.Micro.Platform"  
+	    xmlns:cal="clr-namespace:Caliburn.Micro;assembly=Caliburn.Micro.Platform"        
+        xmlns:p="clr-namespace:VideoTransmitter.Properties"
         mc:Ignorable="d"
         x:Name="SettingsWindow"
-        Title="Settings" Height="320" Width="400"
+        Title="{x:Static p:Resources.SettingsWindowTitle}" Height="320" Width="400"
         Loaded="Window_Loaded">
     <Grid>
         <Grid.RowDefinitions>
@@ -20,28 +20,36 @@
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" VerticalAlignment="Center" Margin="10 0 10 0">
-            <TextBox Text="{Binding TailNumber}"></TextBox>
+            <TextBox Text="{Binding TailNumber}" MaxLength="100"></TextBox>
         </StackPanel>
-        <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="10 0 10 0" Orientation="Horizontal">
-            <RadioButton GroupName="UgcsConnection" Content="UgCS Automatic discovery" IsChecked="{Binding UgcsAutomatic}" />
-            <RadioButton GroupName="UgcsConnection" Content="UgCS Direct IP" Margin="10 0 10 0" IsChecked="{Binding UgcsDirectConnection}" />
+        <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="10 0 10 0" Orientation="Vertical">
+            <StackPanel Margin="0 10 0 0">
+                <TextBlock Text="{x:Static p:Resources.UgCSServer}" Margin="0 0 0 10"></TextBlock>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <RadioButton GroupName="UgcsConnection" Content="{x:Static p:Resources.Autodiscovery}" IsChecked="{Binding UgcsAutomatic}" />
+                <RadioButton GroupName="UgcsConnection" Content="{x:Static p:Resources.DirectIP}" Margin="10 0 10 0" IsChecked="{Binding UgcsDirectConnection}" />
+            </StackPanel>
         </StackPanel>
         <StackPanel Grid.Row="2" VerticalAlignment="Center" Margin="10 0 10 0" Orientation="Horizontal">
-            <TextBox Text="{Binding UcgsAddress}" Width="200" IsEnabled="{Binding UgcsDirectConnection}"></TextBox>
-            <TextBlock>:</TextBlock>
-            <TextBox Text="{Binding UcgsPort}" Width="50" IsEnabled="{Binding UgcsDirectConnection}"></TextBox>
+            <TextBox Text="{Binding UcgsAddress, UpdateSourceTrigger=PropertyChanged}" Width="200" IsEnabled="{Binding UgcsDirectConnection}" MaxLength="15" Margin="0 0 10 0"></TextBox>
+            <TextBox Text="{Binding UcgsPort, UpdateSourceTrigger=PropertyChanged}" Width="50" IsEnabled="{Binding UgcsDirectConnection}" PreviewTextInput="TextBox_KeyDownNumeric" DataObject.Pasting="DisablePasting" MaxLength="5"></TextBox>
         </StackPanel>
-        <StackPanel Grid.Row="3" VerticalAlignment="Center" Margin="10 0 10 0" Orientation="Horizontal">
-            <RadioButton GroupName="VideoServerConnection" Content="VideoServer Automatic discovery" IsChecked="{Binding VideoServerAutomatic}" />
-            <RadioButton GroupName="VideoServerConnection" Content="VideoServer Direct IP" Margin="10 0 10 0" IsChecked="{Binding VideoServerDirectConnection}" />
+        <StackPanel Grid.Row="3" VerticalAlignment="Center" Margin="10 0 10 0" Orientation="Vertical">
+            <StackPanel Margin="0 10 0 0">
+                <TextBlock Text="{x:Static p:Resources.VideoServer}" Margin="0,0,0,10"></TextBlock>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <RadioButton GroupName="VideoServerConnection" Content="{x:Static p:Resources.Autodiscovery}" IsChecked="{Binding VideoServerAutomatic}" />
+                <RadioButton GroupName="VideoServerConnection" Content="{x:Static p:Resources.DirectIP}" Margin="10 0 10 0" IsChecked="{Binding VideoServerDirectConnection}" />
+            </StackPanel>
         </StackPanel>
         <StackPanel Grid.Row="4" VerticalAlignment="Center" Margin="10 0 10 0" Orientation="Horizontal">
-            <TextBox Text="{Binding VideoServerAddress}" Width="200" IsEnabled="{Binding VideoServerDirectConnection}"></TextBox>
-            <TextBlock>:</TextBlock>
-            <TextBox Text="{Binding VideoServerPort}" Width="50" IsEnabled="{Binding VideoServerDirectConnection}"></TextBox>
+            <TextBox Text="{Binding VideoServerAddress, UpdateSourceTrigger=PropertyChanged}" Width="200" IsEnabled="{Binding VideoServerDirectConnection}" MaxLength="15" Margin="0 0 10 0"></TextBox>
+            <TextBox Text="{Binding VideoServerPort, UpdateSourceTrigger=PropertyChanged}" Width="50" IsEnabled="{Binding VideoServerDirectConnection}" PreviewTextInput="TextBox_KeyDownNumeric" DataObject.Pasting="DisablePasting" MaxLength="5"></TextBox>
         </StackPanel>
         <StackPanel Grid.Row="5" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10 0 10 0" Orientation="Horizontal">
-            <Button Content="Apply" Margin="10 0 10 0">
+            <Button Content="{x:Static p:Resources.Apply}" Margin="10 0 10 0" IsEnabled="{Binding IsApplyEnabled}">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="Click">
                         <cal:ActionMessage MethodName="SaveSettings">
@@ -50,7 +58,7 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </Button>
-            <Button Content="Cancel" Click="Close_Click"></Button>
+            <Button Content="{x:Static p:Resources.Cancel}" Click="Close_Click"></Button>
         </StackPanel>
     </Grid>
 </Window>
