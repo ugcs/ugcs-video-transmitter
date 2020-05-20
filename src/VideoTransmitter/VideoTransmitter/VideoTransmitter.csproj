@@ -32,7 +32,7 @@
       <Generator>XamlIntelliSenseFileGenerator</Generator>
     </Page>
     <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
+      <Generator>PublicSettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
@@ -40,5 +40,12 @@
     <ProjectReference Include="..\DiscoveryService\DiscoveryService.csproj" />
     <ProjectReference Include="..\UcsService\UcsService.csproj" />
     <ProjectReference Include="..\VideoSources\VideoSources.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>

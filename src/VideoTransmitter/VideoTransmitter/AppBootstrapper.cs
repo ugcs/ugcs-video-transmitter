@@ -43,7 +43,8 @@ namespace VideoTransmitter
             Kernel.Bind<VehicleListener>().ToSelf().InSingletonScope();
             Kernel.Bind<TelemetryListener>().ToSelf().InSingletonScope();
             Kernel.Bind<VehicleService>().ToSelf().InSingletonScope();
-            Kernel.Bind<VideoSourcesService>().ToSelf().InSingletonScope();
+            VideoSourcesService vss = new VideoSourcesService(Settings.Default.VideoSources);
+            Kernel.Bind<VideoSourcesService>().ToConstant(vss).InSingletonScope();
 
             _isInitialized = true;
         }

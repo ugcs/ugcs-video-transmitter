@@ -197,7 +197,7 @@
                                     <Setter Property="Text" Value="{x:Static p:Resources.Failed}"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FINISHED}">
-                                    <Setter Property="Text" Value="{x:Static p:Resources.Streamfinished}"/>
+                                    <Setter Property="Text" Value="{x:Static p:Resources.Readytostream}"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.CONNECTION_FAILED}">
                                     <Setter Property="Text" Value="{x:Static p:Resources.Connectionfailed}"/>
