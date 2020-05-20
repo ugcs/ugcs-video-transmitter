@@ -61,7 +61,13 @@ git_commit_ugcs_video_transmitter=${git_commit_ugcs_video_transmitter} " > build
 		stage('Building & Publishing: Win library') {
 			agent { node { label 'windows-node-3' }}
 			steps {
-				bat ''' echo "build" '''
+				bat ''' 
+					mkdir build
+					cd src/VideoTransmitter
+					"%DOTNET_PATH_15%/msbuild.exe" /t:restore;build /p:Configuration=Release;Version="%version%";FileVersion="%version%";AssemblyVersion="%version%"
+					if ERRORLEVEL 1 exit 1
+					"%ARCHIVATOR_7z_PATH%/7z.exe" a -tzip %WORKSPACE%/build/ugcs-video-transmitter-win.zip %WORKSPACE%/src/VideoTransmitter/VideoTransmitter/bin/x64/Release/net461/* 
+					if ERRORLEVEL 1 exit 1 '''
 
 				cifsPublisher alwaysPublishFromMaster: false, continueOnError: false, failOnError: false, publishers: [[
 					configName: 'binaries_repo', transfers: [[
