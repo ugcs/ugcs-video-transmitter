@@ -9,6 +9,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ApplicationIcon />
     <StartupObject />
+    <Platforms>x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
