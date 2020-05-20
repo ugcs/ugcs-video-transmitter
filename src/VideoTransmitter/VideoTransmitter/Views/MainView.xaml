@@ -177,52 +177,59 @@
             <ffme:MediaElement x:Name="Media" LoadedBehavior="Play" UnloadedBehavior="Manual" MediaOpening="Media_MediaOpening"/>
             <TextBlock Text="{Binding VideoMessage}" VerticalAlignment="Center" x:Name="LoadingVideo" HorizontalAlignment="Center" Visibility="{Binding VideoMessageVisibility}" />
             <StackPanel HorizontalAlignment="Right" Orientation="Vertical" VerticalAlignment="Top" Margin="0 20 50 0">
-                <TextBlock Background="White" Foreground="Black" ToolTip="{Binding Path=VideoServerStatusText}" FontSize="20" VerticalAlignment="Center" x:Name="VideoServerStatusTextField" HorizontalAlignment="Right" Visibility="Visible" Margin="0 0 10 0">
-                    <TextBlock.Style>
-                        <Style TargetType="{x:Type TextBlock}">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.NOT_READY_TO_STREAM}">
-                                    <Setter Property="Text" Value="{x:Static p:Resources.Notreadytostream}"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.READY_TO_STREAM}">
-                                    <Setter Property="Text" Value="{x:Static p:Resources.Readytostream}"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.STREAMING}">
-                                    <Setter Property="Text" Value="{x:Static p:Resources.Streaming}"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.INITIALIZING}">
-                                    <Setter Property="Text" Value="{x:Static p:Resources.Initializing}"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FAILED}">
-                                    <Setter Property="Text" Value="{x:Static p:Resources.Failed}"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FINISHED}">
-                                    <Setter Property="Text" Value="{x:Static p:Resources.Readytostream}"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.CONNECTION_FAILED}">
-                                    <Setter Property="Text" Value="{x:Static p:Resources.Connectionfailed}"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
-                <TextBlock Background="White" Foreground="Black" ToolTip="{Binding Path=TelemetryStatusText}" FontSize="20" VerticalAlignment="Center" x:Name="TelemetryStatusTextField" HorizontalAlignment="Right" Visibility="Visible" Margin="0 0 10 0">
-                    <TextBlock.Style>
-                        <Style TargetType="{x:Type TextBlock}">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding TelemetryStatus}" Value="{x:Static enum:TelemetryStatus.NOT_READY_TO_STREAM}">
-                                    <Setter Property="Text" Value="{x:Static p:Resources.Notreadytostream}"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding TelemetryStatus}" Value="{x:Static enum:TelemetryStatus.READY_TO_STREAM}">
-                                    <Setter Property="Text" Value="{x:Static p:Resources.Readytostream}"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding TelemetryStatus}" Value="{x:Static enum:TelemetryStatus.STREAMING}">
-                                    <Setter Property="Text" Value="{x:Static p:Resources.Streaming}"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
+                <StackPanel Orientation="Horizontal" Background="White" HorizontalAlignment="Right" ToolTip="{Binding Path=VideoServerStatusText}">
+                    <TextBlock Foreground="Black" FontSize="20" VerticalAlignment="Center" x:Name="VideoServerStatusTextFieldLabel" Text="{x:Static p:Resources.VideoLabel}" />
+                    <TextBlock Foreground="Black" FontSize="20" VerticalAlignment="Center" x:Name="VideoServerStatusTextField" HorizontalAlignment="Right" Visibility="Visible" Margin="0 0 10 0">
+                        <TextBlock.Style>
+                            <Style TargetType="{x:Type TextBlock}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.NOT_READY_TO_STREAM}">
+                                        <Setter Property="Text" Value="{x:Static p:Resources.Notreadytostream}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.READY_TO_STREAM}">
+                                        <Setter Property="Text" Value="{x:Static p:Resources.Readytostream}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.STREAMING}">
+                                        <Setter Property="Text" Value="{x:Static p:Resources.Streaming}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.INITIALIZING}">
+                                        <Setter Property="Text" Value="{x:Static p:Resources.Initializing}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FAILED}">
+                                        <Setter Property="Text" Value="{x:Static p:Resources.Failed}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FINISHED}">
+                                        <Setter Property="Text" Value="{x:Static p:Resources.Readytostream}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.CONNECTION_FAILED}">
+                                        <Setter Property="Text" Value="{x:Static p:Resources.Connectionfailed}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Background="White" HorizontalAlignment="Right" ToolTip="{Binding Path=TelemetryStatusText}">
+                    <TextBlock Foreground="Black" FontSize="20" VerticalAlignment="Center" x:Name="TelemetryStatusTextFieldLabel" Text="{x:Static p:Resources.TelemetryLabel}" />
+                    <TextBlock Foreground="Black" ToolTip="{Binding Path=TelemetryStatusText}" FontSize="20" VerticalAlignment="Center" x:Name="TelemetryStatusTextField" HorizontalAlignment="Right" Visibility="Visible" Margin="0 0 10 0">
+                        <TextBlock.Style>
+                            <Style TargetType="{x:Type TextBlock}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding TelemetryStatus}" Value="{x:Static enum:TelemetryStatus.NOT_READY_TO_STREAM}">
+                                        <Setter Property="Text" Value="{x:Static p:Resources.Notreadytostream}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding TelemetryStatus}" Value="{x:Static enum:TelemetryStatus.READY_TO_STREAM}">
+                                        <Setter Property="Text" Value="{x:Static p:Resources.Readytostream}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding TelemetryStatus}" Value="{x:Static enum:TelemetryStatus.STREAMING}">
+                                        <Setter Property="Text" Value="{x:Static p:Resources.Streaming}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
             </StackPanel>
         </Grid>
     </Grid>
