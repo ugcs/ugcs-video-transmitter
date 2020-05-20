@@ -122,12 +122,12 @@ namespace VideoTransmitter.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string LastVehicleName {
+        public string LastVehicleId {
             get {
-                return ((string)(this["LastVehicleName"]));
+                return ((string)(this["LastVehicleId"]));
             }
             set {
-                this["LastVehicleName"] = value;
+                this["LastVehicleId"] = value;
             }
         }
     }

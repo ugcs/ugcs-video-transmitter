@@ -139,16 +139,19 @@ namespace VideoTransmitter.ViewModels
             if (SelectedVehicle != null)
             {
                 var telemetry = _telemetryListener.GetTelemetryById(SelectedVehicle.VehicleId);
-                double? altitude = telemetry.AltitudeAMSL;
-                double? longitude = telemetry.Longitude;
-                double? latitude = telemetry.Latitude;
-                string platformDesignation = SelectedVehicle.Name;
-                double? heading = telemetry.Heading;
-                double? pitch = telemetry.Pitch;
-                double? roll = telemetry.Roll;
-                double? sensorRelativeAzimuth = telemetry.PayloadHeading;
-                double? sensorRelativeElevation = telemetry.PayloadPitch;
-                double? sensorRelativeRoll = telemetry.PayloadRoll;
+                if (telemetry != null)
+                {
+                    double? altitude = telemetry.AltitudeAMSL;
+                    double? longitude = telemetry.Longitude;
+                    double? latitude = telemetry.Latitude;
+                    string platformDesignation = SelectedVehicle.Name;
+                    double? heading = telemetry.Heading;
+                    double? pitch = telemetry.Pitch;
+                    double? roll = telemetry.Roll;
+                    double? sensorRelativeAzimuth = telemetry.PayloadHeading;
+                    double? sensorRelativeElevation = telemetry.PayloadPitch;
+                    double? sensorRelativeRoll = telemetry.PayloadRoll;
+                }
                 //TODO: send misp telemetry
                 /*
         tlm.sensorHorizontalFov = mediaStreamerContainer.getSensorHorizontalFov();
@@ -178,7 +181,6 @@ namespace VideoTransmitter.ViewModels
                 lock (vehicleUpdateLocked)
                 {
                     _vehicleList.Clear();
-
                 }
                 NotifyOfPropertyChange(() => VehicleList);
             });
@@ -331,7 +333,7 @@ namespace VideoTransmitter.ViewModels
                     }
                 }
                 if (mod)
-                {
+                {                    
                     NotifyOfPropertyChange(() => VehicleList);
                 }
             });
@@ -365,6 +367,11 @@ namespace VideoTransmitter.ViewModels
                     {
                         SelectedVehicle = null;
                     }
+                    var defaultVehicle = VehicleList.FirstOrDefault(v => v.VehicleId.ToString() == Settings.Default.LastVehicleId);
+                    if (defaultVehicle != null)
+                    {
+                        SelectedVehicle = defaultVehicle;
+                    }
                     NotifyOfPropertyChange(() => VehicleList);
                     if (callback != null)
                     {
@@ -388,6 +395,8 @@ namespace VideoTransmitter.ViewModels
                     return;
                 }
                 _selectedVehicle = value;
+                Settings.Default.LastVehicleId = _selectedVehicle?.VehicleId.ToString();
+                Settings.Default.Save();
                 NotifyOfPropertyChange(() => SelectedVehicle);
                 NotifyOfPropertyChange(() => TelemetryStatus);
                 NotifyOfPropertyChange(() => TelemetryStatusText);
