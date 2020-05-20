@@ -1,0 +1,15 @@
+<Project>
+  <!-- Here is the information, that is common for all assemblieis in the solution -->
+  <PropertyGroup>
+    <Product>UgCS for Command &amp; Control</Product>
+    <Company>SPH Engineering</Company>
+    <Authors>SPH Engineering</Authors>
+    <Copyright>Copyright &#169; 2020</Copyright>
+    <PackageLicenseUrl>https://ccs.ugcs.com/</PackageLicenseUrl>
+    <PackageProjectUrl>https://ccs.ugcs.com/</PackageProjectUrl>
+    <!-- Product version -->
+    <Version>4.0</Version>
+    <AssemblyVersion>4.0</AssemblyVersion>
+    <FileVersion>4.0</FileVersion>
+  </PropertyGroup>
+</Project>
