@@ -30,6 +30,8 @@ namespace VideoTransmitter.ViewModels
         private Timer ucsConnectionTimer;
         private Timer videoServerConnectionTimer;
 
+        private Timer mediaTimer;
+
         private const string UCS_SERVER_TYPE = "ugcs:hci-server";
 
         private Uri urtpServer = null;
@@ -43,6 +45,8 @@ namespace VideoTransmitter.ViewModels
         private VideoSourcesService _videoSourcesService;
         private Unosquare.FFME.MediaElement m_MediaElement;
         private IWindowManager _iWindowManager;
+        private long _lastPacketRead = 0;
+        private int LastPacketReadTimeout = 5000;
 
         public unsafe MainViewModel(DiscoveryService ds,
             ConnectionService cs,
@@ -84,6 +88,11 @@ namespace VideoTransmitter.ViewModels
             videoServerConnectionTimer.AutoReset = true;
             videoServerConnectionTimer.Enabled = true;
 
+            mediaTimer = new Timer(500);
+            mediaTimer.Elapsed += OnMediaReceiveTimer;
+            mediaTimer.AutoReset = true;
+            mediaTimer.Enabled = true;
+
             telemetryTimer = new Timer(1000);
             telemetryTimer.Elapsed += OnTelemetryTimer;
             telemetryTimer.AutoReset = true;
@@ -101,6 +110,37 @@ namespace VideoTransmitter.ViewModels
                 isConnecting = false;
             }
         }
+
+        private bool isRunningMediaCheck = false;
+        private async void OnMediaReceiveTimer(Object source, ElapsedEventArgs e)
+        {
+            if (isRunningMediaCheck)
+            {
+                return;
+            }
+            isRunningMediaCheck = true;
+            if (MediaElement != null && MediaElement.MediaState == MediaPlaybackState.Play)
+            {
+                if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - LastPacketReadTimeout > _lastPacketRead)
+                {
+                    await MediaElement.Close();
+                    VideoMessage = $"Video Stopped from {SelectedVideoSource.Name}";
+                    VideoMessageVisibility = Visibility.Visible;
+                    VideoReady = CamVideo.NOT_READY;
+                    _isStreaming = false;
+                    NotifyOfPropertyChange(() => VideoServerStatus);
+                    NotifyOfPropertyChange(() => VideoServerStatusText);
+                    NotifyOfPropertyChange(() => TelemetryStatus);
+                    NotifyOfPropertyChange(() => TelemetryStatusText);
+                }
+            }
+            else if (MediaElement != null && MediaElement.MediaState == MediaPlaybackState.Close)
+            {
+                await StartScreenStreaming();
+            }
+            isRunningMediaCheck = false;
+        }
+
         private void OnVideoServerConnection(Object source, ElapsedEventArgs e)
         {
             if (urtpServer == null)
@@ -424,7 +464,7 @@ namespace VideoTransmitter.ViewModels
                 NotifyOfPropertyChange(() => VideoServerStatus);
                 if (_selectedVideoSource != null && viewLoaded)
                 {
-                    StartScreenStreaming();
+                    MediaElement.Close();
                 }
                 NotifyOfPropertyChange(() => SelectedVideoSource);
             }
@@ -434,23 +474,14 @@ namespace VideoTransmitter.ViewModels
         {
             get
             {
-                if (m_MediaElement == null)
-                    m_MediaElement = (Application.Current.MainWindow as MainView)?.Media;
-
                 return m_MediaElement;
             }
         }
 
-        private async void StartScreenStreaming()
+        private async Task StartScreenStreaming()
         {
-            if (MediaElement == null)
+            if (MediaElement == null || SelectedVideoSource == null)
             {
-                MessageBox.Show("Media element is null");
-                return;
-            }
-            if (SelectedVideoSource == null)
-            {
-                MessageBox.Show("Please select video source");
                 return;
             }
             if (MediaElement != null)
@@ -500,18 +531,21 @@ namespace VideoTransmitter.ViewModels
         public void ViewLoaded()
         {
             viewLoaded = true;
+            m_MediaElement = (Application.Current.MainWindow as MainView)?.Media;
             MediaElement.PacketRead += packedRead;
             MediaElement.MediaInitializing += OnMediaInitializing;
             MediaElement.MediaOpening += OnMediaOpening;
             MediaElement.MediaOpened += OnMediaOpened;
-            StartScreenStreaming();
         }
         private unsafe void packedRead(object sender, Unosquare.FFME.Common.PacketReadEventArgs e)
         {
+            if (MediaElement.MediaState == MediaPlaybackState.Play)
+            {
+                _lastPacketRead = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            }
             // Capture stream here
             if (e.Packet != null)
             {
-
                 Debug.WriteLine(e.Packet->size);
             }
         }
