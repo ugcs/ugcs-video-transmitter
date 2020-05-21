@@ -225,4 +225,7 @@
   <data name="VideoLabel" xml:space="preserve">
     <value>Video: </value>
   </data>
+  <data name="Loadingvideo" xml:space="preserve">
+    <value>Loading video</value>
+  </data>
 </root>

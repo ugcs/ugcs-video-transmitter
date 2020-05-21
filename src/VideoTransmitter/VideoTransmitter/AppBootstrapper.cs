@@ -9,11 +9,14 @@ using VideoTransmitter.Properties;
 using VideoTransmitter.ViewModels;
 using UcsService;
 using VideoSources;
+using VideoTransmitter.Log;
 
 namespace VideoTransmitter
 {
     public class AppBootstrapper : BootstrapperBase
     {
+
+        private ILogger logger = new Logger(typeof(AppBootstrapper));
         private bool _isInitialized;
 
         public IKernel Kernel
@@ -29,7 +32,9 @@ namespace VideoTransmitter
         }
         public AppBootstrapper()
         {
+            logger.LogInfoMessage("Application started");
             Initialize();
+            logger.LogInfoMessage("Application initialized");
         }
 
         protected override void Configure()
