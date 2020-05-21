@@ -139,14 +139,5 @@ namespace VideoTransmitter.Properties {
                 return ((string)(this["CurrentUICulture"]));
             }
         }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("USB Capture HDMI;Webcam C170")]
-        public string VideoSources {
-            get {
-                return ((string)(this["VideoSources"]));
-            }
-        }
     }
 }

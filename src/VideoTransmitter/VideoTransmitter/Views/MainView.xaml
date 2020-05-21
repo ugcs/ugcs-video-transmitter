@@ -95,34 +95,57 @@
                     <Button.Style>
                         <Style TargetType="{x:Type Button}">
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.NOT_READY_TO_STREAM}">
+                                <DataTrigger Binding="{Binding IsStreaming}" Value="True">
+                                    <Setter Property="Content" Value="{x:Static p:Resources.StopStreaming}"/>
+                                </DataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsStreaming}" Value="False" />
+                                        <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.NOT_READY_TO_STREAM}" />
+                                    </MultiDataTrigger.Conditions>
                                     <Setter Property="Content" Value="{x:Static p:Resources.StartStreaming}"/>
                                     <Setter Property="IsEnabled" Value="False"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.READY_TO_STREAM}">
+                                </MultiDataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsStreaming}" Value="False" />
+                                        <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.READY_TO_STREAM}" />
+                                    </MultiDataTrigger.Conditions>
                                     <Setter Property="Content" Value="{x:Static p:Resources.StartStreaming}"/>
                                     <Setter Property="IsEnabled" Value="True"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.STREAMING}">
+                                </MultiDataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsStreaming}" Value="False" />
+                                        <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.STREAMING}" />
+                                    </MultiDataTrigger.Conditions>
                                     <Setter Property="Content" Value="{x:Static p:Resources.StopStreaming}"/>
                                     <Setter Property="IsEnabled" Value="True"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.INITIALIZING}">
-                                    <Setter Property="Content" Value="{x:Static p:Resources.StopStreaming}"/>
-                                    <Setter Property="IsEnabled" Value="True"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FAILED}">
+                                </MultiDataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsStreaming}" Value="False" />
+                                        <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FAILED}" />
+                                    </MultiDataTrigger.Conditions>
                                     <Setter Property="Content" Value="{x:Static p:Resources.StartStreaming}"/>
                                     <Setter Property="IsEnabled" Value="True"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FINISHED}">
+                                </MultiDataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsStreaming}" Value="False" />
+                                        <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FINISHED}" />
+                                    </MultiDataTrigger.Conditions>
                                     <Setter Property="Content" Value="{x:Static p:Resources.StartStreaming}"/>
                                     <Setter Property="IsEnabled" Value="True"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.CONNECTION_FAILED}">
+                                </MultiDataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsStreaming}" Value="False" />
+                                        <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.CONNECTION_FAILED}" />
+                                    </MultiDataTrigger.Conditions>
                                     <Setter Property="Content" Value="{x:Static p:Resources.StartStreaming}"/>
                                     <Setter Property="IsEnabled" Value="True"/>
-                                </DataTrigger>
+                                </MultiDataTrigger>
                             </Style.Triggers>
                         </Style>
                     </Button.Style>

@@ -70,16 +70,7 @@ namespace VideoTransmitter.ViewModels
             _telemetryListener = tl;
             _ucsConnectionService = cs;
             _discoveryService = ds;
-            lock (videoSourcesListLocker)
-            {
-                var videoList = _videoSourcesService.GetVideoSources();
-                VideoSourcesList = new ObservableCollection<VideoSourceDTO>(videoList);
-                var defaultVideo = videoList.FirstOrDefault(v => v.Name == Settings.Default.LastCapureDevice);
-                if (defaultVideo != null)
-                {
-                    SelectedVideoSource = defaultVideo;
-                }
-            }
+
             _ucsConnectionService.Connected += ucsConnection_onConnected;
             _ucsConnectionService.Disconnected += ucsConnection_onDisconnected;
             _videoSourcesService.SourcesChanged += videoSources_onChanged;
@@ -128,14 +119,21 @@ namespace VideoTransmitter.ViewModels
             isRunningMediaCheck = true;
             if (MediaElement != null && MediaElement.MediaState != MediaPlaybackState.Close)
             {
-                if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - LastPacketReadTimeout > _lastPacketRead)
+                if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - LastPacketReadTimeout > _lastPacketRead && _lastPacketRead > 0)
                 {
                     logger.LogInfoMessage("Media will close due packet timeout");
                     await MediaElement.Close();
-                    VideoMessage = string.Format(Resources.Videostoppedfrom, SelectedVideoSource.Name);
+                    _lastPacketRead = 0;
+                    if (SelectedVideoSource != null)
+                    {
+                        VideoMessage = string.Format(Resources.Videostoppedfrom, SelectedVideoSource.Name);
+                    }
+                    else
+                    {
+                        VideoMessage = string.Format(Resources.Videostoppedfrom, _lastKnownName); 
+                    }
                     VideoMessageVisibility = Visibility.Visible;
                     VideoReady = CamVideo.NOT_READY;
-                    stopMisp();
                     updateVideoAndTelemetryStatuses();
                 }
             }
@@ -267,7 +265,6 @@ namespace VideoTransmitter.ViewModels
                 });
             });
         }
-
         private void videoSources_onChanged(object sender, EventArgs e)
         {
             logger.LogInfoMessage("videoSources_onChanged called");
@@ -285,7 +282,7 @@ namespace VideoTransmitter.ViewModels
                             mod = true;
                         }
                     }
-                    foreach (var source in _videoSourcesList)
+                    foreach (var source in _videoSourcesList.ToList())
                     {
                         if (!sources.Any(v => v.Name == source.Name))
                         {
@@ -298,6 +295,19 @@ namespace VideoTransmitter.ViewModels
                 if (mod)
                 {
                     NotifyOfPropertyChange(() => VideoSourcesList);
+                }                
+                var defaultVideo = VideoSourcesList.FirstOrDefault(v => v.Name == Settings.Default.LastCapureDevice);
+                if (defaultVideo != null)
+                {
+                    SelectedVideoSource = defaultVideo;
+                }
+                else
+                {
+                    var defaultVideoLastKnown = VideoSourcesList.FirstOrDefault(v => v.Name == _lastKnownName);
+                    if (defaultVideoLastKnown != null)
+                    {
+                        SelectedVideoSource = defaultVideoLastKnown;
+                    }
                 }
             });
         }
@@ -440,6 +450,7 @@ namespace VideoTransmitter.ViewModels
             }
         }
 
+        private string _lastKnownName = string.Empty;
         private VideoSourceDTO _selectedVideoSource;
         public VideoSourceDTO SelectedVideoSource
         {
@@ -457,8 +468,11 @@ namespace VideoTransmitter.ViewModels
                 Settings.Default.LastCapureDevice = _selectedVideoSource?.Name;
                 Settings.Default.Save();
                 VideoReady = CamVideo.NOT_READY;
-                stopMisp();
                 updateVideoAndTelemetryStatuses();
+                if (_selectedVideoSource != null)
+                {
+                    _lastKnownName = _selectedVideoSource.Name;
+                }
                 if (_selectedVideoSource != null && viewLoaded)
                 {
                     MediaElement.Close();
@@ -622,7 +636,7 @@ namespace VideoTransmitter.ViewModels
                 _lastPacketRead = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             }
             // Capture stream here
-            if (e.Packet != null && e.Packet->data != null && e.Packet->size > 0 && mispStreamer != null)
+            if (e.Packet != null && e.Packet->data != null && e.Packet->size > 0 && mispStreamer != null && _isStreaming)
             {
                 try
                 {
@@ -672,7 +686,6 @@ namespace VideoTransmitter.ViewModels
             });
             logger.LogInfoMessage("OnMediaOpening - CamVideo.NOT_READY");
             VideoReady = CamVideo.NOT_READY;
-            stopMisp();
             updateVideoAndTelemetryStatuses();
         }
         private void OnMediaOpened(object sender, MediaOpenedEventArgs e)
@@ -695,7 +708,6 @@ namespace VideoTransmitter.ViewModels
             });
             logger.LogInfoMessage("OnMediaOpening - CamVideo.READY");
             VideoReady = CamVideo.NOT_READY;
-            stopMisp();
             updateVideoAndTelemetryStatuses();
         }
 
@@ -733,6 +745,7 @@ namespace VideoTransmitter.ViewModels
             NotifyOfPropertyChange(() => VideoServerStatusText);
             NotifyOfPropertyChange(() => TelemetryStatus);
             NotifyOfPropertyChange(() => TelemetryStatusText);
+            NotifyOfPropertyChange(() => IsStreaming);
         }
 
 
@@ -844,15 +857,11 @@ namespace VideoTransmitter.ViewModels
             }
         }
 
-        public bool SettingsButtonEnabled
+        public bool IsStreaming
         {
             get
             {
-                if (_isStreaming)
-                {
-                    return false;
-                }
-                return true;
+                return _isStreaming;
             }
         }
 
