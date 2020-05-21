@@ -170,7 +170,7 @@ namespace VideoTransmitter.ViewModels
         }
         private void OnTelemetryTimer(Object source, ElapsedEventArgs e)
         {
-            if (SelectedVehicle != null && mispStreamer != null)
+            if (SelectedVehicle != null && mispStreamer != null && _isStreaming)
             {
                 var telemetry = _telemetryListener.GetTelemetryById(SelectedVehicle.VehicleId);
                 if (telemetry != null)
