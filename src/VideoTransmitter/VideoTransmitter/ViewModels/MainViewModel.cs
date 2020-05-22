@@ -16,6 +16,7 @@ using UcsService;
 using UcsService.DTO;
 using UcsService.Enums;
 using Ugcs.Video.MispStreamer;
+using Ugcs.Video.Tools;
 using Unosquare.FFME.Common;
 using VideoSources;
 using VideoSources.DTO;
@@ -29,6 +30,8 @@ namespace VideoTransmitter.ViewModels
 {
     public partial class MainViewModel : Caliburn.Micro.PropertyChangedBase
     {
+        private const long BITRATE = 2 * 1024 * 1024;
+
         private ILogger logger = new Logger(typeof(MainViewModel));
 
         private Timer telemetryTimer;
@@ -52,8 +55,9 @@ namespace VideoTransmitter.ViewModels
         private Unosquare.FFME.MediaElement m_MediaElement;
         private IWindowManager _iWindowManager;
         private long _lastPacketRead = 0;
-        private int LastPacketReadTimeout = 5000;
-        private MispVideoStreamer mispStreamer;
+        private int _lastPacketReadTimeout = 5000;
+        private MispVideoStreamer _mispStreamer;
+        private VideoEncoder _encoder;
 
         public unsafe MainViewModel(DiscoveryService ds,
             ConnectionService cs,
@@ -120,7 +124,7 @@ namespace VideoTransmitter.ViewModels
             isRunningMediaCheck = true;
             if (MediaElement != null && MediaElement.MediaState != MediaPlaybackState.Close)
             {
-                if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - LastPacketReadTimeout > _lastPacketRead && _lastPacketRead > 0)
+                if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _lastPacketReadTimeout > _lastPacketRead && _lastPacketRead > 0)
                 {
                     logger.LogInfoMessage("Media will close due packet timeout");
                     await MediaElement.Close();
@@ -177,7 +181,7 @@ namespace VideoTransmitter.ViewModels
         }
         private void OnTelemetryTimer(Object source, ElapsedEventArgs e)
         {
-            if (SelectedVehicle != null && mispStreamer != null && _isStreaming)
+            if (SelectedVehicle != null && _mispStreamer != null && _isStreaming)
             {
                 var telemetry = _telemetryListener.GetTelemetryById(SelectedVehicle.VehicleId);
                 if (telemetry != null)
@@ -195,7 +199,7 @@ namespace VideoTransmitter.ViewModels
                         SensorRelativeElevation = telemetry.PayloadPitch,
                         SensorRelativeRoll = telemetry.PayloadRoll
                     };
-                    mispStreamer.FeedTelemetry(tlm);
+                    _mispStreamer.FeedTelemetry(tlm);
                 }
             }
         }
@@ -511,7 +515,7 @@ namespace VideoTransmitter.ViewModels
         }
         private void startMisp()
         {
-            if (mispStreamer == null)
+            if (_mispStreamer == null)
             {
                 logger.LogInfoMessage("startMisp called but mispStreamer is null");
                 return;
@@ -519,7 +523,7 @@ namespace VideoTransmitter.ViewModels
             try
             {
                 logger.LogInfoMessage("startMisp called");
-                mispStreamer.Start();
+                _mispStreamer.Start();
                 _isStreaming = true;
                 logger.LogInfoMessage("startMisp success");
             }
@@ -532,7 +536,7 @@ namespace VideoTransmitter.ViewModels
 
         public void stopMisp()
         {
-            if (mispStreamer == null)
+            if (_mispStreamer == null)
             {
                 logger.LogInfoMessage("stopMisp called but mispStreamer is null");
                 return;
@@ -541,7 +545,7 @@ namespace VideoTransmitter.ViewModels
             {
                 logger.LogInfoMessage("stopMisp called");
                 _isStreaming = false;
-                mispStreamer.Stop();
+                _mispStreamer.Stop();
                 logger.LogInfoMessage("stopMisp success");
             }
             catch (Exception e)
@@ -573,8 +577,8 @@ namespace VideoTransmitter.ViewModels
                         TargetUri = urtpServer.OriginalString,
                         VehicleId = vehicleId,
                     };
-                    mispStreamer = new MispVideoStreamer(mispParams);
-                    mispStreamer.StateChanged += stateChanged;
+                    _mispStreamer = new MispVideoStreamer(mispParams);
+                    _mispStreamer.StateChanged += stateChanged;
                     startMisp();
                     logger.LogInfoMessage(string.Format("new misp started {0}", urtpServer.OriginalString));
                 }
@@ -625,35 +629,53 @@ namespace VideoTransmitter.ViewModels
             logger.LogInfoMessage("ViewLoaded called");
             viewLoaded = true;
             m_MediaElement = (Application.Current.MainWindow as MainView)?.Media;
-            MediaElement.PacketRead += packedRead;
+            MediaElement.VideoFrameDecoded += onVideoFrameDecoded;
             MediaElement.MediaInitializing += OnMediaInitializing;
             MediaElement.MediaOpening += OnMediaOpening;
             MediaElement.MediaOpened += OnMediaOpened;
+            MediaElement.MediaClosed += onMediaClosed;
         }
-        private unsafe void packedRead(object sender, Unosquare.FFME.Common.PacketReadEventArgs e)
+
+        private void onMediaClosed(object sender, EventArgs e)
         {
-            if (MediaElement.MediaState == MediaPlaybackState.Play)
+            // No picture on the screen - no more encoder required because new picture may be in different size
+            _encoder?.Dispose();
+            _encoder = null;
+        }
+
+        private unsafe void onVideoFrameDecoded(object sender, FrameDecodedEventArgs e)
+        {
+            if (_encoder == null)
             {
-                _lastPacketRead = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                // We don't know the image size before the first frame is decoded, 
+                // this is why here is a good place to initialize encoder
+                _encoder = new VideoEncoder(e.Frame->width, e.Frame->height, AVPixelFormat.AV_PIX_FMT_YUVJ422P, BITRATE);
             }
-            // Capture stream here
-            if (e.Packet != null && e.Packet->data != null && e.Packet->size > 0 && mispStreamer != null && _isStreaming)
+
+            if (_mispStreamer != null && (_mispStreamer.State == MispVideoStreamerState.Initial || _mispStreamer.State == MispVideoStreamerState.Operational))
             {
                 try
                 {
-                    byte[] arr = new byte[e.Packet->size];
-                    if (e.Packet->size > 0)
-                    {
-                        Marshal.Copy((IntPtr)e.Packet->data, arr, 0, e.Packet->size);
-                        mispStreamer.FeedData(arr, 0, 0);
-                    }
+                    _encoder.Encode(e.Frame, _mispStreamer.VideoStream);
                 }
-                catch
+                catch (ObjectDisposedException err)
                 {
-
+                    // Stream is finished and object is disposed.
+                    // Log verbose.
+                }
+                catch (InvalidOperationException err)
+                {
+                    // Looks lile streamer was closed. It's ok to do nothing
+                    // Log verbose
+                }
+                catch (Exception err)
+                {
+                    // Log error
                 }
             }
         }
+
+
         public void SettingsWindows()
         {
             logger.LogInfoMessage("SettingsWindows called");
@@ -870,7 +892,7 @@ namespace VideoTransmitter.ViewModels
         {
             get
             {
-                return string.Format(Resources.UgCSVideoTransmitter, 
+                return string.Format(Resources.UgCSVideoTransmitter,
                     Assembly.GetExecutingAssembly().GetName().Version.ToString());
             }
         }
