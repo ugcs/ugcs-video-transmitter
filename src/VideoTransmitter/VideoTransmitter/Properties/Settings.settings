@@ -32,5 +32,8 @@
     <Setting Name="CurrentUICulture" Type="System.String" Scope="Application">
       <Value Profile="(Default)">en-US</Value>
     </Setting>
+    <Setting Name="InstallationId" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
   </Settings>
 </SettingsFile>

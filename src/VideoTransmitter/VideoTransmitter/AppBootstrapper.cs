@@ -10,6 +10,7 @@ using VideoTransmitter.ViewModels;
 using UcsService;
 using VideoSources;
 using VideoTransmitter.Log;
+using System.Text.RegularExpressions;
 
 namespace VideoTransmitter
 {
@@ -53,9 +54,19 @@ namespace VideoTransmitter
             _isInitialized = true;
         }
 
+        private string generteInstallationId()
+        {
+            return Regex.Replace(Convert.ToBase64String(Guid.NewGuid().ToByteArray()), "[/+=]", "");
+        }
 
         protected override void OnStartup(object sender, StartupEventArgs e)
         {
+            if (String.IsNullOrWhiteSpace(Settings.Default.InstallationId))
+            {
+                Settings.Default.InstallationId = generteInstallationId();
+                Settings.Default.Save();
+            }
+
             if (_isInitialized)
             {
                 DisplayRootViewFor<MainViewModel>();

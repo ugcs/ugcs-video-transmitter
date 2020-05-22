@@ -139,5 +139,17 @@ namespace VideoTransmitter.Properties {
                 return ((string)(this["CurrentUICulture"]));
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string InstallationId {
+            get {
+                return ((string)(this["InstallationId"]));
+            }
+            set {
+                this["InstallationId"] = value;
+            }
+        }
     }
 }

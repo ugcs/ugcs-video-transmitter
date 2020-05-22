@@ -564,18 +564,11 @@ namespace VideoTransmitter.ViewModels
             {
                 if (!_isStreaming)
                 {
-                    string tailNumber = Settings.Default.TailNumber;
-                    string vehicleId = Settings.Default.TailNumber;
-                    if (SelectedVehicle != null)
-                    {
-                        tailNumber = SelectedVehicle.TailNumber;
-                        vehicleId = SelectedVehicle.VehicleId.ToString();
-                    }
                     MispStreamerParameters mispParams = new MispStreamerParameters()
                     {
-                        TailNumber = tailNumber,
+                        TailNumber = Settings.Default.TailNumber,
                         TargetUri = urtpServer.OriginalString,
-                        VehicleId = vehicleId,
+                        VehicleId = Settings.Default.InstallationId,
                     };
                     _mispStreamer = new MispVideoStreamer(mispParams);
                     _mispStreamer.StateChanged += stateChanged;
