@@ -37,9 +37,10 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20 0 5 0">
+            <Border Style="{StaticResource ComboPadding}">
                 <Grid>
-                    <ComboBox                               
+                    <ComboBox    
+                          Style="{StaticResource ComboBoxSelector}"                           
                           SelectedItem="{Binding SelectedVideoSource}"
                           Width="200" 
                           Height="30" 
@@ -56,17 +57,20 @@
                         </ComboBox.ItemContainerStyle>
                     </ComboBox>
                     <TextBlock
-                        Margin="5 0 0 0"
+                        Margin="4 0 0 0"
                         VerticalAlignment="Center"
                         HorizontalAlignment="Left"
+                        Foreground="White"
+                        FontSize="16"
                         Visibility="{Binding SelectedItem, ElementName=SelectedVideoSourceElement, Converter={StaticResource NullToVisibilityConverter}}"
                         IsHitTestVisible="False"
                         Text="{x:Static p:Resources.SelectVideoSource}" />
                 </Grid>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20 0 5 0">
+            </Border>
+            <Border Style="{StaticResource ComboPadding}">
                 <Grid>
-                    <ComboBox               
+                    <ComboBox            
+                              Style="{StaticResource ComboBoxSelector}"
                               SelectedItem="{Binding SelectedVehicle}"
                               x:Name="SelectedVehicleElement"
                               Width="200" 
@@ -83,15 +87,17 @@
                         </ComboBox.ItemContainerStyle>
                     </ComboBox>
                     <TextBlock
-                            Margin="5 0 0 0"
+                            Margin="4 0 0 0"
                             VerticalAlignment="Center"
                             HorizontalAlignment="Left"
+                            Foreground="White"
+                            FontSize="16"
                             Visibility="{Binding SelectedItem, ElementName=SelectedVehicleElement, Converter={StaticResource NullToVisibilityConverter}}"
                             IsHitTestVisible="False"
                             Text="{x:Static p:Resources.SelectVehicle}" />
                 </Grid>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20 0 5 0">
+            </Border>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <Button>
                     <Button.Style>
                         <Style TargetType="{x:Type Button}" BasedOn="{StaticResource PlayButton}">
