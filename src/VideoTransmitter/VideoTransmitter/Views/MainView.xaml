@@ -12,7 +12,7 @@
         xmlns:p="clr-namespace:VideoTransmitter.Properties"
         mc:Ignorable="d"
         Style="{StaticResource MainWindowStyle}"
-        Title="{x:Static p:Resources.UgCSVideoTransmitter}" Height="830" Width="1280">
+        Title="{Binding Title}" Height="686" Width="1024">
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Loaded">
             <cal:ActionMessage MethodName="ViewLoaded">
@@ -42,7 +42,7 @@
                     <ComboBox    
                           Style="{StaticResource ComboBoxSelector}"                           
                           SelectedItem="{Binding SelectedVideoSource}"
-                          Width="200" 
+                          Width="252" 
                           Height="30" 
                           x:Name="SelectedVideoSourceElement"
                           DisplayMemberPath="Name" 
@@ -69,16 +69,21 @@
             </Border>
             <Border Style="{StaticResource ComboPadding}">
                 <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="121*"/>
+                        <ColumnDefinition Width="27*"/>
+                        <ColumnDefinition Width="52*"/>
+                    </Grid.ColumnDefinitions>
                     <ComboBox            
                               Style="{StaticResource ComboBoxSelector}"
                               SelectedItem="{Binding SelectedVehicle}"
                               x:Name="SelectedVehicleElement"
-                              Width="200" 
+                              Width="252" 
                               Height="30" 
                               DisplayMemberPath="Name" 
                               SelectedValuePath="VehicleId"             
                               SelectedValue="{Binding Path=VehicleId}"
-                              ItemsSource="{Binding Path=VehicleList}" >
+                              ItemsSource="{Binding Path=VehicleList}" Grid.ColumnSpan="3" Margin="0,3" >
                         <ComboBox.ItemContainerStyle>
                             <Style TargetType="ComboBoxItem">
                                 <Setter Property="Height" Value="30" />
@@ -87,7 +92,7 @@
                         </ComboBox.ItemContainerStyle>
                     </ComboBox>
                     <TextBlock
-                            Margin="4 0 0 0"
+                            Margin="4,7,0,7"
                             VerticalAlignment="Center"
                             HorizontalAlignment="Left"
                             Foreground="White"
@@ -164,7 +169,7 @@
                     </i:Interaction.Triggers>
                 </Button>
             </StackPanel>
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="100 0 5 0">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="122 0 16 0">
                 <Button>
                     <Button.Style>
                         <Style TargetType="{x:Type Button}" BasedOn="{StaticResource SettingsButton}">

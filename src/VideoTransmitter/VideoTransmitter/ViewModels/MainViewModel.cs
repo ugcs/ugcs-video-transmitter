@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Timers;
@@ -130,7 +131,7 @@ namespace VideoTransmitter.ViewModels
                     }
                     else
                     {
-                        VideoMessage = string.Format(Resources.Videostoppedfrom, _lastKnownName); 
+                        VideoMessage = string.Format(Resources.Videostoppedfrom, _lastKnownName);
                     }
                     VideoMessageVisibility = Visibility.Visible;
                     VideoReady = CamVideo.NOT_READY;
@@ -295,7 +296,7 @@ namespace VideoTransmitter.ViewModels
                 if (mod)
                 {
                     NotifyOfPropertyChange(() => VideoSourcesList);
-                }                
+                }
                 var defaultVideo = VideoSourcesList.FirstOrDefault(v => v.Name == Settings.Default.LastCapureDevice);
                 if (defaultVideo != null)
                 {
@@ -503,7 +504,7 @@ namespace VideoTransmitter.ViewModels
                     logger.LogInfoMessage(string.Format("StartScreenStreaming cant open stream on {0}", SelectedVideoSource.Name));
                     VideoMessage = string.Format(Resources.Failedtoloadvideofrom, SelectedVideoSource.Name);
                     VideoMessageVisibility = Visibility.Visible;
-                    VideoReady = CamVideo.NOT_READY;                    
+                    VideoReady = CamVideo.NOT_READY;
                     updateVideoAndTelemetryStatuses();
                 }
             }
@@ -681,7 +682,7 @@ namespace VideoTransmitter.ViewModels
         {
             Execute.OnUIThreadAsync(() =>
             {
-                VideoMessage = Resources.Loadingvideo; 
+                VideoMessage = Resources.Loadingvideo;
                 VideoMessageVisibility = Visibility.Visible;
             });
             logger.LogInfoMessage("OnMediaOpening - CamVideo.NOT_READY");
@@ -862,6 +863,15 @@ namespace VideoTransmitter.ViewModels
             get
             {
                 return _isStreaming;
+            }
+        }
+
+        public string Title
+        {
+            get
+            {
+                return string.Format(Resources.UgCSVideoTransmitter, 
+                    Assembly.GetExecutingAssembly().GetName().Version.ToString());
             }
         }
 

@@ -169,7 +169,7 @@
     <value>UgCS Server is not connected</value>
   </data>
   <data name="UgCSVideoTransmitter" xml:space="preserve">
-    <value>UgCS Video Transmitter</value>
+    <value>UgCS Video Transmitter {0}</value>
   </data>
   <data name="Vehicleisnotselected" xml:space="preserve">
     <value>Vehicle is not selected</value>

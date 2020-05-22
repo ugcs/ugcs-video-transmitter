@@ -8,19 +8,19 @@
         xmlns:p="clr-namespace:VideoTransmitter.Properties"
         mc:Ignorable="d"
         x:Name="SettingsWindow"
-        Title="{x:Static p:Resources.SettingsWindowTitle}" Height="370" Width="420"
+        Title="{x:Static p:Resources.SettingsWindowTitle}" Height="485" Width="464"
         Style="{StaticResource MainWindowStyle}"
         Loaded="Window_Loaded">
-    <Grid Margin="10 0 10 0">
+    <Grid Margin="32 0 32 0">
         <Grid.RowDefinitions>
-            <RowDefinition Height="60"></RowDefinition>
-            <RowDefinition Height="60"></RowDefinition>
-            <RowDefinition Height="50"></RowDefinition>
-            <RowDefinition Height="60"></RowDefinition>
-            <RowDefinition Height="50"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="76"></RowDefinition>
+            <RowDefinition Height="75"></RowDefinition>
+            <RowDefinition Height="64"></RowDefinition>
+            <RowDefinition Height="75"></RowDefinition>
+            <RowDefinition Height="64"></RowDefinition>
+            <RowDefinition Height="104"></RowDefinition>
         </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" VerticalAlignment="Center" Margin="10 10 10 0">
+        <StackPanel Grid.Row="0" VerticalAlignment="Center" Margin="0 26 0 0" Height="48">
             <Border Style="{StaticResource SettingsBorder}">
                 <StackPanel Orientation="Vertical">
                     <TextBlock Text="{x:Static p:Resources.Videosourcename}" Style="{StaticResource SettingsTextBlock}"></TextBlock>
@@ -28,17 +28,17 @@
                 </StackPanel>
             </Border>
         </StackPanel>
-        <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="10 0 10 10" Orientation="Vertical">
-            <StackPanel Margin="0 10 0 0">
-                <TextBlock Text="{x:Static p:Resources.UgCSServer}" Margin="0 0 0 10" Style="{StaticResource SettingsTextBlockHeader}"></TextBlock>
+        <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0 24 0 0" Orientation="Vertical">
+            <StackPanel Height="19">
+                <TextBlock Text="{x:Static p:Resources.UgCSServer}" Style="{StaticResource SettingsTextBlockHeader}"></TextBlock>
             </StackPanel>
-            <StackPanel Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal" Height="16" Margin="0 16 0 0">
                 <RadioButton Style="{StaticResource SettingsTextBlockRadio}" GroupName="UgcsConnection" Content="{x:Static p:Resources.Autodiscovery}" IsChecked="{Binding UgcsAutomatic}" />
-                <RadioButton Style="{StaticResource SettingsTextBlockRadio}" GroupName="UgcsConnection" Content="{x:Static p:Resources.DirectIP}" Margin="10 0 10 0" IsChecked="{Binding UgcsDirectConnection}" />
+                <RadioButton Style="{StaticResource SettingsTextBlockRadio}" GroupName="UgcsConnection" Content="{x:Static p:Resources.DirectIP}" Margin="16 0 0 0" IsChecked="{Binding UgcsDirectConnection}" />
             </StackPanel>
         </StackPanel>
-        <StackPanel Grid.Row="2" VerticalAlignment="Center" Margin="10 0 10 0" Orientation="Horizontal">
-            <StackPanel Width="300">
+        <StackPanel Grid.Row="2" VerticalAlignment="Center" Margin="0 16 0 0" Orientation="Horizontal" Height="48">
+            <StackPanel Width="248">
                 <Border Style="{StaticResource SettingsBorder}">
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="{x:Static p:Resources.IPAddress}" Style="{StaticResource SettingsTextBlock}"></TextBlock>
@@ -46,7 +46,7 @@
                     </StackPanel>
                 </Border>
             </StackPanel>
-            <StackPanel Margin="10 0 0 0" Width="55">
+            <StackPanel Margin="16 0 0 0" Width="120">
                 <Border Style="{StaticResource SettingsBorder}">
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="{x:Static p:Resources.Port}" Style="{StaticResource SettingsTextBlock}"></TextBlock>
@@ -55,25 +55,25 @@
                 </Border>
             </StackPanel>
         </StackPanel>
-        <StackPanel Grid.Row="3" VerticalAlignment="Center" Margin="10 0 10 10" Orientation="Vertical">
-            <StackPanel Margin="0 10 0 0">
-                <TextBlock Text="{x:Static p:Resources.VideoServer}" Margin="0 0 0 10" Style="{StaticResource SettingsTextBlockHeader}"></TextBlock>
+        <StackPanel Grid.Row="3" VerticalAlignment="Center" Margin="0 24 0 0" Orientation="Vertical">
+            <StackPanel Height="19">
+                <TextBlock Text="{x:Static p:Resources.VideoServer}" Style="{StaticResource SettingsTextBlockHeader}"></TextBlock>
             </StackPanel>
-            <StackPanel Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal" Height="16" Margin="0 16 0 0">
                 <RadioButton Style="{StaticResource SettingsTextBlockRadio}" GroupName="VideoServerConnection" Content="{x:Static p:Resources.Autodiscovery}" IsChecked="{Binding VideoServerAutomatic}" />
-                <RadioButton Style="{StaticResource SettingsTextBlockRadio}" GroupName="VideoServerConnection" Content="{x:Static p:Resources.DirectIP}" Margin="10 0 10 0" IsChecked="{Binding VideoServerDirectConnection}" />
+                <RadioButton Style="{StaticResource SettingsTextBlockRadio}" GroupName="VideoServerConnection" Content="{x:Static p:Resources.DirectIP}" Margin="16 0 0 0" IsChecked="{Binding VideoServerDirectConnection}" />
             </StackPanel>
         </StackPanel>
-        <StackPanel Grid.Row="4" VerticalAlignment="Center" Margin="10 0 10 0" Orientation="Horizontal">
-            <StackPanel Width="300">
+        <StackPanel Grid.Row="4" VerticalAlignment="Center" Margin="0 16 0 0" Orientation="Horizontal">
+            <StackPanel Width="248">
                 <Border Style="{StaticResource SettingsBorder}">
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="{x:Static p:Resources.IPAddress}" Style="{StaticResource SettingsTextBlock}"></TextBlock>
-                        <TextBox Text="{Binding VideoServerAddress, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding VideoServerDirectConnection}" MaxLength="15" Margin="0 0 10 0" Style="{StaticResource SettingsTextBox}"></TextBox>
+                        <TextBox Text="{Binding VideoServerAddress, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding VideoServerDirectConnection}" MaxLength="15" Style="{StaticResource SettingsTextBox}"></TextBox>
                     </StackPanel>
                 </Border>
             </StackPanel>
-            <StackPanel Margin="10 0 0 0" Width="55">
+            <StackPanel Margin="16 0 0 0" Width="120">
                 <Border Style="{StaticResource SettingsBorder}">
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="{x:Static p:Resources.Port}" Style="{StaticResource SettingsTextBlock}"></TextBlock>
@@ -82,7 +82,7 @@
                 </Border>
             </StackPanel>
         </StackPanel>
-        <StackPanel Grid.Row="5" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10 0 10 0" Orientation="Horizontal">
+        <StackPanel Grid.Row="5" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 32 0 0" Orientation="Horizontal">
             <Button Content="{x:Static p:Resources.Cancel}" Margin="0 0 10 0" Click="Close_Click" Style="{StaticResource CancelButton}"></Button>
             <Button Content="{x:Static p:Resources.Apply}" IsEnabled="{Binding IsApplyEnabled}" Style="{StaticResource ApplyButton}">
                 <i:Interaction.Triggers>

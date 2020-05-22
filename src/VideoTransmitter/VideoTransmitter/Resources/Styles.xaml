@@ -3,7 +3,7 @@
 
     <Style x:Key="SettingsBorder" TargetType="{x:Type Border}">
         <Setter Property="Padding" Value="5"/>
-        <Setter Property="CornerRadius" Value="2"/>
+        <Setter Property="CornerRadius" Value="4"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Background" Value="#13161a"/>
         <Setter Property="BorderBrush" Value="#4b5762"/>
@@ -15,6 +15,7 @@
     <Style x:Key="SettingsTextBlockHeader" TargetType="{x:Type TextBlock}">
         <Setter Property="Foreground" Value="#e6edf2"/>
         <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="FontSize" Value="16"/>
 
     </Style>
     <Style x:Key="SettingsTextBlockRadio" TargetType="{x:Type RadioButton}">
@@ -41,7 +42,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Grid x:Name="grid">
-                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="2" BorderBrush="Transparent" BorderThickness="0">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="4" BorderBrush="Transparent" BorderThickness="0">
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <ContentPresenter HorizontalAlignment="Center"
                                           VerticalAlignment="Center"
@@ -79,18 +80,18 @@
     <Style x:Key="BorderPanelStatus" TargetType="{x:Type Border}">
         <Setter Property="Background" Value="#13171a"/>
         <Setter Property="Padding" Value="5"/>
-        <Setter Property="CornerRadius" Value="2"/>
+        <Setter Property="CornerRadius" Value="4"/>
         <Setter Property="HorizontalAlignment" Value="Right"/>
     </Style>
     <Style x:Key="ComboPadding" TargetType="{x:Type Border}">
         <Setter Property="Padding" Value="5"/>
-        <Setter Property="CornerRadius" Value="2"/>
+        <Setter Property="CornerRadius" Value="4"/>
         <Setter Property="HorizontalAlignment" Value="Right"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Background" Value="#13161a"/>
         <Setter Property="BorderBrush" Value="#4b5762"/>
         <Setter Property="Height" Value="48"/>
-        <Setter Property="Margin" Value="0 0 20 0"/>
+        <Setter Property="Margin" Value="0 0 24 0"/>
     </Style>
     <Style x:Key="ComboBoxSelector" TargetType="{x:Type ComboBox}">
         <Setter Property="Background" Value="Transparent" />
@@ -170,9 +171,9 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Grid x:Name="grid">
-                        <Border x:Name="border" Background="#76b82a" CornerRadius="2" BorderBrush="Transparent" BorderThickness="0">
+                        <Border x:Name="border" Background="#76b82a" CornerRadius="4" BorderBrush="Transparent" BorderThickness="0">
                             <StackPanel Orientation="Horizontal">
-                                <Image Source="/Resources/streaming-live-2-24-px3x.png" Width="24" Height="24" Margin="18 0 15 0" />
+                                <Image Source="/Resources/streaming-live-2-24-px3x.png" Width="24" Height="24" Margin="24 0 24 0" />
                                 <ContentPresenter HorizontalAlignment="Center"
                                           VerticalAlignment="Center"
                                           TextElement.FontWeight="Normal" Margin="0 -3 0 0">
@@ -203,7 +204,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Grid x:Name="grid">
-                        <Border x:Name="border" Background="#262d33" CornerRadius="2" BorderBrush="Transparent" BorderThickness="0">
+                        <Border x:Name="border" Background="#262d33" CornerRadius="4" BorderBrush="Transparent" BorderThickness="0">
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <Image Source="/Resources/icon-map-settings-24-px3x.png" Width="24" Height="24"/>
                             </StackPanel>

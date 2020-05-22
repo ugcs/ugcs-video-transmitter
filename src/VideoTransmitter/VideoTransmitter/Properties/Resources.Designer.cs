@@ -304,7 +304,7 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to UgCS Video Transmitter.
+        ///   Looks up a localized string similar to UgCS Video Transmitter {0}.
         /// </summary>
         public static string UgCSVideoTransmitter {
             get {
