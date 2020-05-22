@@ -205,7 +205,7 @@
 
         <Grid Grid.Row="1" Style="{StaticResource MainWindowContentStyle}">
             <ffme:MediaElement x:Name="Media" LoadedBehavior="Play" UnloadedBehavior="Manual" MediaOpening="Media_MediaOpening"/>
-            <TextBlock Text="{Binding VideoMessage}" VerticalAlignment="Center" x:Name="LoadingVideo" HorizontalAlignment="Center" Visibility="{Binding VideoMessageVisibility}" />
+            <TextBlock Text="{Binding VideoMessage}" Foreground="White" FontSize="16" VerticalAlignment="Center" x:Name="LoadingVideo" HorizontalAlignment="Center" Visibility="{Binding VideoMessageVisibility}" />
             <StackPanel HorizontalAlignment="Right" Orientation="Vertical" VerticalAlignment="Top" Margin="0 4 3 0">
                 <Border Style="{StaticResource BorderPanelStatus}">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" ToolTip="{Binding Path=VideoServerStatusText}">
@@ -261,7 +261,7 @@
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding TelemetryStatus}" Value="{x:Static enum:TelemetryStatus.READY_TO_STREAM}">
                                             <Setter Property="Text" Value="{x:Static p:Resources.Readytostream}"/>
-                                            <Setter Property="Foreground" Value="#cc671e" />
+                                            <Setter Property="Foreground" Value="#f5f9fc" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding TelemetryStatus}" Value="{x:Static enum:TelemetryStatus.STREAMING}">
                                             <Setter Property="Text" Value="{x:Static p:Resources.Streaming}"/>
