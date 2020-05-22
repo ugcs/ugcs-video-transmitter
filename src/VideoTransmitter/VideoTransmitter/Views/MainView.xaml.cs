@@ -30,5 +30,6 @@ namespace VideoTransmitter.Views
         {
             e.Options.MinimumPlaybackBufferPercent = 0;
         }
+
     }
 }

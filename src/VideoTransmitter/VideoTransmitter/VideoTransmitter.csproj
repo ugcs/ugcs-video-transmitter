@@ -27,6 +27,18 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="App.xaml" />
+    <None Remove="Resources\icon-map-settings-24-px3x.png" />
+    <None Remove="Resources\streaming-live-2-24-px3x.png" />
+    <None Remove="Resources\Styles.xaml" />
+    <Content Include="Resources\icon-map-settings-24-px3x.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\streaming-live-2-24-px3x.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Page Include="Resources\Styles.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\MainView.xaml">
       <Generator>XamlIntelliSenseFileGenerator</Generator>
     </Page>
@@ -34,7 +46,7 @@
       <Generator>XamlIntelliSenseFileGenerator</Generator>
     </Page>
     <None Include="Properties\Settings.settings">
-      <Generator>PublicSettingsSingleFileGenerator</Generator>
+      <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
