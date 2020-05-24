@@ -142,6 +142,15 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Loading video.
+        /// </summary>
+        public static string Loadingvideo {
+            get {
+                return ResourceManager.GetString("Loadingvideo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Not ready to stream.
         /// </summary>
         public static string Notreadytostream {
@@ -295,7 +304,7 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to UgCS Video Transmitter.
+        ///   Looks up a localized string similar to UgCS Video Transmitter {0}.
         /// </summary>
         public static string UgCSVideoTransmitter {
             get {

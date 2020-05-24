@@ -169,7 +169,7 @@
     <value>UgCS Server is not connected</value>
   </data>
   <data name="UgCSVideoTransmitter" xml:space="preserve">
-    <value>UgCS Video Transmitter</value>
+    <value>UgCS Video Transmitter {0}</value>
   </data>
   <data name="Vehicleisnotselected" xml:space="preserve">
     <value>Vehicle is not selected</value>
@@ -224,5 +224,8 @@
   </data>
   <data name="VideoLabel" xml:space="preserve">
     <value>Video: </value>
+  </data>
+  <data name="Loadingvideo" xml:space="preserve">
+    <value>Loading video</value>
   </data>
 </root>

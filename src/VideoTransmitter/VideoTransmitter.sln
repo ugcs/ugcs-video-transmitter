@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UcsService", "UcsService\Uc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VideoSources", "VideoSources\VideoSources.csproj", "{0A378D8F-03BF-448A-AD4F-C04198CE2E35}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoTools", "VideoTools\VideoTools.csproj", "{B096F6D7-8D68-4D2C-8FA0-9CCC2968091C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -33,6 +35,10 @@ Global
 		{0A378D8F-03BF-448A-AD4F-C04198CE2E35}.Debug|x64.Build.0 = Debug|x64
 		{0A378D8F-03BF-448A-AD4F-C04198CE2E35}.Release|x64.ActiveCfg = Release|x64
 		{0A378D8F-03BF-448A-AD4F-C04198CE2E35}.Release|x64.Build.0 = Release|x64
+		{B096F6D7-8D68-4D2C-8FA0-9CCC2968091C}.Debug|x64.ActiveCfg = Debug|x64
+		{B096F6D7-8D68-4D2C-8FA0-9CCC2968091C}.Debug|x64.Build.0 = Debug|x64
+		{B096F6D7-8D68-4D2C-8FA0-9CCC2968091C}.Release|x64.ActiveCfg = Release|x64
+		{B096F6D7-8D68-4D2C-8FA0-9CCC2968091C}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
