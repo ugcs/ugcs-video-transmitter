@@ -219,4 +219,10 @@
   <data name="Videosourcename" xml:space="preserve">
     <value>Video source name</value>
   </data>
+  <data name="TelemetryLabel" xml:space="preserve">
+    <value>Telemetry: </value>
+  </data>
+  <data name="VideoLabel" xml:space="preserve">
+    <value>Video: </value>
+  </data>
 </root>

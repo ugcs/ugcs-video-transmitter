@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoTransmitter", "VideoTransmitter\VideoTransmitter.csproj", "{C0201FE6-BE1D-4975-827E-922FAEB8E676}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VideoTransmitter", "VideoTransmitter\VideoTransmitter.csproj", "{C0201FE6-BE1D-4975-827E-922FAEB8E676}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscoveryService", "DiscoveryService\DiscoveryService.csproj", "{C7031853-B8A5-43FA-AEB0-FDD05A84B2C4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UcsService", "UcsService\UcsService.csproj", "{90334FF5-4A29-40E5-8E59-0966EDA3EF3F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UcsService", "UcsService\UcsService.csproj", "{90334FF5-4A29-40E5-8E59-0966EDA3EF3F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoSources", "VideoSources\VideoSources.csproj", "{0A378D8F-03BF-448A-AD4F-C04198CE2E35}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VideoSources", "VideoSources\VideoSources.csproj", "{0A378D8F-03BF-448A-AD4F-C04198CE2E35}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,22 +17,22 @@ Global
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C0201FE6-BE1D-4975-827E-922FAEB8E676}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{C0201FE6-BE1D-4975-827E-922FAEB8E676}.Debug|x64.Build.0 = Debug|Any CPU
-		{C0201FE6-BE1D-4975-827E-922FAEB8E676}.Release|x64.ActiveCfg = Release|Any CPU
-		{C0201FE6-BE1D-4975-827E-922FAEB8E676}.Release|x64.Build.0 = Release|Any CPU
-		{C7031853-B8A5-43FA-AEB0-FDD05A84B2C4}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{C7031853-B8A5-43FA-AEB0-FDD05A84B2C4}.Debug|x64.Build.0 = Debug|Any CPU
-		{C7031853-B8A5-43FA-AEB0-FDD05A84B2C4}.Release|x64.ActiveCfg = Release|Any CPU
-		{C7031853-B8A5-43FA-AEB0-FDD05A84B2C4}.Release|x64.Build.0 = Release|Any CPU
-		{90334FF5-4A29-40E5-8E59-0966EDA3EF3F}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{90334FF5-4A29-40E5-8E59-0966EDA3EF3F}.Debug|x64.Build.0 = Debug|Any CPU
-		{90334FF5-4A29-40E5-8E59-0966EDA3EF3F}.Release|x64.ActiveCfg = Release|Any CPU
-		{90334FF5-4A29-40E5-8E59-0966EDA3EF3F}.Release|x64.Build.0 = Release|Any CPU
-		{0A378D8F-03BF-448A-AD4F-C04198CE2E35}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{0A378D8F-03BF-448A-AD4F-C04198CE2E35}.Debug|x64.Build.0 = Debug|Any CPU
-		{0A378D8F-03BF-448A-AD4F-C04198CE2E35}.Release|x64.ActiveCfg = Release|Any CPU
-		{0A378D8F-03BF-448A-AD4F-C04198CE2E35}.Release|x64.Build.0 = Release|Any CPU
+		{C0201FE6-BE1D-4975-827E-922FAEB8E676}.Debug|x64.ActiveCfg = Debug|x64
+		{C0201FE6-BE1D-4975-827E-922FAEB8E676}.Debug|x64.Build.0 = Debug|x64
+		{C0201FE6-BE1D-4975-827E-922FAEB8E676}.Release|x64.ActiveCfg = Release|x64
+		{C0201FE6-BE1D-4975-827E-922FAEB8E676}.Release|x64.Build.0 = Release|x64
+		{C7031853-B8A5-43FA-AEB0-FDD05A84B2C4}.Debug|x64.ActiveCfg = Debug|x64
+		{C7031853-B8A5-43FA-AEB0-FDD05A84B2C4}.Debug|x64.Build.0 = Debug|x64
+		{C7031853-B8A5-43FA-AEB0-FDD05A84B2C4}.Release|x64.ActiveCfg = Release|x64
+		{C7031853-B8A5-43FA-AEB0-FDD05A84B2C4}.Release|x64.Build.0 = Release|x64
+		{90334FF5-4A29-40E5-8E59-0966EDA3EF3F}.Debug|x64.ActiveCfg = Debug|x64
+		{90334FF5-4A29-40E5-8E59-0966EDA3EF3F}.Debug|x64.Build.0 = Debug|x64
+		{90334FF5-4A29-40E5-8E59-0966EDA3EF3F}.Release|x64.ActiveCfg = Release|x64
+		{90334FF5-4A29-40E5-8E59-0966EDA3EF3F}.Release|x64.Build.0 = Release|x64
+		{0A378D8F-03BF-448A-AD4F-C04198CE2E35}.Debug|x64.ActiveCfg = Debug|x64
+		{0A378D8F-03BF-448A-AD4F-C04198CE2E35}.Debug|x64.Build.0 = Debug|x64
+		{0A378D8F-03BF-448A-AD4F-C04198CE2E35}.Release|x64.ActiveCfg = Release|x64
+		{0A378D8F-03BF-448A-AD4F-C04198CE2E35}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -18,12 +18,30 @@ namespace VideoSources
         {
             _videoSourceList.Add(new VideoSourceDTO()
             {
-                Name = "Webcam C170"
+                Name = "USB Capture HDMI"
             });
             _videoSourceList.Add(new VideoSourceDTO()
             {
-                Name = "USB Capture HDMI"
+                Name = "Webcam C170"
             });
+        }
+
+        public VideoSourcesService(string devices)
+        {
+            try
+            {
+                List<string> str = devices.Split(';').ToList();
+                foreach (var dev in str)
+                {
+                    _videoSourceList.Add(new VideoSourceDTO()
+                    {
+                        Name = dev
+                    });
+                }
+            } catch (Exception e)
+            {
+                throw e;
+            }
         }
 
         public List<VideoSourceDTO> GetVideoSources()

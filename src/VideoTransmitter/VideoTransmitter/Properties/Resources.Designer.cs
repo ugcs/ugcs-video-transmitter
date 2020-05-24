@@ -268,6 +268,15 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Telemetry: .
+        /// </summary>
+        public static string TelemetryLabel {
+            get {
+                return ResourceManager.GetString("TelemetryLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to UgCS Server.
         /// </summary>
         public static string UgCSServer {
@@ -300,6 +309,15 @@ namespace VideoTransmitter.Properties {
         public static string Vehicleisnotselected {
             get {
                 return ResourceManager.GetString("Vehicleisnotselected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Video: .
+        /// </summary>
+        public static string VideoLabel {
+            get {
+                return ResourceManager.GetString("VideoLabel", resourceCulture);
             }
         }
         

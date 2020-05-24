@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
@@ -13,6 +14,7 @@ using SSDPDiscoveryService;
 using UcsService;
 using UcsService.DTO;
 using UcsService.Enums;
+using Ugcs.Video.MispStreamer;
 using Unosquare.FFME.Common;
 using VideoSources;
 using VideoSources.DTO;
@@ -47,6 +49,7 @@ namespace VideoTransmitter.ViewModels
         private IWindowManager _iWindowManager;
         private long _lastPacketRead = 0;
         private int LastPacketReadTimeout = 5000;
+        private MispVideoStreamer mispStreamer;
 
         public unsafe MainViewModel(DiscoveryService ds,
             ConnectionService cs,
@@ -127,7 +130,7 @@ namespace VideoTransmitter.ViewModels
                     VideoMessage = string.Format(Resources.Videostoppedfrom, SelectedVideoSource.Name);
                     VideoMessageVisibility = Visibility.Visible;
                     VideoReady = CamVideo.NOT_READY;
-                    _isStreaming = false;
+                    stopMisp();
                     updateVideoAndTelemetryStatuses();
                 }
             }
@@ -167,28 +170,26 @@ namespace VideoTransmitter.ViewModels
         }
         private void OnTelemetryTimer(Object source, ElapsedEventArgs e)
         {
-            if (SelectedVehicle != null)
+            if (SelectedVehicle != null && mispStreamer != null && _isStreaming)
             {
                 var telemetry = _telemetryListener.GetTelemetryById(SelectedVehicle.VehicleId);
                 if (telemetry != null)
                 {
-                    double? altitude = telemetry.AltitudeAMSL;
-                    double? longitude = telemetry.Longitude;
-                    double? latitude = telemetry.Latitude;
-                    string platformDesignation = SelectedVehicle.Name;
-                    double? heading = telemetry.Heading;
-                    double? pitch = telemetry.Pitch;
-                    double? roll = telemetry.Roll;
-                    double? sensorRelativeAzimuth = telemetry.PayloadHeading;
-                    double? sensorRelativeElevation = telemetry.PayloadPitch;
-                    double? sensorRelativeRoll = telemetry.PayloadRoll;
+                    MispTelemetry tlm = new MispTelemetry()
+                    {
+                        Altitude = telemetry.AltitudeAMSL,
+                        Longitude = telemetry.Longitude,
+                        Latitude = telemetry.Latitude,
+                        Heading = telemetry.Heading,
+                        PlatformDesignation = SelectedVehicle.Name,
+                        Pitch = telemetry.Pitch,
+                        Roll = telemetry.Roll,
+                        SensorRelativeAzimuth = telemetry.PayloadHeading,
+                        SensorRelativeElevation = telemetry.PayloadPitch,
+                        SensorRelativeRoll = telemetry.PayloadRoll
+                    };
+                    mispStreamer.FeedTelemetry(tlm);
                 }
-                //TODO: send misp telemetry
-                /*
-        tlm.sensorHorizontalFov = mediaStreamerContainer.getSensorHorizontalFov();
-        tlm.sensorVerticalFov = mediaStreamerContainer.getSensorVerticalFov();
-        tlm.slantRange = mediaStreamerContainer.getSlantRange();
-        */
             }
         }
 
@@ -287,7 +288,7 @@ namespace VideoTransmitter.ViewModels
                 }
             });
         }
-        
+
         private ObservableCollection<ClientVehicleDTO> _vehicleList = new ObservableCollection<ClientVehicleDTO>();
         public ObservableCollection<ClientVehicleDTO> VehicleList
         {
@@ -433,7 +434,7 @@ namespace VideoTransmitter.ViewModels
                 Settings.Default.LastCapureDevice = _selectedVideoSource?.Name;
                 Settings.Default.Save();
                 VideoReady = CamVideo.NOT_READY;
-                _isStreaming = false;
+                stopMisp();
                 updateVideoAndTelemetryStatuses();
                 if (_selectedVideoSource != null && viewLoaded)
                 {
@@ -463,10 +464,42 @@ namespace VideoTransmitter.ViewModels
                 {
                     VideoMessage = string.Format(Resources.Failedtoloadvideofrom, SelectedVideoSource.Name);
                     VideoMessageVisibility = Visibility.Visible;
-                    VideoReady = CamVideo.NOT_READY;
-                    _isStreaming = false;
+                    VideoReady = CamVideo.NOT_READY;                    
                     updateVideoAndTelemetryStatuses();
                 }
+            }
+        }
+        private void startMisp()
+        {
+            if (mispStreamer == null)
+            {
+                return;
+            }
+            try
+            {
+                mispStreamer.Start();
+                _isStreaming = true;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        public void stopMisp()
+        {
+            if (mispStreamer == null)
+            {
+                return;
+            }
+            try
+            {
+                _isStreaming = false;
+                mispStreamer.Stop();
+            }
+            catch (Exception e)
+            {
+                throw e;
             }
         }
 
@@ -478,19 +511,61 @@ namespace VideoTransmitter.ViewModels
             {
                 if (!_isStreaming)
                 {
-                    videoStreamingStatus = VideoServerStatus.INITIALIZING;
-                    updateVideoAndTelemetryStatuses();
-                    System.Threading.Thread.Sleep(1000);
-                    _isStreaming = true;
-                    videoStreamingStatus = VideoServerStatus.STREAMING;
+                    string tailNumber = Settings.Default.TailNumber;
+                    string vehicleId = Settings.Default.TailNumber;
+                    if (SelectedVehicle != null)
+                    {
+                        tailNumber = SelectedVehicle.TailNumber;
+                        vehicleId = SelectedVehicle.VehicleId.ToString();
+                    }
+                    MispStreamerParameters mispParams = new MispStreamerParameters()
+                    {
+                        TailNumber = tailNumber,
+                        TargetUri = urtpServer.OriginalString,
+                        VehicleId = vehicleId,
+                    };
+                    mispStreamer = new MispVideoStreamer(mispParams);
+                    mispStreamer.StateChanged += stateChanged;
+                    startMisp();
                 }
                 else
                 {
-                    videoStreamingStatus = VideoServerStatus.FINISHED;
-                    _isStreaming = false;
+                    stopMisp();
                 }
                 updateVideoAndTelemetryStatuses();
             });
+        }
+        private void stateChanged(object sender, EventArgs e)
+        {
+            MispVideoStreamer state = (MispVideoStreamer)sender;
+            if (state != null)
+            {
+                switch (state.State)
+                {
+                    case MispVideoStreamerState.NotStarted:
+                        videoStreamingStatus = VideoServerStatus.READY_TO_STREAM;
+                        break;
+                    case MispVideoStreamerState.Initial:
+                        videoStreamingStatus = VideoServerStatus.INITIALIZING;
+                        break;
+                    case MispVideoStreamerState.Operational:
+                        videoStreamingStatus = VideoServerStatus.STREAMING;
+                        break;
+                    case MispVideoStreamerState.ConnectFailure:
+                        videoStreamingStatus = VideoServerStatus.CONNECTION_FAILED;
+                        break;
+                    case MispVideoStreamerState.ProtocolBadVersion:
+                    case MispVideoStreamerState.OtherFailure:
+                        videoStreamingStatus = VideoServerStatus.FAILED;
+                        break;
+                    case MispVideoStreamerState.Finished:
+                        videoStreamingStatus = VideoServerStatus.FAILED;
+                        break;
+                    default:
+                        throw new Exception(string.Format("Unknown state submitted: {0}", state));
+                }
+                updateVideoAndTelemetryStatuses();
+            }
         }
 
         private bool viewLoaded = false;
@@ -510,9 +585,21 @@ namespace VideoTransmitter.ViewModels
                 _lastPacketRead = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             }
             // Capture stream here
-            if (e.Packet != null)
+            if (e.Packet != null && e.Packet->data != null && e.Packet->size > 0 && mispStreamer != null)
             {
-                Debug.WriteLine(e.Packet->size);
+                try
+                {
+                    byte[] arr = new byte[e.Packet->size];
+                    if (e.Packet->size > 0)
+                    {
+                        Marshal.Copy((IntPtr)e.Packet->data, arr, 0, e.Packet->size);
+                        mispStreamer.FeedData(arr, 0, 0);
+                    }
+                }
+                catch
+                {
+
+                }
             }
         }
         public void SettingsWindows()
@@ -546,7 +633,7 @@ namespace VideoTransmitter.ViewModels
                 VideoMessageVisibility = Visibility.Visible;
             });
             VideoReady = CamVideo.NOT_READY;
-            _isStreaming = false;
+            stopMisp();
             updateVideoAndTelemetryStatuses();
         }
         private void OnMediaOpened(object sender, MediaOpenedEventArgs e)
@@ -567,7 +654,7 @@ namespace VideoTransmitter.ViewModels
                 VideoMessageVisibility = Visibility.Visible;
             });
             VideoReady = CamVideo.NOT_READY;
-            _isStreaming = false;
+            stopMisp();
             updateVideoAndTelemetryStatuses();
         }
 
@@ -648,7 +735,7 @@ namespace VideoTransmitter.ViewModels
                 {
                     return VideoServerStatus.FINISHED;
                 }
-                else if (_isStreaming)
+                else if (videoStreamingStatus == VideoServerStatus.STREAMING)
                 {
                     return VideoServerStatus.STREAMING;
                 }

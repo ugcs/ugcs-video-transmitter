@@ -6,6 +6,7 @@
     <AssemblyName>VideoSources</AssemblyName>
     <RootNamespace>VideoSources</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Platforms>x64</Platforms>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="FFmpeg.AutoGen" Version="4.2.0" />
