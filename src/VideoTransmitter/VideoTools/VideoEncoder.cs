@@ -21,22 +21,23 @@ namespace Ugcs.Video.Tools
         /// <param name="height">Target picture height.</param>
         /// <param name="pxfmt">Pixel format.</param>
         /// <param name="bitrate">The average bitrate. Null for constant quantizer encoding.</param>
-        public unsafe VideoEncoder(int width, int height, AVPixelFormat pxfmt, long? bitrate)
+        /// <param name="framerate"></param>
+        public unsafe VideoEncoder(int width, int height, AVPixelFormat pxfmt, long? bitrate, AVRational framerate)
         {
             const string CODEC = "libx264";
             AVCodec* codec = ffmpeg.avcodec_find_encoder_by_name(CODEC);
             if ((IntPtr)codec == IntPtr.Zero)
-                throw new ApplicationException($"Codec '{CODEC}' not found.");
+                throw new FfmpegException($"Codec '{CODEC}' not found.");
 
             AVCodecContext* c = ffmpeg.avcodec_alloc_context3(codec);
             if ((IntPtr)c == IntPtr.Zero)
-                throw new ApplicationException("Can't allocate codec context.");
+                throw new FfmpegException("Can't allocate codec context.");
 
             AVPacket* pkt = ffmpeg.av_packet_alloc();
             if ((IntPtr)pkt == IntPtr.Zero)
             {
                 ffmpeg.avcodec_free_context(&c);
-                throw new ApplicationException("Can't allocate packet.");
+                throw new FfmpegException("Can't allocate packet.");
             }
 
 
@@ -47,8 +48,8 @@ namespace Ugcs.Video.Tools
             c->height = height;
 
             // frames per second
-            c->time_base = new AVRational { num = 1, den = 30 };
-            c->framerate = new AVRational { num = 30, den = 1 };
+            c->time_base = new AVRational { num = framerate.den, den = framerate.num};
+            c->framerate = framerate;
 
             c->gop_size = 15;
             c->max_b_frames = 1;
@@ -61,13 +62,13 @@ namespace Ugcs.Video.Tools
             {
                 ffmpeg.avcodec_free_context(&c);
                 ffmpeg.av_packet_free(&pkt);
-                throw new ApplicationException($"Could not open codec. Error code: {resultCode}");
+                throw new FfmpegException($"Could not open codec. Error code: {resultCode}");
             }
 
             _pkt = pkt;
             _codecContext = c;
-
         }
+
 
         public unsafe void Dispose()
         {
@@ -95,7 +96,7 @@ namespace Ugcs.Video.Tools
         {
             int resultCode = ffmpeg.avcodec_send_frame(enc_ctx, frame);
             if (resultCode < 0)
-                throw new ApplicationException($"Error sending a frame for encoding. Error code: {resultCode}.");
+                throw new FfmpegException($"Error sending a frame for encoding. Error code: {resultCode}.");
 
             while (resultCode >= 0)
             {
@@ -103,7 +104,7 @@ namespace Ugcs.Video.Tools
                 if (resultCode == ffmpeg.AVERROR(ffmpeg.EAGAIN) || resultCode == ffmpeg.AVERROR(ffmpeg.AVERROR_EOF))
                     return;
                 else if (resultCode < 0)
-                    throw new ApplicationException($"Error during encoding. Error code: {resultCode}.");
+                    throw new FfmpegException($"Error during encoding. Error code: {resultCode}.");
 
                 Debug.Write(String.Format("Tncoded frame %{0} (size={1})\n", pkt->pts, pkt->size));
                 var data = new byte[pkt->size];

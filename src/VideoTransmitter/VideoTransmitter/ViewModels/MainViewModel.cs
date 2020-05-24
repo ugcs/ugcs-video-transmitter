@@ -58,6 +58,7 @@ namespace VideoTransmitter.ViewModels
         private int _lastPacketReadTimeout = 5000;
         private MispVideoStreamer _mispStreamer;
         private VideoEncoder _encoder;
+        private FrameRateCollector _frameRateCollector;
 
         public unsafe MainViewModel(DiscoveryService ds,
             ConnectionService cs,
@@ -638,15 +639,45 @@ namespace VideoTransmitter.ViewModels
 
         private unsafe void onVideoFrameDecoded(object sender, FrameDecodedEventArgs e)
         {
-            if (_encoder == null)
-            {
-                // We don't know the image size before the first frame is decoded, 
-                // this is why here is a good place to initialize encoder
-                _encoder = new VideoEncoder(e.Frame->width, e.Frame->height, AVPixelFormat.AV_PIX_FMT_YUVJ422P, BITRATE);
-            }
+            _frameRateCollector.FrameReceived();            
 
             if (_mispStreamer != null && (_mispStreamer.State == MispVideoStreamerState.Initial || _mispStreamer.State == MispVideoStreamerState.Operational))
             {
+                if (_encoder == null)
+                {
+                    // We don't know the image size and frame rate before the first frame is decoded, 
+                    // this is why here is a good place to initialize encoder
+
+                    if (!_frameRateCollector.FrameRate.HasValue)
+                        return;
+
+                    try
+                    {
+                        _encoder = new VideoEncoder(
+                            e.Frame->width,
+                            e.Frame->height,
+                            AVPixelFormat.AV_PIX_FMT_YUV422P,
+                            BITRATE,
+                            _frameRateCollector.FrameRate.Value);
+                    }
+                    catch (Exception err)
+                    {
+                        // TODO: Log error 
+                        // <here>
+
+                        stopMisp();
+                        Execute.OnUIThreadAsync(() =>
+                        {
+                            MessageBox.Show(
+                                App.Current.MainWindow,
+                                "Encoder initialization error: " + err.Message,
+                                "Error",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Error);
+                        });
+                    }
+                }
+
                 try
                 {
                     _encoder.Encode(e.Frame, _mispStreamer.VideoStream);
@@ -654,16 +685,16 @@ namespace VideoTransmitter.ViewModels
                 catch (ObjectDisposedException err)
                 {
                     // Stream is finished and object is disposed.
-                    // Log verbose.
+                    // TODO: Log verbose.
                 }
                 catch (InvalidOperationException err)
                 {
                     // Looks lile streamer was closed. It's ok to do nothing
-                    // Log verbose
+                    // TODO: Log verbose
                 }
                 catch (Exception err)
                 {
-                    // Log error
+                    // TODO: Log error
                 }
             }
         }
@@ -703,6 +734,7 @@ namespace VideoTransmitter.ViewModels
             logger.LogInfoMessage("OnMediaOpening - CamVideo.NOT_READY");
             VideoReady = CamVideo.NOT_READY;
             updateVideoAndTelemetryStatuses();
+            _frameRateCollector = new FrameRateCollector(15);
         }
         private void OnMediaOpened(object sender, MediaOpenedEventArgs e)
         {
@@ -717,6 +749,9 @@ namespace VideoTransmitter.ViewModels
         }
         private void OnMediaInitializing(object sender, MediaInitializingEventArgs e)
         {
+            // Ffme subscribes on ffmpeg log. To get log messages we should subscribe after ffme. Here is a good place.
+            FfmpegLog.Enable(ffmpeg.AV_LOG_WARNING);
+
             Execute.OnUIThreadAsync(() =>
             {
                 VideoMessage = Resources.Loadingvideo;
