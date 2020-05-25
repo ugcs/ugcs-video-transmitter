@@ -17,15 +17,15 @@ namespace VideoTransmitter.ViewModels
             this.onSave = onSave;
             TailNumber = Settings.Default.TailNumber;
 
-            UgcsAutomatic = Settings.Default.UgcsAutomatic;
-            UgcsDirectConnection = !Settings.Default.UgcsAutomatic;
             UcgsAddress = Settings.Default.UcgsAddress;
             UcgsPort = Settings.Default.UcgsPort;
+            UgcsAutomatic = Settings.Default.UgcsAutomatic;
+            UgcsDirectConnection = !Settings.Default.UgcsAutomatic;
 
-            VideoServerAutomatic = Settings.Default.VideoServerAutomatic;
-            VideoServerDirectConnection = !Settings.Default.VideoServerAutomatic;
             VideoServerAddress = Settings.Default.VideoServerAddress;
             VideoServerPort = Settings.Default.VideoServerPort;
+            VideoServerAutomatic = Settings.Default.VideoServerAutomatic;
+            VideoServerDirectConnection = !Settings.Default.VideoServerAutomatic;
         }        
 
         public string _tailNumber;
@@ -51,6 +51,17 @@ namespace VideoTransmitter.ViewModels
             }
             set
             {
+                if (value && !_ugcsAutomatic)
+                {
+                    if (!IPAddress.TryParse(UcgsAddress, out var ip))
+                    {
+                        UcgsAddress = Settings.Default.UcgsAddress;
+                    }
+                    if (UcgsPort == null || UcgsPort < 1 || UcgsPort > 65535)
+                    {
+                        UcgsPort = Settings.Default.UcgsPort;
+                    }
+                }
                 _ugcsAutomatic = value;
                 NotifyOfPropertyChange(() => UgcsAutomatic);
             }
@@ -107,6 +118,17 @@ namespace VideoTransmitter.ViewModels
             }
             set
             {
+                if (value && !_videoServerAutomatic)
+                {
+                    if (!IPAddress.TryParse(VideoServerAddress, out var ip))
+                    {
+                        VideoServerAddress = Settings.Default.VideoServerAddress;
+                    }
+                    if (VideoServerPort == null || VideoServerPort < 1 || VideoServerPort > 65535)
+                    {
+                        VideoServerPort = Settings.Default.VideoServerPort;
+                    }
+                }
                 _videoServerAutomatic = value;
                 NotifyOfPropertyChange(() => VideoServerAutomatic);
             }
@@ -204,22 +226,28 @@ namespace VideoTransmitter.ViewModels
                 Settings.Default.UgcsAutomatic = UgcsAutomatic;
                 changed.Add("UgcsAutomatic");
             }
-            if (!UgcsAutomatic && (UcgsAddress != Settings.Default.UcgsAddress || UcgsPort != Settings.Default.UcgsPort))
+            if (UcgsAddress != Settings.Default.UcgsAddress || UcgsPort != Settings.Default.UcgsPort)
             {
                 Settings.Default.UcgsAddress = UcgsAddress;
-                Settings.Default.UcgsPort = UcgsPort.Value;
-                changed.Add("UcgsAddress");
+                Settings.Default.UcgsPort = UcgsPort.GetValueOrDefault();
+                if (!UgcsAutomatic)
+                { 
+                    changed.Add("UcgsAddress");
+                }
             }
             if (VideoServerAutomatic != Settings.Default.VideoServerAutomatic)
             {
                 Settings.Default.VideoServerAutomatic = VideoServerAutomatic;
                 changed.Add("VideoServerAutomatic");
             }
-            if (!VideoServerAutomatic && (VideoServerAddress != Settings.Default.VideoServerAddress || VideoServerPort != Settings.Default.VideoServerPort))
+            if (VideoServerAddress != Settings.Default.VideoServerAddress || VideoServerPort != Settings.Default.VideoServerPort)
             {
                 Settings.Default.VideoServerAddress = VideoServerAddress;
-                Settings.Default.VideoServerPort = VideoServerPort.Value;
-                changed.Add("VideoServerAddress");
+                Settings.Default.VideoServerPort = VideoServerPort.GetValueOrDefault();
+                if (!VideoServerAutomatic)
+                {
+                    changed.Add("VideoServerAddress");
+                }
             }
 
             Settings.Default.Save();
