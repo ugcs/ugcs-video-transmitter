@@ -39,7 +39,7 @@
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" MinWidth="106" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Column="0">
@@ -72,7 +72,7 @@
                         Text="{x:Static p:Resources.Selectvideosource}" />
                     </Grid>
                 </Border>
-                <Border Style="{StaticResource ComboPadding}" Margin="24 0 0 0">
+                <Border Style="{StaticResource ComboPadding}" Margin="16 0 0 0">
                     <Grid>
                         <ComboBox            
                         Style="{StaticResource ComboBoxSelectorVehicle}"
@@ -101,7 +101,7 @@
                         Text="{x:Static p:Resources.Selecttelemetrysource}" />
                     </Grid>
                 </Border>
-                <Button Grid.Column="1" Margin="16 0 16 0">
+                <Button Grid.Column="1" Margin="24 0 0 0">
                     <Button.Style>
                         <Style TargetType="{x:Type Button}" BasedOn="{StaticResource PlayButton}">
                             <Style.Triggers>

@@ -226,10 +226,10 @@
     <value>Loading video</value>
   </data>
   <data name="Nodevice" xml:space="preserve">
-    <value>No device</value>
+    <value>&lt;Not selected&gt;</value>
   </data>
   <data name="Novehicle" xml:space="preserve">
-    <value>No vehicle</value>
+    <value>&lt;Not selected&gt;</value>
   </data>
   <data name="Selecttelemetrysource" xml:space="preserve">
     <value>Select telemetry source</value>

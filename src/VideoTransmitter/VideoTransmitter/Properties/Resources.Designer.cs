@@ -151,7 +151,7 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No device.
+        ///   Looks up a localized string similar to &lt;Not selected&gt;.
         /// </summary>
         public static string Nodevice {
             get {
@@ -169,7 +169,7 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No vehicle.
+        ///   Looks up a localized string similar to &lt;Not selected&gt;.
         /// </summary>
         public static string Novehicle {
             get {
