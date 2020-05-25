@@ -51,7 +51,8 @@ namespace VideoSources
                 {
                     var vsd = new VideoSourceDTO()
                     {
-                        Name = VideoCaptureDevice.Name
+                        Name = VideoCaptureDevice.Name,
+                        Id = VideoCaptureDevice.MonikerString
                     };
                     exists.Add(vsd);
                 }
@@ -62,7 +63,8 @@ namespace VideoSources
                     {
                         var vsd = new VideoSourceDTO()
                         {
-                            Name = videoCaptureDevice.Name
+                            Name = videoCaptureDevice.Name,
+                            Id = videoCaptureDevice.Id
                         };
                         _videoSourceList.Add(vsd);
                         changed = true;

@@ -228,4 +228,7 @@
   <data name="Loadingvideo" xml:space="preserve">
     <value>Loading video</value>
   </data>
+  <data name="Nodevice" xml:space="preserve">
+    <value>No device</value>
+  </data>
 </root>

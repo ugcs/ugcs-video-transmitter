@@ -46,6 +46,9 @@ namespace VideoTransmitter.ViewModels
         private Uri urtpServer = null;
         public const string UGCS_VIDEOSERVER_URTP_ST = "ugcs:video-server:input:urtp";
 
+        private VideoSourceDTO _defaultVideoDevice;
+        private const string EMPTY_DEVICE_ID = "empty_device";
+
         private IDiscoveryService _discoveryService;
         private ConnectionService _ucsConnectionService;
         private VehicleListener _vehicleListener;
@@ -76,6 +79,13 @@ namespace VideoTransmitter.ViewModels
             _telemetryListener = tl;
             _ucsConnectionService = cs;
             _discoveryService = ds;
+            _defaultVideoDevice = new VideoSourceDTO()
+            {
+                Name = Resources.Nodevice,
+                Id = EMPTY_DEVICE_ID
+            };
+            VideoSourcesList.Add(_defaultVideoDevice);
+            SelectedVideoSource = _defaultVideoDevice;
 
             _ucsConnectionService.Connected += ucsConnection_onConnected;
             _ucsConnectionService.Disconnected += ucsConnection_onDisconnected;
@@ -130,7 +140,7 @@ namespace VideoTransmitter.ViewModels
                     logger.LogInfoMessage("Media will close due packet timeout");
                     await MediaElement.Close();
                     _lastPacketRead = 0;
-                    if (SelectedVideoSource != null)
+                    if (SelectedVideoSource != null && SelectedVideoSource.Id != EMPTY_DEVICE_ID)
                     {
                         VideoMessage = string.Format(Resources.Videostoppedfrom, SelectedVideoSource.Name);
                     }
@@ -278,6 +288,7 @@ namespace VideoTransmitter.ViewModels
             Execute.OnUIThreadAsync(() =>
             {
                 bool mod = false;
+                bool updateToDefault = false;
                 lock (videoSourcesListLocker)
                 {
                     foreach (var source in sources)
@@ -288,16 +299,23 @@ namespace VideoTransmitter.ViewModels
                             mod = true;
                         }
                     }
-                    foreach (var source in _videoSourcesList.ToList())
+                    foreach (var source in _videoSourcesList.Skip(1).ToList())
                     {
                         if (!sources.Any(v => v.Name == source.Name))
                         {
+                            if (SelectedVideoSource != null && SelectedVideoSource.Id == source.Id)
+                            {
+                                updateToDefault = true;
+                            }
                             VideoSourcesList.Remove(source);
                             mod = true;
                         }
                     }
                 }
-
+                if (updateToDefault)
+                {
+                    SelectedVideoSource = _defaultVideoDevice;
+                }
                 if (mod)
                 {
                     NotifyOfPropertyChange(() => VideoSourcesList);
@@ -471,11 +489,14 @@ namespace VideoTransmitter.ViewModels
                     return;
                 }
                 _selectedVideoSource = value;
-                Settings.Default.LastCapureDevice = _selectedVideoSource?.Name;
-                Settings.Default.Save();
+                if (_selectedVideoSource != null && _selectedVideoSource.Id != EMPTY_DEVICE_ID)
+                {
+                    Settings.Default.LastCapureDevice = _selectedVideoSource.Name;
+                    Settings.Default.Save();
+                }
                 VideoReady = CamVideo.NOT_READY;
                 updateVideoAndTelemetryStatuses();
-                if (_selectedVideoSource != null)
+                if (_selectedVideoSource != null && _selectedVideoSource.Id != EMPTY_DEVICE_ID)
                 {
                     _lastKnownName = _selectedVideoSource.Name;
                 }
@@ -498,7 +519,7 @@ namespace VideoTransmitter.ViewModels
         private async Task StartScreenStreaming()
         {
             logger.LogInfoMessage("StartScreenStreaming called");
-            if (MediaElement == null || SelectedVideoSource == null)
+            if (MediaElement == null || SelectedVideoSource == null || SelectedVideoSource.Id == EMPTY_DEVICE_ID)
             {
                 return;
             }
@@ -639,6 +660,10 @@ namespace VideoTransmitter.ViewModels
 
         private unsafe void onVideoFrameDecoded(object sender, FrameDecodedEventArgs e)
         {
+            if (MediaElement.MediaState == MediaPlaybackState.Play)
+            {
+                _lastPacketRead = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            }
             _frameRateCollector.FrameReceived();            
 
             if (_mispStreamer != null && (_mispStreamer.State == MispVideoStreamerState.Initial || _mispStreamer.State == MispVideoStreamerState.Operational))
@@ -806,6 +831,7 @@ namespace VideoTransmitter.ViewModels
             {
                 if (SelectedVehicle == null
                     || SelectedVideoSource == null
+                    || SelectedVideoSource.Id == EMPTY_DEVICE_ID
                     || urtpServer == null
                     || !_ucsConnectionService.IsConnected)
                 {
@@ -827,6 +853,7 @@ namespace VideoTransmitter.ViewModels
             get
             {
                 if (SelectedVideoSource == null
+                    || SelectedVideoSource.Id == EMPTY_DEVICE_ID
                     || urtpServer == null
                     || VideoReady == CamVideo.NOT_READY)
                 {
@@ -865,7 +892,7 @@ namespace VideoTransmitter.ViewModels
                 {
                     return Resources.UgCSServerisnotconnected;
                 }
-                if (SelectedVideoSource == null)
+                if (SelectedVideoSource == null || SelectedVideoSource.Id == EMPTY_DEVICE_ID)
                 {
                     return Resources.Videosourcenotselected;
                 }
@@ -888,7 +915,7 @@ namespace VideoTransmitter.ViewModels
                 {
                     return Resources.VideoServernotdiscovered;
                 }
-                if (SelectedVideoSource == null)
+                if (SelectedVideoSource == null || SelectedVideoSource.Id == EMPTY_DEVICE_ID)
                 {
                     return Resources.Videosourceisnotselected;
                 }

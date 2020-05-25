@@ -151,6 +151,15 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No device.
+        /// </summary>
+        public static string Nodevice {
+            get {
+                return ResourceManager.GetString("Nodevice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Not ready.
         /// </summary>
         public static string Notreadytostream {

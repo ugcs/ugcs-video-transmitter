@@ -8,6 +8,7 @@ namespace VideoSources.DTO
 {
     public class VideoSourceDTO
     {
+        public string Id { get; set; }
         public string Name { get; set; }
     }
 }
