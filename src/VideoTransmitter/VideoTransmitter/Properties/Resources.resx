@@ -141,11 +141,8 @@
   <data name="ReadytostreamtoVideoServer" xml:space="preserve">
     <value>Ready to stream to VideoServer {0}</value>
   </data>
-  <data name="SelectVehicle" xml:space="preserve">
-    <value>Select vehicle...</value>
-  </data>
-  <data name="SelectVideoSource" xml:space="preserve">
-    <value>Select video source...</value>
+  <data name="Selectvideosource" xml:space="preserve">
+    <value>Select video source</value>
   </data>
   <data name="Settings" xml:space="preserve">
     <value>Settings</value>
@@ -233,5 +230,8 @@
   </data>
   <data name="Novehicle" xml:space="preserve">
     <value>No vehicle</value>
+  </data>
+  <data name="Selecttelemetrysource" xml:space="preserve">
+    <value>Select telemetry source</value>
   </data>
 </root>

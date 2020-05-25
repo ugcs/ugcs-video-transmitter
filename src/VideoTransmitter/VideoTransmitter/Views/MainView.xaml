@@ -12,7 +12,7 @@
         xmlns:p="clr-namespace:VideoTransmitter.Properties"
         mc:Ignorable="d"
         Style="{StaticResource MainWindowStyle}"
-        Title="{Binding Title}" Height="686" Width="1024">
+        Title="{Binding Title}" Height="686" Width="1024" MinWidth="1024">
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Loaded">
             <cal:ActionMessage MethodName="ViewLoaded">
@@ -36,177 +36,178 @@
             <RowDefinition Height="80" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <Border Style="{StaticResource ComboPadding}">
-                <Grid>
-                    <ComboBox    
-                          Style="{StaticResource ComboBoxSelector}"                           
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="432" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Column="0">
+                <Border Style="{StaticResource ComboPadding}" Margin="16 0 0 0">
+                    <Grid>
+                        <ComboBox    
+                          Style="{StaticResource ComboBoxSelectorDevice}"                           
                           SelectedItem="{Binding SelectedVideoSource}"
-                          Width="252" 
-                          Height="30" 
+                          Height="48" 
                           x:Name="SelectedVideoSourceElement"
                           DisplayMemberPath="Name" 
                           SelectedValuePath="Name"                       
                           SelectedValue="{Binding Path=Name}"
                           ItemsSource="{Binding Path=VideoSourcesList, Mode=OneWay}" >
-                        <ComboBox.ItemContainerStyle>
-                            <Style TargetType="ComboBoxItem">
-                                <Setter Property="Height" Value="30" />
-                                <Setter Property="VerticalContentAlignment" Value="Center" />
-                            </Style>
-                        </ComboBox.ItemContainerStyle>
-                    </ComboBox>
-                    <TextBlock
-                        Margin="4 0 0 0"
+                            <ComboBox.ItemContainerStyle>
+                                <Style TargetType="ComboBoxItem">
+                                    <Setter Property="Height" Value="30" />
+                                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                                </Style>
+                            </ComboBox.ItemContainerStyle>
+                        </ComboBox>
+                        <TextBlock
+                        Margin="16,16,0,7"
                         VerticalAlignment="Center"
                         HorizontalAlignment="Left"
                         Foreground="White"
                         FontSize="16"
                         Visibility="{Binding SelectedItem, ElementName=SelectedVideoSourceElement, Converter={StaticResource NullToVisibilityConverter}}"
                         IsHitTestVisible="False"
-                        Text="{x:Static p:Resources.SelectVideoSource}" />
-                </Grid>
-            </Border>
-            <Border Style="{StaticResource ComboPadding}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="121*"/>
-                        <ColumnDefinition Width="27*"/>
-                        <ColumnDefinition Width="52*"/>
-                    </Grid.ColumnDefinitions>
-                    <ComboBox            
-                              Style="{StaticResource ComboBoxSelector}"
-                              SelectedItem="{Binding SelectedVehicle}"
-                              x:Name="SelectedVehicleElement"
-                              Width="252" 
-                              Height="30" 
-                              DisplayMemberPath="Name" 
-                              SelectedValuePath="VehicleId"             
-                              SelectedValue="{Binding Path=VehicleId}"
-                              ItemsSource="{Binding Path=VehicleList}" Grid.ColumnSpan="3" Margin="0,3" >
-                        <ComboBox.ItemContainerStyle>
-                            <Style TargetType="ComboBoxItem">
-                                <Setter Property="Height" Value="30" />
-                                <Setter Property="VerticalContentAlignment" Value="Center" />
+                        Text="{x:Static p:Resources.Selectvideosource}" />
+                    </Grid>
+                </Border>
+                <Border Style="{StaticResource ComboPadding}" Margin="24 0 0 0">
+                    <Grid>
+                        <ComboBox            
+                        Style="{StaticResource ComboBoxSelectorVehicle}"
+                        SelectedItem="{Binding SelectedVehicle}"
+                        x:Name="SelectedVehicleElement"
+                        Height="48" 
+                        DisplayMemberPath="Name" 
+                        SelectedValuePath="VehicleId"             
+                        SelectedValue="{Binding Path=VehicleId}"
+                        ItemsSource="{Binding Path=VehicleList}" Grid.ColumnSpan="3" >
+                            <ComboBox.ItemContainerStyle>
+                                <Style TargetType="ComboBoxItem">
+                                    <Setter Property="Height" Value="30" />
+                                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                                </Style>
+                            </ComboBox.ItemContainerStyle>
+                        </ComboBox>
+                        <TextBlock
+                        Margin="16,16,0,7"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Left"
+                        Foreground="White"
+                        FontSize="16"
+                        Visibility="{Binding SelectedItem, ElementName=SelectedVehicleElement, Converter={StaticResource NullToVisibilityConverter}}"
+                        IsHitTestVisible="False"
+                        Text="{x:Static p:Resources.Selecttelemetrysource}" />
+                    </Grid>
+                </Border>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Column="1">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button>
+                        <Button.Style>
+                            <Style TargetType="{x:Type Button}" BasedOn="{StaticResource PlayButton}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsStreaming}" Value="True">
+                                        <Setter Property="Content" Value="{x:Static p:Resources.StopStreaming}"/>
+                                    </DataTrigger>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding IsStreaming}" Value="False" />
+                                            <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.NOT_READY_TO_STREAM}" />
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Content" Value="{x:Static p:Resources.StartStreaming}"/>
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                    </MultiDataTrigger>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding IsStreaming}" Value="False" />
+                                            <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.READY_TO_STREAM}" />
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Content" Value="{x:Static p:Resources.StartStreaming}"/>
+                                        <Setter Property="IsEnabled" Value="True"/>
+                                    </MultiDataTrigger>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding IsStreaming}" Value="False" />
+                                            <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.STREAMING}" />
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Content" Value="{x:Static p:Resources.StopStreaming}"/>
+                                        <Setter Property="IsEnabled" Value="True"/>
+                                    </MultiDataTrigger>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding IsStreaming}" Value="False" />
+                                            <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FAILED}" />
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Content" Value="{x:Static p:Resources.StartStreaming}"/>
+                                        <Setter Property="IsEnabled" Value="True"/>
+                                    </MultiDataTrigger>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding IsStreaming}" Value="False" />
+                                            <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FINISHED}" />
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Content" Value="{x:Static p:Resources.StartStreaming}"/>
+                                        <Setter Property="IsEnabled" Value="True"/>
+                                    </MultiDataTrigger>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding IsStreaming}" Value="False" />
+                                            <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.CONNECTION_FAILED}" />
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Content" Value="{x:Static p:Resources.StartStreaming}"/>
+                                        <Setter Property="IsEnabled" Value="True"/>
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
                             </Style>
-                        </ComboBox.ItemContainerStyle>
-                    </ComboBox>
-                    <TextBlock
-                            Margin="4,7,0,7"
-                            VerticalAlignment="Center"
-                            HorizontalAlignment="Left"
-                            Foreground="White"
-                            FontSize="16"
-                            Visibility="{Binding SelectedItem, ElementName=SelectedVehicleElement, Converter={StaticResource NullToVisibilityConverter}}"
-                            IsHitTestVisible="False"
-                            Text="{x:Static p:Resources.SelectVehicle}" />
-                </Grid>
-            </Border>
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                <Button>
-                    <Button.Style>
-                        <Style TargetType="{x:Type Button}" BasedOn="{StaticResource PlayButton}">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsStreaming}" Value="True">
-                                    <Setter Property="Content" Value="{x:Static p:Resources.StopStreaming}"/>
-                                </DataTrigger>
-                                <MultiDataTrigger>
-                                    <MultiDataTrigger.Conditions>
-                                        <Condition Binding="{Binding IsStreaming}" Value="False" />
-                                        <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.NOT_READY_TO_STREAM}" />
-                                    </MultiDataTrigger.Conditions>
-                                    <Setter Property="Content" Value="{x:Static p:Resources.StartStreaming}"/>
-                                    <Setter Property="IsEnabled" Value="False"/>
-                                </MultiDataTrigger>
-                                <MultiDataTrigger>
-                                    <MultiDataTrigger.Conditions>
-                                        <Condition Binding="{Binding IsStreaming}" Value="False" />
-                                        <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.READY_TO_STREAM}" />
-                                    </MultiDataTrigger.Conditions>
-                                    <Setter Property="Content" Value="{x:Static p:Resources.StartStreaming}"/>
-                                    <Setter Property="IsEnabled" Value="True"/>
-                                </MultiDataTrigger>
-                                <MultiDataTrigger>
-                                    <MultiDataTrigger.Conditions>
-                                        <Condition Binding="{Binding IsStreaming}" Value="False" />
-                                        <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.STREAMING}" />
-                                    </MultiDataTrigger.Conditions>
-                                    <Setter Property="Content" Value="{x:Static p:Resources.StopStreaming}"/>
-                                    <Setter Property="IsEnabled" Value="True"/>
-                                </MultiDataTrigger>
-                                <MultiDataTrigger>
-                                    <MultiDataTrigger.Conditions>
-                                        <Condition Binding="{Binding IsStreaming}" Value="False" />
-                                        <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FAILED}" />
-                                    </MultiDataTrigger.Conditions>
-                                    <Setter Property="Content" Value="{x:Static p:Resources.StartStreaming}"/>
-                                    <Setter Property="IsEnabled" Value="True"/>
-                                </MultiDataTrigger>
-                                <MultiDataTrigger>
-                                    <MultiDataTrigger.Conditions>
-                                        <Condition Binding="{Binding IsStreaming}" Value="False" />
-                                        <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FINISHED}" />
-                                    </MultiDataTrigger.Conditions>
-                                    <Setter Property="Content" Value="{x:Static p:Resources.StartStreaming}"/>
-                                    <Setter Property="IsEnabled" Value="True"/>
-                                </MultiDataTrigger>
-                                <MultiDataTrigger>
-                                    <MultiDataTrigger.Conditions>
-                                        <Condition Binding="{Binding IsStreaming}" Value="False" />
-                                        <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.CONNECTION_FAILED}" />
-                                    </MultiDataTrigger.Conditions>
-                                    <Setter Property="Content" Value="{x:Static p:Resources.StartStreaming}"/>
-                                    <Setter Property="IsEnabled" Value="True"/>
-                                </MultiDataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="Click">
-                            <cal:ActionMessage MethodName="StartStreaming">
-                            </cal:ActionMessage>
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
-                </Button>
+                        </Button.Style>
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="Click">
+                                <cal:ActionMessage MethodName="StartStreaming">
+                                </cal:ActionMessage>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </Button>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="122 0 16 0">
+                    <Button>
+                        <Button.Style>
+                            <Style TargetType="{x:Type Button}" BasedOn="{StaticResource SettingsButton}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.NOT_READY_TO_STREAM}">
+                                        <Setter Property="IsEnabled" Value="True"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.READY_TO_STREAM}">
+                                        <Setter Property="IsEnabled" Value="True"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.STREAMING}">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.INITIALIZING}">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FAILED}">
+                                        <Setter Property="IsEnabled" Value="True"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FINISHED}">
+                                        <Setter Property="IsEnabled" Value="True"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.CONNECTION_FAILED}">
+                                        <Setter Property="IsEnabled" Value="True"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="Click">
+                                <cal:ActionMessage MethodName="SettingsWindows">
+                                </cal:ActionMessage>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </Button>
+                </StackPanel>
             </StackPanel>
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="122 0 16 0">
-                <Button>
-                    <Button.Style>
-                        <Style TargetType="{x:Type Button}" BasedOn="{StaticResource SettingsButton}">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.NOT_READY_TO_STREAM}">
-                                    <Setter Property="IsEnabled" Value="True"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.READY_TO_STREAM}">
-                                    <Setter Property="IsEnabled" Value="True"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.STREAMING}">
-                                    <Setter Property="IsEnabled" Value="False"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.INITIALIZING}">
-                                    <Setter Property="IsEnabled" Value="False"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FAILED}">
-                                    <Setter Property="IsEnabled" Value="True"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FINISHED}">
-                                    <Setter Property="IsEnabled" Value="True"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.CONNECTION_FAILED}">
-                                    <Setter Property="IsEnabled" Value="True"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="Click">
-                            <cal:ActionMessage MethodName="SettingsWindows">
-                            </cal:ActionMessage>
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
-                </Button>
-            </StackPanel>
-        </StackPanel>
+        </Grid>
 
         <Grid Grid.Row="1" Style="{StaticResource MainWindowContentStyle}">
             <ffme:MediaElement x:Name="Media" LoadedBehavior="Play" UnloadedBehavior="Manual" MediaOpening="Media_MediaOpening"/>

@@ -232,9 +232,12 @@ namespace VideoTransmitter.ViewModels
             {
                 _ucsConnectionService.Connect(address, new UcsCredentials(string.Empty, string.Empty));
                 updateVideoAndTelemetryStatuses();
+                logger.LogError("UgCS connected");
             }
-            catch
+            catch (Exception e)
             {
+                logger.LogError("Could not connect to UgCS");
+                logger.LogException(e);
                 ucsConnection_onDisconnected(null, null);
             }
         }
@@ -252,6 +255,7 @@ namespace VideoTransmitter.ViewModels
                 }
                 NotifyOfPropertyChange(() => VehicleList);
             });
+            logger.LogInfoMessage("UgCS server disconnected");
             updateVideoAndTelemetryStatuses();
         }
 
@@ -267,7 +271,7 @@ namespace VideoTransmitter.ViewModels
                     {
                         if (Settings.Default.UgcsAutomatic)
                         {
-                            logger.LogInfoMessage(string.Format("Found new ugcs server {0}", location.AbsolutePath));
+                            logger.LogInfoMessage(string.Format("Found new UgCS server {0}", location.AbsolutePath));
                             Connect(location);
                         }
                         searhing = false;
@@ -277,7 +281,7 @@ namespace VideoTransmitter.ViewModels
             else
             {
                 var uri = new Uri("tcp://" + Settings.Default.UcgsAddress + ":" + Settings.Default.UcgsPort);
-                logger.LogInfoMessage(string.Format("Direct connection used to ugcs server {0}", uri.AbsolutePath));
+                logger.LogInfoMessage(string.Format("Direct connection used to UgCS server {0}", uri.AbsolutePath));
                 Connect(uri);
             }
         }

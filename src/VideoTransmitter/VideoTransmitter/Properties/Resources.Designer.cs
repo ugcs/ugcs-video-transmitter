@@ -214,20 +214,20 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Select vehicle....
+        ///   Looks up a localized string similar to Select telemetry source.
         /// </summary>
-        public static string SelectVehicle {
+        public static string Selecttelemetrysource {
             get {
-                return ResourceManager.GetString("SelectVehicle", resourceCulture);
+                return ResourceManager.GetString("Selecttelemetrysource", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Select video source....
+        ///   Looks up a localized string similar to Select video source.
         /// </summary>
-        public static string SelectVideoSource {
+        public static string Selectvideosource {
             get {
-                return ResourceManager.GetString("SelectVideoSource", resourceCulture);
+                return ResourceManager.GetString("Selectvideosource", resourceCulture);
             }
         }
         
