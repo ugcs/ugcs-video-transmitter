@@ -21,7 +21,7 @@
       <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="TailNumber" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">UgCS video transmitter</Value>
     </Setting>
     <Setting Name="LastCapureDevice" Type="System.String" Scope="User">
       <Value Profile="(Default)" />

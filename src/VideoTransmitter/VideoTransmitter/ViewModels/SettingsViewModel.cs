@@ -168,7 +168,7 @@ namespace VideoTransmitter.ViewModels
             get
             {
                 bool mod = false;
-                if (TailNumber != Settings.Default.TailNumber)
+                if (TailNumber != Settings.Default.TailNumber && !string.IsNullOrEmpty(TailNumber.Trim()))
                 {
                     mod = true;
                 }
