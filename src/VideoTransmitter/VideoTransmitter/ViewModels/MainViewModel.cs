@@ -862,6 +862,10 @@ namespace VideoTransmitter.ViewModels
                 }
                 else if (_isStreaming)
                 {
+                    if (videoStreamingStatus == VideoServerStatus.INITIALIZING)
+                    {
+                        return TelemetryStatus.READY_TO_STREAM;
+                    }
                     return TelemetryStatus.STREAMING;
                 }
                 else
@@ -952,6 +956,10 @@ namespace VideoTransmitter.ViewModels
                 }
                 if (_isStreaming)
                 {
+                    if (videoStreamingStatus == VideoServerStatus.INITIALIZING)
+                    {
+                        return string.Format(Resources.ReadytostreamtoVideoServer, urtpServer.Host + ":" + urtpServer.Port);
+                    }
                     return Resources.Streaming;
                 }
                 return string.Format(Resources.ReadytostreamtoVideoServer, urtpServer.Host + ":" + urtpServer.Port);
