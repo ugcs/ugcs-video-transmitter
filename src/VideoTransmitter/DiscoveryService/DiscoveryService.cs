@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -8,13 +9,14 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using UGCS.Ssdp;
 
 namespace SSDPDiscoveryService
 {
+    public delegate void ServiceLost(string serviceType, string location);
     public class DiscoveryService : IDiscoveryService, IDisposable
     {
-
         SsdpAgent _ssdpAgent;
 
         private const string DEFAULT_MULTICAST_IP = "239.198.46.46";
@@ -22,14 +24,25 @@ namespace SSDPDiscoveryService
         
         private log4net.ILog _log = log4net.LogManager.GetLogger(typeof(DiscoveryService));
 
+        private object _locker = new object();
+        private const int TIMEOUT_SEC = 30;
+        private List<string> servicesToFind = new List<string>();
+        private readonly Dictionary<string, ConcurrentDictionary<string, long>> foundServices = new Dictionary<string, ConcurrentDictionary<string, long>>();
+
+        private const int DEAD_SSDP_CHECK_INTERVAL = 500;
+        private System.Timers.Timer serviceTimer;
+
         // key - type of service that is listened for
         // value - list of listeners
         private readonly ConcurrentDictionary<string, IList<ServiceUrlEventHandler>> _listeners = new ConcurrentDictionary<string, IList<ServiceUrlEventHandler>>();
-        
+
         public DiscoveryService()
             : this(DEFAULT_MULTICAST_IP, DEFAULT_PORT)
         {
-
+            serviceTimer = new System.Timers.Timer(DEAD_SSDP_CHECK_INTERVAL);
+            serviceTimer.Elapsed += onServiceTimer;
+            serviceTimer.AutoReset = true;
+            serviceTimer.Enabled = true;
         }
 
         public DiscoveryService(string multicastIp, int port)
@@ -41,6 +54,8 @@ namespace SSDPDiscoveryService
 
             _ssdpAgent = new SsdpAgent(ip, port);
         }
+
+        public event ServiceLost ServiceLost;
 
         public void StartListen()
         {
@@ -99,9 +114,19 @@ namespace SSDPDiscoveryService
             if (!SsdpArgs.IsAlive)//ignore services which notify they die
                 return;
 
-            _log.DebugFormat("Srvice with type \"{0}\" found at '{1}'.", SsdpArgs.ServiceInfo.Type, SsdpArgs.ServiceInfo.Location);
+            _log.DebugFormat("Service with type \"{0}\" found at '{1}'.", SsdpArgs.ServiceInfo.Type, SsdpArgs.ServiceInfo.Location);
             try
             {
+                lock (_locker)
+                {
+                    if (foundServices.ContainsKey(SsdpArgs.ServiceInfo.Type))
+                    {
+                        foundServices[SsdpArgs.ServiceInfo.Type].AddOrUpdate(SsdpArgs.ServiceInfo.Location,
+                            DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+                            (k, old) => DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+                    }
+                }
+                
                 string serviceType = SsdpArgs.ServiceInfo.Type;
                 Uri locationUri = new Uri(SsdpArgs.ServiceInfo.Location);
                 if (_listeners.TryRemove(serviceType, out var listeners))
@@ -127,6 +152,56 @@ namespace SSDPDiscoveryService
         {
             StopListen();
             _ssdpAgent.Dispose();
+        }
+
+        public void AddToListen(string serviceType)
+        {
+            lock (_locker)
+            {
+                if (!foundServices.ContainsKey(serviceType))
+                {
+                    foundServices.Add(serviceType, new ConcurrentDictionary<string, long>());
+                }
+            }
+        }
+
+        public string GetService(string serviceType)
+        {
+            lock (_locker)
+            {
+                if (foundServices.ContainsKey(serviceType))
+                {
+                    return foundServices[serviceType].Keys.FirstOrDefault();
+                }
+                return null;
+            }
+        }
+
+        private void onServiceTimer(object source, ElapsedEventArgs e)
+        {
+            List<Tuple<string, string>> removed = new List<Tuple<string, string>>();
+            lock (_locker)
+            {
+                Parallel.ForEach(foundServices, (service) => {
+                    foreach (var location in service.Value)
+                    {
+                        if (location.Value < DateTimeOffset.UtcNow.ToUnixTimeSeconds() - TIMEOUT_SEC)
+                        {
+                            if (service.Value.TryRemove(location.Key, out var val))
+                            {
+                                removed.Add(new Tuple<string, string>(service.Key, location.Key));
+                            }
+                        }
+                    }
+                });
+            }
+            if (removed.Count > 0)
+            {
+                foreach(var removedUrl in removed)
+                {
+                    ServiceLost?.Invoke(removedUrl.Item1, removedUrl.Item2);
+                }
+            }
         }
     }
 }

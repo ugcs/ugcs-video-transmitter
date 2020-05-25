@@ -82,6 +82,12 @@ namespace VideoTransmitter.ViewModels
             _telemetryListener = tl;
             _ucsConnectionService = cs;
             _discoveryService = ds;
+
+            _discoveryService.AddToListen(UCS_SERVER_TYPE);
+            _discoveryService.AddToListen(UGCS_VIDEOSERVER_URTP_ST);
+            _discoveryService.ServiceLost += onSsdpServiceLost;
+
+
             _defaultVideoDevice = new VideoSourceDTO()
             {
                 Name = Resources.Nodevice,
@@ -353,6 +359,17 @@ namespace VideoTransmitter.ViewModels
                     }
                 }
             });
+        }
+
+        private void onSsdpServiceLost(string serviceType, string location)
+        {
+            if (Settings.Default.VideoServerAutomatic == true 
+                && serviceType == UGCS_VIDEOSERVER_URTP_ST 
+                && location == urtpServer.OriginalString)
+            {
+                urtpServer = null;
+                stopMisp();
+            }
         }
 
         private ObservableCollection<ClientVehicleDTO> _vehicleList = new ObservableCollection<ClientVehicleDTO>();
