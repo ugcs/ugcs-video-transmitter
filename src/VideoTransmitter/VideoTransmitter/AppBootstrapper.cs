@@ -9,15 +9,15 @@ using VideoTransmitter.Properties;
 using VideoTransmitter.ViewModels;
 using UcsService;
 using VideoSources;
-using VideoTransmitter.Log;
 using System.Text.RegularExpressions;
+using log4net;
 
 namespace VideoTransmitter
 {
     public class AppBootstrapper : BootstrapperBase
     {
 
-        private ILogger logger = new Logger(typeof(AppBootstrapper));
+        private log4net.ILog logger = log4net.LogManager.GetLogger(typeof(AppBootstrapper));
         private bool _isInitialized;
 
         public IKernel Kernel
@@ -33,9 +33,11 @@ namespace VideoTransmitter
         }
         public AppBootstrapper()
         {
-            logger.LogInfoMessage("Application started");
+            log4net.Config.XmlConfigurator.Configure();
+            GlobalContext.Properties["host"] = Environment.MachineName;
+            logger.Info("Application started");
             Initialize();
-            logger.LogInfoMessage("Application initialized");
+            logger.Info("Application initialized");
         }
 
         protected override void Configure()
