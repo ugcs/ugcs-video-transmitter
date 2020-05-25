@@ -49,6 +49,9 @@ namespace VideoTransmitter.ViewModels
         private VideoSourceDTO _defaultVideoDevice;
         private const string EMPTY_DEVICE_ID = "empty_device";
 
+        private ClientVehicleDTO _defaultVehicle;
+        private const int EMPTY_VEHICLE_ID = 0;
+
         private IDiscoveryService _discoveryService;
         private ConnectionService _ucsConnectionService;
         private VehicleListener _vehicleListener;
@@ -86,6 +89,14 @@ namespace VideoTransmitter.ViewModels
             };
             VideoSourcesList.Add(_defaultVideoDevice);
             SelectedVideoSource = _defaultVideoDevice;
+            
+            _defaultVehicle = new ClientVehicleDTO()
+            {
+                Name = Resources.Novehicle,
+                VehicleId = EMPTY_VEHICLE_ID
+            };
+            VehicleList.Add(_defaultVehicle);
+            SelectedVehicle = _defaultVehicle;
 
             _ucsConnectionService.Connected += ucsConnection_onConnected;
             _ucsConnectionService.Disconnected += ucsConnection_onDisconnected;
@@ -192,7 +203,7 @@ namespace VideoTransmitter.ViewModels
         }
         private void OnTelemetryTimer(Object source, ElapsedEventArgs e)
         {
-            if (SelectedVehicle != null && _mispStreamer != null && _isStreaming)
+            if (SelectedVehicle != null && SelectedVehicle.VehicleId != EMPTY_VEHICLE_ID && _mispStreamer != null && _isStreaming)
             {
                 var telemetry = _telemetryListener.GetTelemetryById(SelectedVehicle.VehicleId);
                 if (telemetry != null)
@@ -231,9 +242,13 @@ namespace VideoTransmitter.ViewModels
         {
             Execute.OnUIThreadAsync(() =>
             {
+                SelectedVehicle = _defaultVehicle;
                 lock (vehicleUpdateLocked)
                 {
-                    _vehicleList.Clear();
+                    foreach (var vInList in _vehicleList.Skip(1).ToList())
+                    {
+                        _vehicleList.Remove(vInList);
+                    }
                 }
                 NotifyOfPropertyChange(() => VehicleList);
             });
@@ -420,7 +435,7 @@ namespace VideoTransmitter.ViewModels
                         list.Add(vInList.VehicleId);
                     }
 
-                    foreach (var vInList in _vehicleList.ToList())
+                    foreach (var vInList in _vehicleList.Skip(1).ToList())
                     {
                         if (!list.Any(l => l == vInList.VehicleId))
                         {
@@ -429,7 +444,7 @@ namespace VideoTransmitter.ViewModels
                     }
                     if (_vehicleList.Count == 0)
                     {
-                        SelectedVehicle = null;
+                        SelectedVehicle = _defaultVehicle;
                     }
                     var defaultVehicle = VehicleList.FirstOrDefault(v => v.VehicleId.ToString() == Settings.Default.LastVehicleId);
                     if (defaultVehicle != null)
@@ -459,10 +474,13 @@ namespace VideoTransmitter.ViewModels
                     return;
                 }
                 _selectedVehicle = value;
-                Settings.Default.LastVehicleId = _selectedVehicle?.VehicleId.ToString();
-                Settings.Default.Save();
+                if (_selectedVehicle != null && _selectedVehicle.VehicleId != EMPTY_VEHICLE_ID)
+                {
+                    Settings.Default.LastVehicleId = _selectedVehicle.VehicleId.ToString();
+                    Settings.Default.Save();
+                }
                 NotifyOfPropertyChange(() => SelectedVehicle);
-                if (_selectedVehicle != null)
+                if (_selectedVehicle != null && _selectedVehicle.VehicleId != EMPTY_VEHICLE_ID)
                 {
                     logger.LogInfoMessage(string.Format("Vehicle selected {0}", _selectedVehicle.Name));
                 }
@@ -830,6 +848,7 @@ namespace VideoTransmitter.ViewModels
             get
             {
                 if (SelectedVehicle == null
+                    || SelectedVehicle.VehicleId == EMPTY_VEHICLE_ID
                     || SelectedVideoSource == null
                     || SelectedVideoSource.Id == EMPTY_DEVICE_ID
                     || urtpServer == null
@@ -896,7 +915,7 @@ namespace VideoTransmitter.ViewModels
                 {
                     return Resources.Videosourcenotselected;
                 }
-                if (SelectedVehicle == null)
+                if (SelectedVehicle == null || SelectedVehicle.VehicleId == EMPTY_VEHICLE_ID)
                 {
                     return Resources.Vehicleisnotselected;
                 }

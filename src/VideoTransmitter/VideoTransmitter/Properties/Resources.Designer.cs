@@ -169,6 +169,15 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No vehicle.
+        /// </summary>
+        public static string Novehicle {
+            get {
+                return ResourceManager.GetString("Novehicle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No Vehicles found.
         /// </summary>
         public static string NoVehiclesFound {

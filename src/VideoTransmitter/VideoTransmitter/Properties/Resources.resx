@@ -231,4 +231,7 @@
   <data name="Nodevice" xml:space="preserve">
     <value>No device</value>
   </data>
+  <data name="Novehicle" xml:space="preserve">
+    <value>No vehicle</value>
+  </data>
 </root>
