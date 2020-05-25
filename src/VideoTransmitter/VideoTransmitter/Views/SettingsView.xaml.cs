@@ -28,8 +28,8 @@ namespace VideoTransmitter.Views
         {
             Application curApp = Application.Current;
             Window mainWindow = curApp.MainWindow;
-            this.Left = mainWindow.Left + (mainWindow.Width - this.ActualWidth) / 2;
-            this.Top = mainWindow.Top + (mainWindow.Height - this.ActualHeight) / 2;
+            this.Left = mainWindow.Left + (mainWindow.ActualWidth - this.ActualWidth) / 2;
+            this.Top = mainWindow.Top + (mainWindow.ActualHeight - this.ActualHeight) / 2;
         }
 
         private void Close_Click(object sender, RoutedEventArgs e)
