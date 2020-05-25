@@ -204,7 +204,7 @@ namespace VideoTransmitter.ViewModels
                 Settings.Default.UgcsAutomatic = UgcsAutomatic;
                 changed.Add("UgcsAutomatic");
             }
-            if (UcgsAddress != Settings.Default.UcgsAddress || UcgsPort != Settings.Default.UcgsPort)
+            if (!UgcsAutomatic && (UcgsAddress != Settings.Default.UcgsAddress || UcgsPort != Settings.Default.UcgsPort))
             {
                 Settings.Default.UcgsAddress = UcgsAddress;
                 Settings.Default.UcgsPort = UcgsPort.Value;
@@ -215,7 +215,7 @@ namespace VideoTransmitter.ViewModels
                 Settings.Default.VideoServerAutomatic = VideoServerAutomatic;
                 changed.Add("VideoServerAutomatic");
             }
-            if (VideoServerAddress != Settings.Default.VideoServerAddress || VideoServerPort != Settings.Default.VideoServerPort)
+            if (!VideoServerAutomatic && (VideoServerAddress != Settings.Default.VideoServerAddress || VideoServerPort != Settings.Default.VideoServerPort))
             {
                 Settings.Default.VideoServerAddress = VideoServerAddress;
                 Settings.Default.VideoServerPort = VideoServerPort.Value;
