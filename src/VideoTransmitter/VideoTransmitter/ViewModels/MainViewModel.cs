@@ -805,6 +805,12 @@ namespace VideoTransmitter.ViewModels
 
         private void OnMediaOpening(object sender, MediaOpeningEventArgs e)
         {
+            e.Options.MinimumPlaybackBufferPercent = 0;
+            e.Options.DecoderParams.EnableFastDecoding = true;
+            e.Options.DecoderParams.EnableLowDelayDecoding = true;
+            e.Options.VideoBlockCache = 0;
+            e.Options.IsTimeSyncDisabled = true;
+
             Execute.OnUIThreadAsync(() =>
             {
                 VideoMessage = Resources.Loadingvideo;
