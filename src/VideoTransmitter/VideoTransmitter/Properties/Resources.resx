@@ -127,16 +127,16 @@
     <value>Failed to load video from {0}</value>
   </data>
   <data name="Initializing" xml:space="preserve">
-    <value>Initializing</value>
+    <value>Initializing...</value>
   </data>
   <data name="Notreadytostream" xml:space="preserve">
-    <value>Not ready to stream</value>
+    <value>Not ready</value>
   </data>
   <data name="NoVehiclesFound" xml:space="preserve">
     <value>No Vehicles found</value>
   </data>
   <data name="Readytostream" xml:space="preserve">
-    <value>Ready to stream</value>
+    <value>Ready</value>
   </data>
   <data name="ReadytostreamtoVideoServer" xml:space="preserve">
     <value>Ready to stream to VideoServer {0}</value>

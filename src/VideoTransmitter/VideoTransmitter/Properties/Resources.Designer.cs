@@ -124,7 +124,7 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Initializing.
+        ///   Looks up a localized string similar to Initializing....
         /// </summary>
         public static string Initializing {
             get {
@@ -151,7 +151,7 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Not ready to stream.
+        ///   Looks up a localized string similar to Not ready.
         /// </summary>
         public static string Notreadytostream {
             get {
@@ -178,7 +178,7 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Ready to stream.
+        ///   Looks up a localized string similar to Ready.
         /// </summary>
         public static string Readytostream {
             get {
