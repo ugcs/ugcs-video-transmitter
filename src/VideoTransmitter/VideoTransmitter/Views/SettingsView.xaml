@@ -8,6 +8,7 @@
         xmlns:p="clr-namespace:VideoTransmitter.Properties"
         mc:Ignorable="d"
         x:Name="SettingsWindow"
+        ResizeMode="NoResize"
         Title="{x:Static p:Resources.SettingsWindowTitle}" Height="485" Width="464"
         Style="{StaticResource MainWindowStyle}"
         Loaded="Window_Loaded">
