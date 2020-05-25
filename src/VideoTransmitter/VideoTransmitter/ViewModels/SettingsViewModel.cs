@@ -204,22 +204,50 @@ namespace VideoTransmitter.ViewModels
                 Settings.Default.UgcsAutomatic = UgcsAutomatic;
                 changed.Add("UgcsAutomatic");
             }
-            if (!UgcsAutomatic && (UcgsAddress != Settings.Default.UcgsAddress || UcgsPort != Settings.Default.UcgsPort))
+            if (UcgsAddress != Settings.Default.UcgsAddress || UcgsPort != Settings.Default.UcgsPort)
             {
-                Settings.Default.UcgsAddress = UcgsAddress;
-                Settings.Default.UcgsPort = UcgsPort.Value;
-                changed.Add("UcgsAddress");
+                if (UgcsAutomatic)
+                {
+                    if (IPAddress.TryParse(UcgsAddress, out var ip))
+                    {
+                        Settings.Default.UcgsAddress = UcgsAddress;
+                    }
+                    if (UcgsPort != null && UcgsPort >= 1 && UcgsPort <= 65535)
+                    {
+                        Settings.Default.UcgsPort = UcgsPort.Value;
+                    }
+                }
+                else
+                {
+                    Settings.Default.UcgsAddress = UcgsAddress;
+                    Settings.Default.UcgsPort = UcgsPort.Value;
+                    changed.Add("UcgsAddress");
+                }
             }
             if (VideoServerAutomatic != Settings.Default.VideoServerAutomatic)
             {
                 Settings.Default.VideoServerAutomatic = VideoServerAutomatic;
                 changed.Add("VideoServerAutomatic");
             }
-            if (!VideoServerAutomatic && (VideoServerAddress != Settings.Default.VideoServerAddress || VideoServerPort != Settings.Default.VideoServerPort))
+            if (VideoServerAddress != Settings.Default.VideoServerAddress || VideoServerPort != Settings.Default.VideoServerPort)
             {
-                Settings.Default.VideoServerAddress = VideoServerAddress;
-                Settings.Default.VideoServerPort = VideoServerPort.Value;
-                changed.Add("VideoServerAddress");
+                if (VideoServerAutomatic)
+                {
+                    if (IPAddress.TryParse(VideoServerAddress, out var ip))
+                    {
+                        Settings.Default.VideoServerAddress = VideoServerAddress;
+                    }
+                    if (VideoServerPort != null && VideoServerPort >= 1 && VideoServerPort <= 65535)
+                    {
+                        Settings.Default.VideoServerPort = VideoServerPort.Value;
+                    }
+                }
+                else
+                {
+                    Settings.Default.VideoServerAddress = VideoServerAddress;
+                    Settings.Default.VideoServerPort = VideoServerPort.Value;
+                    changed.Add("VideoServerAddress");
+                }
             }
 
             Settings.Default.Save();
