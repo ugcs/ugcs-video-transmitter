@@ -637,41 +637,55 @@ namespace VideoTransmitter.ViewModels
                 {
                     stopMisp();
                 }
+                hasConnected = false;
                 updateVideoAndTelemetryStatuses();
             });
         }
+        bool hasConnected = false;
         private void stateChanged(object sender, EventArgs e)
         {
-            MispVideoStreamer state = (MispVideoStreamer)sender;
-            if (state != null)
+            new System.Threading.Thread((data) =>
             {
-                logger.Info(string.Format("misp new status {0}", state.State.ToString()));
-                switch (state.State)
+                MispVideoStreamer state = (MispVideoStreamer)sender;
+                if (state != null)
                 {
-                    case MispVideoStreamerState.NotStarted:
-                        videoStreamingStatus = VideoServerStatus.READY_TO_STREAM;
-                        break;
-                    case MispVideoStreamerState.Initial:
-                        videoStreamingStatus = VideoServerStatus.INITIALIZING;
-                        break;
-                    case MispVideoStreamerState.Operational:
-                        videoStreamingStatus = VideoServerStatus.STREAMING;
-                        break;
-                    case MispVideoStreamerState.ConnectFailure:
-                        videoStreamingStatus = VideoServerStatus.CONNECTION_FAILED;
-                        break;
-                    case MispVideoStreamerState.ProtocolBadVersion:
-                    case MispVideoStreamerState.OtherFailure:
-                        videoStreamingStatus = VideoServerStatus.FAILED;
-                        break;
-                    case MispVideoStreamerState.Finished:
-                        videoStreamingStatus = VideoServerStatus.FAILED;
-                        break;
-                    default:
-                        throw new Exception(string.Format("Unknown state submitted: {0}", state));
+                    logger.Info(string.Format("misp new status {0}", state.State.ToString()));
+                    switch (state.State)
+                    {
+                        case MispVideoStreamerState.NotStarted:
+                            videoStreamingStatus = VideoServerStatus.READY_TO_STREAM;
+                            break;
+                        case MispVideoStreamerState.Initial:
+                            videoStreamingStatus = VideoServerStatus.INITIALIZING;
+                            break;
+                        case MispVideoStreamerState.Operational:
+                            videoStreamingStatus = VideoServerStatus.STREAMING;
+                            hasConnected = true;
+                            break;
+                        case MispVideoStreamerState.ConnectFailure:
+                            videoStreamingStatus = VideoServerStatus.CONNECTION_FAILED;
+                            break;
+                        case MispVideoStreamerState.ProtocolBadVersion:
+                        case MispVideoStreamerState.OtherFailure:
+                            videoStreamingStatus = VideoServerStatus.FAILED;
+                            break;
+                        case MispVideoStreamerState.Finished:
+                            videoStreamingStatus = VideoServerStatus.FAILED;
+                            break;
+                        default:
+                            throw new Exception(string.Format("Unknown state submitted: {0}", state));
+                    }
+                    //ensure start stop in other thread.
+                    if (_isStreaming &&
+                            (videoStreamingStatus == VideoServerStatus.FAILED || videoStreamingStatus == VideoServerStatus.CONNECTION_FAILED) && hasConnected)
+                    {
+                        videoStreamingStatus = VideoServerStatus.RECONNECTING;
+                        stopMisp();
+                        startMisp();
+                    }
+                    updateVideoAndTelemetryStatuses();
                 }
-                updateVideoAndTelemetryStatuses();
-            }
+            });
         }
 
         private bool viewLoaded = false;

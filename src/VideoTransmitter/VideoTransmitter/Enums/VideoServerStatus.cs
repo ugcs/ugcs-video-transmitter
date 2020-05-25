@@ -10,6 +10,7 @@ namespace VideoTransmitter.Enums
     {
         NOT_READY_TO_STREAM,
         READY_TO_STREAM,
+        RECONNECTING,
         STREAMING,
         INITIALIZING,
         CONNECTION_FAILED,
