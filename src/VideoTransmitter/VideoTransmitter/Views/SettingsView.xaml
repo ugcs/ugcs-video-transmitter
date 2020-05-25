@@ -43,7 +43,7 @@
                 <Border Style="{StaticResource SettingsBorder}">
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="{x:Static p:Resources.IPAddress}" Style="{StaticResource SettingsTextBlock}"></TextBlock>
-                        <TextBox Text="{Binding UcgsAddress, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding UgcsDirectConnection}" MaxLength="15" Margin="0 0 10 0" Style="{StaticResource SettingsTextBox}"></TextBox>
+                        <TextBox Text="{Binding UcgsAddress, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding UgcsDirectConnection}" PreviewKeyDown="TextBox_PreviewKeyDown" MaxLength="15" Margin="0 0 10 0" Style="{StaticResource SettingsTextBox}"></TextBox>
                     </StackPanel>
                 </Border>
             </StackPanel>
@@ -51,7 +51,7 @@
                 <Border Style="{StaticResource SettingsBorder}">
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="{x:Static p:Resources.Port}" Style="{StaticResource SettingsTextBlock}"></TextBlock>
-                        <TextBox Text="{Binding UcgsPort, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" IsEnabled="{Binding UgcsDirectConnection}" PreviewTextInput="TextBox_KeyDownNumeric" DataObject.Pasting="DisablePasting" MaxLength="5" Style="{StaticResource SettingsTextBox}"></TextBox>
+                        <TextBox Text="{Binding UcgsPort, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" IsEnabled="{Binding UgcsDirectConnection}" PreviewKeyDown="TextBox_PreviewKeyDown"  PreviewTextInput="TextBox_KeyDownNumeric" DataObject.Pasting="DisablePasting" MaxLength="5" Style="{StaticResource SettingsTextBox}"></TextBox>
                     </StackPanel>
                 </Border>
             </StackPanel>
@@ -70,7 +70,7 @@
                 <Border Style="{StaticResource SettingsBorder}">
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="{x:Static p:Resources.IPAddress}" Style="{StaticResource SettingsTextBlock}"></TextBlock>
-                        <TextBox Text="{Binding VideoServerAddress, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding VideoServerDirectConnection}" MaxLength="15" Style="{StaticResource SettingsTextBox}"></TextBox>
+                        <TextBox Text="{Binding VideoServerAddress, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding VideoServerDirectConnection}" PreviewKeyDown="TextBox_PreviewKeyDown" MaxLength="15" Style="{StaticResource SettingsTextBox}"></TextBox>
                     </StackPanel>
                 </Border>
             </StackPanel>
@@ -78,7 +78,7 @@
                 <Border Style="{StaticResource SettingsBorder}">
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="{x:Static p:Resources.Port}" Style="{StaticResource SettingsTextBlock}"></TextBlock>
-                        <TextBox Text="{Binding VideoServerPort, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" IsEnabled="{Binding VideoServerDirectConnection}" PreviewTextInput="TextBox_KeyDownNumeric" DataObject.Pasting="DisablePasting" MaxLength="5" Style="{StaticResource SettingsTextBox}"></TextBox>
+                        <TextBox Text="{Binding VideoServerPort, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" IsEnabled="{Binding VideoServerDirectConnection}" PreviewKeyDown="TextBox_PreviewKeyDown" PreviewTextInput="TextBox_KeyDownNumeric" DataObject.Pasting="DisablePasting" MaxLength="5" Style="{StaticResource SettingsTextBox}"></TextBox>
                     </StackPanel>
                 </Border>
             </StackPanel>
