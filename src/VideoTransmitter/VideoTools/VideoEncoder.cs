@@ -1,4 +1,5 @@
 ﻿using FFmpeg.AutoGen;
+using log4net;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -15,21 +16,26 @@ namespace Ugcs.Video.Tools
         private unsafe AVCodecContext* _codecContext;
         private object _disposeSyncObj = new Object();
         private bool _isDisposed;
+        private ILog _logger = LogManager.GetLogger(typeof(VideoEncoder));
+        private FrameConverter _scaler;
 
 
-        /// <param name="width">Target picture width.</param>
-        /// <param name="height">Target picture height.</param>
-        /// <param name="pxfmt">Pixel format.</param>
+        /// <summary>
+        /// Initializes video encoder for frames with fixed width, height and pixel format.
+        /// </summary>
+        /// <param name="srcWidth">Source picture width.</param>
+        /// <param name="srcHeight">Source picture height.</param>
+        /// <param name="srcPxfmt">Source зшсегку pixel format. If it is not supported by encoder
+        /// then frames data will be converted to a best compatible pixel format, supported by codec.</param>
         /// <param name="bitrate">The average bitrate. Null for constant quantizer encoding.</param>
         /// <param name="framerate"></param>
-        public unsafe VideoEncoder(int width, int height, AVPixelFormat pxfmt, long? bitrate, AVRational framerate)
+        public unsafe VideoEncoder(int srcWidth, int srcHeight, AVPixelFormat srcPxfmt, long? bitrate, AVRational framerate,
+            Codec codec)
         {
-            const string CODEC = "libx264";
-            AVCodec* codec = ffmpeg.avcodec_find_encoder_by_name(CODEC);
-            if ((IntPtr)codec == IntPtr.Zero)
-                throw new FfmpegException($"Codec '{CODEC}' not found.");
+            _logger.Info($"[{nameof(srcPxfmt)}:{srcPxfmt}] Initializing...");
 
-            AVCodecContext* c = ffmpeg.avcodec_alloc_context3(codec);
+            AVCodec* avCodec = (AVCodec*)((IAVObjectWrapper)codec).WrappedObject;
+            AVCodecContext* c = ffmpeg.avcodec_alloc_context3(avCodec);
             if ((IntPtr)c == IntPtr.Zero)
                 throw new FfmpegException("Can't allocate codec context.");
 
@@ -44,20 +50,19 @@ namespace Ugcs.Video.Tools
             if (bitrate.HasValue)
                 c->bit_rate = bitrate.Value;
 
-            c->width = width;
-            c->height = height;
+            c->width = srcWidth;
+            c->height = srcHeight;
 
-            // frames per second
-            c->time_base = new AVRational { num = framerate.den, den = framerate.num};
+            c->time_base = new AVRational { num = framerate.den, den = framerate.num };
             c->framerate = framerate;
 
-            c->gop_size = 15;
+            c->gop_size = 5;
             c->max_b_frames = 1;
-            c->pix_fmt = pxfmt;
+            c->pix_fmt = srcPxfmt;
 
             ffmpeg.av_opt_set(c->priv_data, "preset", "ultrafast", 0);
 
-            int resultCode = ffmpeg.avcodec_open2(c, codec, null);
+            int resultCode = ffmpeg.avcodec_open2(c, avCodec, null);
             if (resultCode < 0)
             {
                 ffmpeg.avcodec_free_context(&c);
@@ -86,6 +91,10 @@ namespace Ugcs.Video.Tools
                 {
                     ffmpeg.av_packet_free(ptr);
                 }
+
+                if (_scaler != null)
+                    _scaler.Dispose();
+
 
                 _isDisposed = true;
             }
@@ -128,6 +137,7 @@ namespace Ugcs.Video.Tools
             {
                 if (_isDisposed)
                     throw new ObjectDisposedException(nameof(VideoEncoder));
+
                 encode(_codecContext, frame, _pkt, output);
             }
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -27,7 +28,7 @@ namespace VideoTransmitter.ViewModels
 {
     public partial class MainViewModel : Caliburn.Micro.PropertyChangedBase
     {
-        private const long BITRATE = 2 * 1024 * 1024;
+        private const long BITRATE = 6 * 1024 * 1024;
 
         private log4net.ILog logger = log4net.LogManager.GetLogger(typeof(MainViewModel));
 
@@ -60,7 +61,7 @@ namespace VideoTransmitter.ViewModels
         private long _lastPacketRead = 0;
         private int _lastPacketReadTimeout = 5000;
         private MispVideoStreamer _mispStreamer;
-        private VideoEncoder _encoder;
+        private EncodingPipeline _encoding;
         private FrameRateCollector _frameRateCollector;
 
         public unsafe MainViewModel(DiscoveryService ds,
@@ -704,8 +705,8 @@ namespace VideoTransmitter.ViewModels
         private void onMediaClosed(object sender, EventArgs e)
         {
             // No picture on the screen - no more encoder required because new picture may be in different size
-            _encoder?.Dispose();
-            _encoder = null;
+            _encoding?.Dispose();
+            _encoding = null;
         }
 
         private unsafe void onVideoFrameDecoded(object sender, FrameDecodedEventArgs e)
@@ -718,7 +719,7 @@ namespace VideoTransmitter.ViewModels
 
             if (_mispStreamer != null && (_mispStreamer.State == MispVideoStreamerState.Initial || _mispStreamer.State == MispVideoStreamerState.Operational))
             {
-                if (_encoder == null)
+                if (_encoding == null)
                 {
                     // We don't know the image size and frame rate before the first frame is decoded, 
                     // this is why here is a good place to initialize encoder
@@ -728,12 +729,14 @@ namespace VideoTransmitter.ViewModels
 
                     try
                     {
-                        _encoder = new VideoEncoder(
+                        _encoding = new EncodingPipeline(
+                            "libx264",
                             e.Frame->width,
                             e.Frame->height,
-                            AVPixelFormat.AV_PIX_FMT_YUV422P,
+                            (AVPixelFormat)e.Frame->format,
                             BITRATE,
                             _frameRateCollector.FrameRate.Value);
+                        
                     }
                     catch (Exception err)
                     {
@@ -755,7 +758,7 @@ namespace VideoTransmitter.ViewModels
 
                 try
                 {
-                    _encoder.Encode(e.Frame, _mispStreamer.VideoStream);
+                    _encoding.Encode(e.Frame, _mispStreamer.VideoStream);
                 }
                 catch (ObjectDisposedException err)
                 {
@@ -770,6 +773,7 @@ namespace VideoTransmitter.ViewModels
                 catch (Exception err)
                 {
                     // TODO: Log error
+                    throw;
                 }
             }
         }
