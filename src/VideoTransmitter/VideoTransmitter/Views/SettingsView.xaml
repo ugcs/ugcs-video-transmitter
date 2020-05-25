@@ -51,7 +51,7 @@
                 <Border Style="{StaticResource SettingsBorder}">
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="{x:Static p:Resources.Port}" Style="{StaticResource SettingsTextBlock}"></TextBlock>
-                        <TextBox Text="{Binding UcgsPort, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding UgcsDirectConnection}" PreviewTextInput="TextBox_KeyDownNumeric" DataObject.Pasting="DisablePasting" MaxLength="5" Style="{StaticResource SettingsTextBox}"></TextBox>
+                        <TextBox Text="{Binding UcgsPort, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" IsEnabled="{Binding UgcsDirectConnection}" PreviewTextInput="TextBox_KeyDownNumeric" DataObject.Pasting="DisablePasting" MaxLength="5" Style="{StaticResource SettingsTextBox}"></TextBox>
                     </StackPanel>
                 </Border>
             </StackPanel>
@@ -78,14 +78,14 @@
                 <Border Style="{StaticResource SettingsBorder}">
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="{x:Static p:Resources.Port}" Style="{StaticResource SettingsTextBlock}"></TextBlock>
-                        <TextBox Text="{Binding VideoServerPort, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding VideoServerDirectConnection}" PreviewTextInput="TextBox_KeyDownNumeric" DataObject.Pasting="DisablePasting" MaxLength="5" Style="{StaticResource SettingsTextBox}"></TextBox>
+                        <TextBox Text="{Binding VideoServerPort, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" IsEnabled="{Binding VideoServerDirectConnection}" PreviewTextInput="TextBox_KeyDownNumeric" DataObject.Pasting="DisablePasting" MaxLength="5" Style="{StaticResource SettingsTextBox}"></TextBox>
                     </StackPanel>
                 </Border>
             </StackPanel>
         </StackPanel>
         <StackPanel Grid.Row="5" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 32 0 0" Orientation="Horizontal">
             <Button Content="{x:Static p:Resources.Cancel}" IsCancel="True" Margin="0 0 10 0" Click="Close_Click" Style="{StaticResource CancelButton}"></Button>
-            <Button Content="{x:Static p:Resources.Apply}" IsDefault="True" IsEnabled="{Binding IsApplyEnabled}" Style="{StaticResource ApplyButton}">
+            <Button Content="{x:Static p:Resources.Apply}" IsDefault="True" Style="{StaticResource ApplyButton}">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="Click">
                         <cal:ActionMessage MethodName="SaveSettings">

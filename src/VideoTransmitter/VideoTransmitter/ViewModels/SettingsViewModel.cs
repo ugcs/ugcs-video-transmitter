@@ -39,7 +39,6 @@ namespace VideoTransmitter.ViewModels
             {
                 _tailNumber = value;
                 NotifyOfPropertyChange(() => TailNumber);
-                NotifyOfPropertyChange(() => IsApplyEnabled);
             }
         }
 
@@ -54,7 +53,6 @@ namespace VideoTransmitter.ViewModels
             {
                 _ugcsAutomatic = value;
                 NotifyOfPropertyChange(() => UgcsAutomatic);
-                NotifyOfPropertyChange(() => IsApplyEnabled);
             }
         }
 
@@ -69,7 +67,6 @@ namespace VideoTransmitter.ViewModels
             {
                 _ugcsDirectConnection = value;
                 NotifyOfPropertyChange(() => UgcsDirectConnection);
-                NotifyOfPropertyChange(() => IsApplyEnabled);
             }
         }
 
@@ -84,12 +81,11 @@ namespace VideoTransmitter.ViewModels
             {
                 _ugcsAddress = value;
                 NotifyOfPropertyChange(() => UcgsAddress);
-                NotifyOfPropertyChange(() => IsApplyEnabled);
             }
         }
 
-        public int _ugcsPort;
-        public int UcgsPort
+        public int? _ugcsPort;
+        public int? UcgsPort
         {
             get
             {
@@ -99,7 +95,6 @@ namespace VideoTransmitter.ViewModels
             {
                 _ugcsPort = value;
                 NotifyOfPropertyChange(() => UcgsPort);
-                NotifyOfPropertyChange(() => IsApplyEnabled);
             }
         }
 
@@ -114,7 +109,6 @@ namespace VideoTransmitter.ViewModels
             {
                 _videoServerAutomatic = value;
                 NotifyOfPropertyChange(() => VideoServerAutomatic);
-                NotifyOfPropertyChange(() => IsApplyEnabled);
             }
         }
 
@@ -129,7 +123,6 @@ namespace VideoTransmitter.ViewModels
             {
                 _videoServerDirectConnection = value;
                 NotifyOfPropertyChange(() => VideoServerDirectConnection);
-                NotifyOfPropertyChange(() => IsApplyEnabled);
             }
         }
 
@@ -144,12 +137,11 @@ namespace VideoTransmitter.ViewModels
             {
                 _videoServerAddress = value;
                 NotifyOfPropertyChange(() => VideoServerAddress);
-                NotifyOfPropertyChange(() => IsApplyEnabled);
             }
         }
 
-        public int _videoServerPort;
-        public int VideoServerPort
+        public int? _videoServerPort;
+        public int? VideoServerPort
         {
             get
             {
@@ -159,55 +151,48 @@ namespace VideoTransmitter.ViewModels
             {
                 _videoServerPort = value;
                 NotifyOfPropertyChange(() => VideoServerPort);
-                NotifyOfPropertyChange(() => IsApplyEnabled);
             }
         }
 
-        public bool IsApplyEnabled
+        private string GetError()
         {
-            get
+            if (TailNumber == null || string.IsNullOrEmpty(TailNumber.Trim()))
             {
-                bool mod = false;
-                if (TailNumber != Settings.Default.TailNumber && !string.IsNullOrEmpty(TailNumber.Trim()))
-                {
-                    mod = true;
-                }
-                if (UgcsAutomatic != Settings.Default.UgcsAutomatic)
-                {
-                    mod = true;
-                }
-                if (UcgsAddress != Settings.Default.UcgsAddress || UcgsPort != Settings.Default.UcgsPort)
-                {
-                    mod = true;
-                }
-                if (VideoServerAutomatic != Settings.Default.VideoServerAutomatic)
-                {
-                    mod = true;
-                }
-                if (VideoServerAddress != Settings.Default.VideoServerAddress || VideoServerPort != Settings.Default.VideoServerPort)
-                {
-                    mod = true;
-                }
-                if (mod && UgcsAutomatic == false)
-                {
-                    if (!IPAddress.TryParse(UcgsAddress, out var ip) || UcgsPort < 1 || UcgsPort > 65535)
-                    {
-                        mod = false;
-                    }
-                }
-                if (mod && VideoServerAutomatic == false)
-                {
-                    if (!IPAddress.TryParse(VideoServerAddress, out var ip) || VideoServerPort < 1 || VideoServerPort > 65535)
-                    {
-                        mod = false;
-                    }
-                }
-                return mod;
+                return Resources.ErrorTail;
             }
+            if (UgcsAutomatic == false)
+            {
+                if (!IPAddress.TryParse(UcgsAddress, out var ip))
+                {
+                    return Resources.UgcsIp;;
+                }
+                if (UcgsPort == null || UcgsPort < 1 || UcgsPort > 65535)
+                {
+                    return Resources.UgcsPort;
+                }
+            }
+            if (VideoServerAutomatic == false)
+            {
+                if (!IPAddress.TryParse(VideoServerAddress, out var ip))
+                {
+                    return Resources.VideoServerIp;
+                }
+                if (VideoServerPort == null || VideoServerPort < 1 || VideoServerPort > 65535)
+                {
+                    return Resources.VideoServerPort;
+                }
+            }
+            return string.Empty;
         }
 
         public void SaveSettings(Window wnd)
         {
+            string error = GetError();
+            if (!string.IsNullOrEmpty(error))
+            {
+                MessageBox.Show(error, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
             HashSet<string> changed = new HashSet<string>();
             if (TailNumber != Settings.Default.TailNumber)
             {
@@ -222,7 +207,7 @@ namespace VideoTransmitter.ViewModels
             if (UcgsAddress != Settings.Default.UcgsAddress || UcgsPort != Settings.Default.UcgsPort)
             {
                 Settings.Default.UcgsAddress = UcgsAddress;
-                Settings.Default.UcgsPort = UcgsPort;
+                Settings.Default.UcgsPort = UcgsPort.Value;
                 changed.Add("UcgsAddress");
             }
             if (VideoServerAutomatic != Settings.Default.VideoServerAutomatic)
@@ -233,7 +218,7 @@ namespace VideoTransmitter.ViewModels
             if (VideoServerAddress != Settings.Default.VideoServerAddress || VideoServerPort != Settings.Default.VideoServerPort)
             {
                 Settings.Default.VideoServerAddress = VideoServerAddress;
-                Settings.Default.VideoServerPort = VideoServerPort;
+                Settings.Default.VideoServerPort = VideoServerPort.Value;
                 changed.Add("VideoServerAddress");
             }
 

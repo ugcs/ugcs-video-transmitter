@@ -106,6 +106,15 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Tail number could not be empty string..
+        /// </summary>
+        public static string ErrorTail {
+            get {
+                return ResourceManager.GetString("ErrorTail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed.
         /// </summary>
         public static string Failed {
@@ -313,6 +322,24 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Wrong UGCS IP address. Please provide correct IP..
+        /// </summary>
+        public static string UgcsIp {
+            get {
+                return ResourceManager.GetString("UgcsIp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wrong UGCS port address. Please provide correct port..
+        /// </summary>
+        public static string UgcsPort {
+            get {
+                return ResourceManager.GetString("UgcsPort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to UgCS Server.
         /// </summary>
         public static string UgCSServer {
@@ -367,11 +394,29 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Wrong VideoServer IP address. Please provide correct IP..
+        /// </summary>
+        public static string VideoServerIp {
+            get {
+                return ResourceManager.GetString("VideoServerIp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to VideoServer not discovered.
         /// </summary>
         public static string VideoServernotdiscovered {
             get {
                 return ResourceManager.GetString("VideoServernotdiscovered", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wrong VideoServer port address. Please provide correct port..
+        /// </summary>
+        public static string VideoServerPort {
+            get {
+                return ResourceManager.GetString("VideoServerPort", resourceCulture);
             }
         }
         
