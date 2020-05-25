@@ -234,4 +234,7 @@
   <data name="Selecttelemetrysource" xml:space="preserve">
     <value>Select telemetry source</value>
   </data>
+  <data name="Reconnecting" xml:space="preserve">
+    <value>Reconnecting</value>
+  </data>
 </root>

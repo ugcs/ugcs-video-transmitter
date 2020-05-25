@@ -685,7 +685,7 @@ namespace VideoTransmitter.ViewModels
                     }
                     updateVideoAndTelemetryStatuses();
                 }
-            });
+            }).Start();
         }
 
         private bool viewLoaded = false;
@@ -914,6 +914,10 @@ namespace VideoTransmitter.ViewModels
                 {
                     return VideoServerStatus.NOT_READY_TO_STREAM;
                 }
+                else if (videoStreamingStatus == VideoServerStatus.RECONNECTING)
+                {
+                    return VideoServerStatus.RECONNECTING;
+                }
                 else if (videoStreamingStatus == VideoServerStatus.INITIALIZING)
                 {
                     return VideoServerStatus.INITIALIZING;
@@ -955,7 +959,7 @@ namespace VideoTransmitter.ViewModels
                 {
                     return Resources.Vehicleisnotselected;
                 }
-                if (_isStreaming)
+                if (_isStreaming && videoStreamingStatus == VideoServerStatus.STREAMING)
                 {
                     return Resources.Streaming;
                 }
@@ -982,12 +986,8 @@ namespace VideoTransmitter.ViewModels
                 {
                     return Resources.Streaminitializing;
                 }
-                if (_isStreaming)
+                if (_isStreaming && videoStreamingStatus == VideoServerStatus.STREAMING)
                 {
-                    if (videoStreamingStatus == VideoServerStatus.INITIALIZING)
-                    {
-                        return string.Format(Resources.ReadytostreamtoVideoServer, urtpServer.Host + ":" + urtpServer.Port);
-                    }
                     return Resources.Streaming;
                 }
                 return string.Format(Resources.ReadytostreamtoVideoServer, urtpServer.Host + ":" + urtpServer.Port);

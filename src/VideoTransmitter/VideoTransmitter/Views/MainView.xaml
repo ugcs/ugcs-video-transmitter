@@ -186,6 +186,9 @@
                                     <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.INITIALIZING}">
                                         <Setter Property="IsEnabled" Value="False"/>
                                     </DataTrigger>
+                                    <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.RECONNECTING}">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                    </DataTrigger>
                                     <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FAILED}">
                                         <Setter Property="IsEnabled" Value="True"/>
                                     </DataTrigger>
@@ -234,6 +237,10 @@
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.INITIALIZING}">
                                             <Setter Property="Text" Value="{x:Static p:Resources.Initializing}"/>
+                                            <Setter Property="Foreground" Value="#f5f9fc" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.RECONNECTING}">
+                                            <Setter Property="Text" Value="{x:Static p:Resources.Reconnecting}"/>
                                             <Setter Property="Foreground" Value="#f5f9fc" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FAILED}">
