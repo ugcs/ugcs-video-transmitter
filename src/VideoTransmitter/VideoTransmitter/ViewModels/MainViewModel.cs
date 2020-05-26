@@ -64,6 +64,12 @@ namespace VideoTransmitter.ViewModels
         private EncodingPipeline _encoding;
         private FrameRateCollector _frameRateCollector;
 
+        //VideoServer internal statuses
+        private VideoServerStatus _videoStreamingStatus = VideoServerStatus.NOT_READY_TO_STREAM;
+        private bool _isStreaming;
+        private bool _hasConnected = false;
+        private object _startStopLocker = new object();
+
         public unsafe MainViewModel(DiscoveryService ds,
             ConnectionService cs,
             VehicleListener vl,
@@ -189,7 +195,10 @@ namespace VideoTransmitter.ViewModels
                         {
                             if (Settings.Default.VideoServerAutomatic)
                             {
-                                urtpServer = location;
+                                lock (_startStopLocker)
+                                {
+                                    urtpServer = location;
+                                }
                                 updateVideoAndTelemetryStatuses();
                                 logger.Info(string.Format("Found new videoserver {0}", urtpServer.AbsolutePath));
                             }
@@ -199,7 +208,10 @@ namespace VideoTransmitter.ViewModels
                 }
                 else
                 {
-                    urtpServer = new Uri("urtp+connect://" + Settings.Default.VideoServerAddress + ":" + Settings.Default.VideoServerPort);
+                    lock (_startStopLocker)
+                    {
+                        urtpServer = new Uri("urtp+connect://" + Settings.Default.VideoServerAddress + ":" + Settings.Default.VideoServerPort);
+                    }
                     logger.Info(string.Format("Direct connection used to videoserver {0}", urtpServer.AbsolutePath));
                     updateVideoAndTelemetryStatuses();
                 }
@@ -365,7 +377,10 @@ namespace VideoTransmitter.ViewModels
                 && serviceType == UGCS_VIDEOSERVER_URTP_ST 
                 && location == urtpServer.OriginalString)
             {
-                urtpServer = null;
+                lock (_startStopLocker)
+                {
+                    urtpServer = null;
+                }
                 stopMisp();
             }
         }
@@ -574,54 +589,13 @@ namespace VideoTransmitter.ViewModels
         }
         private void startMisp()
         {
-            if (_mispStreamer == null)
+            lock (_startStopLocker)
             {
-                logger.Info("startMisp called but mispStreamer is null");
-                return;
-            }
-            try
-            {
-                logger.Info("startMisp called");
-                _mispStreamer.Start();
-                _isStreaming = true;
-                logger.Info("startMisp success");
-            }
-            catch (Exception e)
-            {
-                logger.Info("startMisp error");
-                throw e;
-            }
-        }
-
-        public void stopMisp()
-        {
-            if (_mispStreamer == null)
-            {
-                logger.Info("stopMisp called but mispStreamer is null");
-                return;
-            }
-            try
-            {
-                logger.Info("stopMisp called");
-                _isStreaming = false;
-                _mispStreamer.Stop();
-                logger.Info("stopMisp success");
-            }
-            catch (Exception e)
-            {
-                logger.Info("stopMisp error");
-                throw e;
-            }
-        }
-
-        private VideoServerStatus videoStreamingStatus = VideoServerStatus.NOT_READY_TO_STREAM;
-        private bool _isStreaming = false;
-        public void StartStreaming()
-        {
-            logger.Info("StartStreaming called");
-            Task.Factory.StartNew(() =>
-            {
-                if (!_isStreaming)
+                if (urtpServer == null)
+                {
+                    throw new Exception("urtpServer is null");
+                }
+                try
                 {
                     MispStreamerParameters mispParams = new MispStreamerParameters()
                     {
@@ -631,6 +605,62 @@ namespace VideoTransmitter.ViewModels
                     };
                     _mispStreamer = new MispVideoStreamer(mispParams);
                     _mispStreamer.StateChanged += stateChanged;
+                    logger.Info("startMisp called");
+                    _mispStreamer.Start();
+                    _isStreaming = true;
+                    logger.Info("startMisp success");
+                }
+                catch (Exception e)
+                {
+                    logger.Info("startMisp error");
+                    logger.Error(e);
+                    throw;
+                }
+            }
+        }
+
+        public void stopMisp(bool stopWithoutStateChange = false)
+        {
+            lock (_startStopLocker)
+            {
+                if (_mispStreamer == null)
+                {
+                    logger.Info("stopMisp called but mispStreamer is null");
+                    return;
+                }
+                try
+                {
+                    if (stopWithoutStateChange)
+                    {
+                        _mispStreamer.StateChanged -= stateChanged;
+                    }
+                    logger.Info("stopMisp called");
+                    _isStreaming = false;
+                    _mispStreamer.Stop();
+                    if (!stopWithoutStateChange)
+                    {
+                        _mispStreamer.StateChanged -= stateChanged;
+                    }
+                    _mispStreamer.Dispose();
+                    _mispStreamer = null;
+                    logger.Info("stopMisp success");
+                }
+                catch (Exception e)
+                {
+                    logger.Info("stopMisp error");
+                    logger.Error(e);
+                    throw;
+                }
+            }
+        }
+        
+        public void StartStreaming()
+        {
+            logger.Info("StartStreaming called");
+            Task.Factory.StartNew(() =>
+            {
+                if (!_isStreaming)
+                {
                     startMisp();
                     logger.Info(string.Format("new misp started {0}", urtpServer.OriginalString));
                 }
@@ -638,11 +668,10 @@ namespace VideoTransmitter.ViewModels
                 {
                     stopMisp();
                 }
-                hasConnected = false;
+                _hasConnected = false;
                 updateVideoAndTelemetryStatuses();
             });
         }
-        bool hasConnected = false;
         private void stateChanged(object sender, EventArgs e)
         {
             new System.Threading.Thread((data) =>
@@ -654,35 +683,48 @@ namespace VideoTransmitter.ViewModels
                     switch (state.State)
                     {
                         case MispVideoStreamerState.NotStarted:
-                            videoStreamingStatus = VideoServerStatus.READY_TO_STREAM;
+                            _videoStreamingStatus = VideoServerStatus.READY_TO_STREAM;
                             break;
                         case MispVideoStreamerState.Initial:
-                            videoStreamingStatus = VideoServerStatus.INITIALIZING;
+                            if (_videoStreamingStatus != VideoServerStatus.RECONNECTING)
+                            {
+                                _videoStreamingStatus = VideoServerStatus.INITIALIZING;
+                            }
                             break;
                         case MispVideoStreamerState.Operational:
-                            videoStreamingStatus = VideoServerStatus.STREAMING;
-                            hasConnected = true;
+                            _videoStreamingStatus = VideoServerStatus.STREAMING;
+                            _hasConnected = true;
                             break;
                         case MispVideoStreamerState.ConnectFailure:
-                            videoStreamingStatus = VideoServerStatus.CONNECTION_FAILED;
+                            _videoStreamingStatus = VideoServerStatus.CONNECTION_FAILED;
                             break;
                         case MispVideoStreamerState.ProtocolBadVersion:
                         case MispVideoStreamerState.OtherFailure:
-                            videoStreamingStatus = VideoServerStatus.FAILED;
+                            _videoStreamingStatus = VideoServerStatus.FAILED;
                             break;
                         case MispVideoStreamerState.Finished:
-                            videoStreamingStatus = VideoServerStatus.FAILED;
+                            _videoStreamingStatus = VideoServerStatus.FINISHED;
                             break;
                         default:
                             throw new Exception(string.Format("Unknown state submitted: {0}", state));
                     }
                     //ensure start stop in other thread.
                     if (_isStreaming &&
-                            (videoStreamingStatus == VideoServerStatus.FAILED || videoStreamingStatus == VideoServerStatus.CONNECTION_FAILED) && hasConnected)
+                            (state.State == MispVideoStreamerState.OtherFailure
+                            || state.State == MispVideoStreamerState.ConnectFailure) 
+                            && _hasConnected
+                            && _videoStreamingStatus != VideoServerStatus.RECONNECTING)
                     {
-                        videoStreamingStatus = VideoServerStatus.RECONNECTING;
-                        stopMisp();
-                        startMisp();
+                        stopMisp(true);
+                        if (urtpServer != null)
+                        {
+                            _videoStreamingStatus = VideoServerStatus.RECONNECTING;
+                            startMisp();
+                        }
+                    }
+                    else if (state.State == MispVideoStreamerState.ConnectFailure || state.State == MispVideoStreamerState.OtherFailure)
+                    {
+                        stopMisp(true);
                     }
                     updateVideoAndTelemetryStatuses();
                 }
@@ -797,7 +839,10 @@ namespace VideoTransmitter.ViewModels
 
             if (changed.Contains("VideoServerAutomatic") || changed.Contains("VideoServerAddress"))
             {
-                urtpServer = null;
+                lock (_startStopLocker)
+                {
+                    urtpServer = null;
+                }
                 updateVideoAndTelemetryStatuses();
 
             }
@@ -900,11 +945,11 @@ namespace VideoTransmitter.ViewModels
                 }
                 else if (_isStreaming)
                 {
-                    if (videoStreamingStatus == VideoServerStatus.INITIALIZING)
+                    if (_videoStreamingStatus == VideoServerStatus.STREAMING)
                     {
-                        return TelemetryStatus.READY_TO_STREAM;
+                        return TelemetryStatus.STREAMING;
                     }
-                    return TelemetryStatus.STREAMING;
+                    return TelemetryStatus.READY_TO_STREAM;
                 }
                 else
                 {
@@ -924,21 +969,29 @@ namespace VideoTransmitter.ViewModels
                 {
                     return VideoServerStatus.NOT_READY_TO_STREAM;
                 }
-                else if (videoStreamingStatus == VideoServerStatus.RECONNECTING)
+                else if (_videoStreamingStatus == VideoServerStatus.RECONNECTING)
                 {
                     return VideoServerStatus.RECONNECTING;
                 }
-                else if (videoStreamingStatus == VideoServerStatus.INITIALIZING)
+                else if (_videoStreamingStatus == VideoServerStatus.INITIALIZING)
                 {
                     return VideoServerStatus.INITIALIZING;
                 }
-                else if (videoStreamingStatus == VideoServerStatus.FINISHED)
+                else if (_videoStreamingStatus == VideoServerStatus.FINISHED)
                 {
                     return VideoServerStatus.FINISHED;
                 }
-                else if (videoStreamingStatus == VideoServerStatus.STREAMING)
+                else if (_videoStreamingStatus == VideoServerStatus.STREAMING)
                 {
                     return VideoServerStatus.STREAMING;
+                }
+                else if (_videoStreamingStatus == VideoServerStatus.FAILED)
+                {
+                    return VideoServerStatus.FAILED;
+                }
+                else if (_videoStreamingStatus == VideoServerStatus.CONNECTION_FAILED)
+                {
+                    return VideoServerStatus.CONNECTION_FAILED;
                 }
                 else
                 {
@@ -969,7 +1022,7 @@ namespace VideoTransmitter.ViewModels
                 {
                     return Resources.Vehicleisnotselected;
                 }
-                if (_isStreaming && videoStreamingStatus == VideoServerStatus.STREAMING)
+                if (_isStreaming && _videoStreamingStatus == VideoServerStatus.STREAMING)
                 {
                     return Resources.Streaming;
                 }
@@ -992,11 +1045,23 @@ namespace VideoTransmitter.ViewModels
                 {
                     return Resources.Videosourceisnotstreamingvideo;
                 }
-                if (videoStreamingStatus == VideoServerStatus.INITIALIZING)
+                if (_videoStreamingStatus == VideoServerStatus.INITIALIZING)
                 {
                     return Resources.Streaminitializing;
                 }
-                if (_isStreaming && videoStreamingStatus == VideoServerStatus.STREAMING)
+                if (_videoStreamingStatus == VideoServerStatus.RECONNECTING)
+                {
+                    return Resources.ReconnectingtoVideoServer;
+                }
+                if (_videoStreamingStatus == VideoServerStatus.FAILED)
+                {
+                    return Resources.FailedtostartstreamtoVideoServer;
+                }
+                if (_videoStreamingStatus == VideoServerStatus.CONNECTION_FAILED)
+                {
+                    return Resources.ConnectionfailedtoVideoServer;
+                }
+                if (_isStreaming && _videoStreamingStatus == VideoServerStatus.STREAMING)
                 {
                     return Resources.Streaming;
                 }

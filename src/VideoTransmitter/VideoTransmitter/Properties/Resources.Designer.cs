@@ -97,6 +97,15 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Connection failed to VideoServer, ready to start new.
+        /// </summary>
+        public static string ConnectionfailedtoVideoServer {
+            get {
+                return ResourceManager.GetString("ConnectionfailedtoVideoServer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Direct IP.
         /// </summary>
         public static string DirectIP {
@@ -129,6 +138,15 @@ namespace VideoTransmitter.Properties {
         public static string Failedtoloadvideofrom {
             get {
                 return ResourceManager.GetString("Failedtoloadvideofrom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to start stream to VideoServer.
+        /// </summary>
+        public static string FailedtostartstreamtoVideoServer {
+            get {
+                return ResourceManager.GetString("FailedtostartstreamtoVideoServer", resourceCulture);
             }
         }
         
@@ -228,6 +246,15 @@ namespace VideoTransmitter.Properties {
         public static string Reconnecting {
             get {
                 return ResourceManager.GetString("Reconnecting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reconnecting to VideoServer.
+        /// </summary>
+        public static string ReconnectingtoVideoServer {
+            get {
+                return ResourceManager.GetString("ReconnectingtoVideoServer", resourceCulture);
             }
         }
         
