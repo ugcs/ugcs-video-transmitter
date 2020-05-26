@@ -49,7 +49,7 @@ namespace VideoTransmitter.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("3334")]
         public int UcgsPort {
             get {
                 return ((int)(this["UcgsPort"]));
@@ -85,7 +85,7 @@ namespace VideoTransmitter.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("3341")]
         public int VideoServerPort {
             get {
                 return ((int)(this["VideoServerPort"]));
