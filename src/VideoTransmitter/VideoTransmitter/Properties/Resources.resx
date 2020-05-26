@@ -261,4 +261,10 @@
   <data name="ReconnectingtoVideoServer" xml:space="preserve">
     <value>Reconnecting to VideoServer</value>
   </data>
+  <data name="Doyouwanttocloseapplication" xml:space="preserve">
+    <value>Do you want to close application?</value>
+  </data>
+  <data name="Shutdownconfirmation" xml:space="preserve">
+    <value>Shutdown confirmation</value>
+  </data>
 </root>

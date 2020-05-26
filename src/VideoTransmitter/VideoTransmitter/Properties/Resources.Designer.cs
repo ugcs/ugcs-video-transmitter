@@ -115,6 +115,15 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Do you want to close application?.
+        /// </summary>
+        public static string Doyouwanttocloseapplication {
+            get {
+                return ResourceManager.GetString("Doyouwanttocloseapplication", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Tail number could not be empty string..
         /// </summary>
         public static string ErrorTail {
@@ -291,6 +300,15 @@ namespace VideoTransmitter.Properties {
         public static string SettingsWindowTitle {
             get {
                 return ResourceManager.GetString("SettingsWindowTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Shutdown confirmation.
+        /// </summary>
+        public static string Shutdownconfirmation {
+            get {
+                return ResourceManager.GetString("Shutdownconfirmation", resourceCulture);
             }
         }
         
