@@ -31,5 +31,9 @@ namespace SSDPDiscoveryService
         /// Stop discovering net for services
         /// </summary>
         void StopListen();
+
+        void AddToListen(string serviceType);
+        string GetService(string serviceType);
+        event ServiceLost ServiceLost;
     }
 }

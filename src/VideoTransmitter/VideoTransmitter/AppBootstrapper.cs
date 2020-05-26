@@ -9,11 +9,15 @@ using VideoTransmitter.Properties;
 using VideoTransmitter.ViewModels;
 using UcsService;
 using VideoSources;
+using System.Text.RegularExpressions;
+using log4net;
 
 namespace VideoTransmitter
 {
     public class AppBootstrapper : BootstrapperBase
     {
+
+        private log4net.ILog logger = log4net.LogManager.GetLogger(typeof(AppBootstrapper));
         private bool _isInitialized;
 
         public IKernel Kernel
@@ -29,7 +33,11 @@ namespace VideoTransmitter
         }
         public AppBootstrapper()
         {
+            log4net.Config.XmlConfigurator.Configure();
+            GlobalContext.Properties["host"] = Environment.MachineName;
+            logger.Info("Application started");
             Initialize();
+            logger.Info("Application initialized");
         }
 
         protected override void Configure()
@@ -43,15 +51,24 @@ namespace VideoTransmitter
             Kernel.Bind<VehicleListener>().ToSelf().InSingletonScope();
             Kernel.Bind<TelemetryListener>().ToSelf().InSingletonScope();
             Kernel.Bind<VehicleService>().ToSelf().InSingletonScope();
-            VideoSourcesService vss = new VideoSourcesService(Settings.Default.VideoSources);
-            Kernel.Bind<VideoSourcesService>().ToConstant(vss).InSingletonScope();
+            Kernel.Bind<VideoSourcesService>().ToSelf().InSingletonScope();
 
             _isInitialized = true;
         }
 
+        private string generteInstallationId()
+        {
+            return Regex.Replace(Convert.ToBase64String(Guid.NewGuid().ToByteArray()), "[/+=]", "");
+        }
 
         protected override void OnStartup(object sender, StartupEventArgs e)
         {
+            if (String.IsNullOrWhiteSpace(Settings.Default.InstallationId))
+            {
+                Settings.Default.InstallationId = generteInstallationId();
+                Settings.Default.Save();
+            }
+
             if (_isInitialized)
             {
                 DisplayRootViewFor<MainViewModel>();

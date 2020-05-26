@@ -13,7 +13,7 @@ namespace VideoTransmitter.Properties {
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.9.0.0")]
-    public sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
+    internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
         
@@ -97,7 +97,7 @@ namespace VideoTransmitter.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("UgCS video transmitter")]
         public string TailNumber {
             get {
                 return ((string)(this["TailNumber"]));
@@ -140,12 +140,15 @@ namespace VideoTransmitter.Properties {
             }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("USB Capture HDMI;Webcam C170")]
-        public string VideoSources {
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string InstallationId {
             get {
-                return ((string)(this["VideoSources"]));
+                return ((string)(this["InstallationId"]));
+            }
+            set {
+                this["InstallationId"] = value;
             }
         }
     }

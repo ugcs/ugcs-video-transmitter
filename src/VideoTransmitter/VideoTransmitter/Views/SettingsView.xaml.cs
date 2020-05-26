@@ -28,8 +28,16 @@ namespace VideoTransmitter.Views
         {
             Application curApp = Application.Current;
             Window mainWindow = curApp.MainWindow;
-            this.Left = mainWindow.Left + (mainWindow.Width - this.ActualWidth) / 2;
-            this.Top = mainWindow.Top + (mainWindow.Height - this.ActualHeight) / 2;
+
+            double left = mainWindow.Left;
+            double top = mainWindow.Top;
+            if (mainWindow.WindowState == System.Windows.WindowState.Maximized)
+            {
+                left = 0;
+                top = 0;
+            }
+            this.Left = left + (mainWindow.ActualWidth - this.ActualWidth) / 2;
+            this.Top = top + (mainWindow.ActualHeight - this.ActualHeight) / 2;
         }
 
         private void Close_Click(object sender, RoutedEventArgs e)
@@ -45,6 +53,14 @@ namespace VideoTransmitter.Views
         private void DisablePasting(object sender, DataObjectPastingEventArgs e)
         {
             e.CancelCommand();
+        }
+
+        private void TextBox_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Space)
+            {
+                 e.Handled = true;
+            }
         }
     }
 }

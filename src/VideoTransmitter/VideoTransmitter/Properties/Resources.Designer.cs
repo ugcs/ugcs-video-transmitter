@@ -106,6 +106,15 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Tail number could not be empty string..
+        /// </summary>
+        public static string ErrorTail {
+            get {
+                return ResourceManager.GetString("ErrorTail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed.
         /// </summary>
         public static string Failed {
@@ -124,7 +133,7 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Initializing.
+        ///   Looks up a localized string similar to Initializing....
         /// </summary>
         public static string Initializing {
             get {
@@ -142,11 +151,38 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Not ready to stream.
+        ///   Looks up a localized string similar to Loading video.
+        /// </summary>
+        public static string Loadingvideo {
+            get {
+                return ResourceManager.GetString("Loadingvideo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;Not selected&gt;.
+        /// </summary>
+        public static string Nodevice {
+            get {
+                return ResourceManager.GetString("Nodevice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Not ready.
         /// </summary>
         public static string Notreadytostream {
             get {
                 return ResourceManager.GetString("Notreadytostream", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;Not selected&gt;.
+        /// </summary>
+        public static string Novehicle {
+            get {
+                return ResourceManager.GetString("Novehicle", resourceCulture);
             }
         }
         
@@ -169,7 +205,7 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Ready to stream.
+        ///   Looks up a localized string similar to Ready.
         /// </summary>
         public static string Readytostream {
             get {
@@ -187,20 +223,29 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Select vehicle....
+        ///   Looks up a localized string similar to Reconnecting.
         /// </summary>
-        public static string SelectVehicle {
+        public static string Reconnecting {
             get {
-                return ResourceManager.GetString("SelectVehicle", resourceCulture);
+                return ResourceManager.GetString("Reconnecting", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Select video source....
+        ///   Looks up a localized string similar to Select telemetry source.
         /// </summary>
-        public static string SelectVideoSource {
+        public static string Selecttelemetrysource {
             get {
-                return ResourceManager.GetString("SelectVideoSource", resourceCulture);
+                return ResourceManager.GetString("Selecttelemetrysource", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select video source.
+        /// </summary>
+        public static string Selectvideosource {
+            get {
+                return ResourceManager.GetString("Selectvideosource", resourceCulture);
             }
         }
         
@@ -277,6 +322,24 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Wrong UGCS IP address. Please provide correct IP..
+        /// </summary>
+        public static string UgcsIp {
+            get {
+                return ResourceManager.GetString("UgcsIp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wrong UGCS port address. Please provide correct port..
+        /// </summary>
+        public static string UgcsPort {
+            get {
+                return ResourceManager.GetString("UgcsPort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to UgCS Server.
         /// </summary>
         public static string UgCSServer {
@@ -295,7 +358,7 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to UgCS Video Transmitter.
+        ///   Looks up a localized string similar to UgCS Video Transmitter {0}.
         /// </summary>
         public static string UgCSVideoTransmitter {
             get {
@@ -331,11 +394,29 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Wrong VideoServer IP address. Please provide correct IP..
+        /// </summary>
+        public static string VideoServerIp {
+            get {
+                return ResourceManager.GetString("VideoServerIp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to VideoServer not discovered.
         /// </summary>
         public static string VideoServernotdiscovered {
             get {
                 return ResourceManager.GetString("VideoServernotdiscovered", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wrong VideoServer port address. Please provide correct port..
+        /// </summary>
+        public static string VideoServerPort {
+            get {
+                return ResourceManager.GetString("VideoServerPort", resourceCulture);
             }
         }
         

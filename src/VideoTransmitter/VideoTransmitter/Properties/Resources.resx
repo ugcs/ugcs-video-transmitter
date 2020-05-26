@@ -127,25 +127,22 @@
     <value>Failed to load video from {0}</value>
   </data>
   <data name="Initializing" xml:space="preserve">
-    <value>Initializing</value>
+    <value>Initializing...</value>
   </data>
   <data name="Notreadytostream" xml:space="preserve">
-    <value>Not ready to stream</value>
+    <value>Not ready</value>
   </data>
   <data name="NoVehiclesFound" xml:space="preserve">
     <value>No Vehicles found</value>
   </data>
   <data name="Readytostream" xml:space="preserve">
-    <value>Ready to stream</value>
+    <value>Ready</value>
   </data>
   <data name="ReadytostreamtoVideoServer" xml:space="preserve">
     <value>Ready to stream to VideoServer {0}</value>
   </data>
-  <data name="SelectVehicle" xml:space="preserve">
-    <value>Select vehicle...</value>
-  </data>
-  <data name="SelectVideoSource" xml:space="preserve">
-    <value>Select video source...</value>
+  <data name="Selectvideosource" xml:space="preserve">
+    <value>Select video source</value>
   </data>
   <data name="Settings" xml:space="preserve">
     <value>Settings</value>
@@ -169,7 +166,7 @@
     <value>UgCS Server is not connected</value>
   </data>
   <data name="UgCSVideoTransmitter" xml:space="preserve">
-    <value>UgCS Video Transmitter</value>
+    <value>UgCS Video Transmitter {0}</value>
   </data>
   <data name="Vehicleisnotselected" xml:space="preserve">
     <value>Vehicle is not selected</value>
@@ -224,5 +221,35 @@
   </data>
   <data name="VideoLabel" xml:space="preserve">
     <value>Video: </value>
+  </data>
+  <data name="Loadingvideo" xml:space="preserve">
+    <value>Loading video</value>
+  </data>
+  <data name="Nodevice" xml:space="preserve">
+    <value>&lt;Not selected&gt;</value>
+  </data>
+  <data name="Novehicle" xml:space="preserve">
+    <value>&lt;Not selected&gt;</value>
+  </data>
+  <data name="Selecttelemetrysource" xml:space="preserve">
+    <value>Select telemetry source</value>
+  </data>
+  <data name="Reconnecting" xml:space="preserve">
+    <value>Reconnecting</value>
+  </data>
+  <data name="ErrorTail" xml:space="preserve">
+    <value>Tail number could not be empty string.</value>
+  </data>
+  <data name="UgcsIp" xml:space="preserve">
+    <value>Wrong UGCS IP address. Please provide correct IP.</value>
+  </data>
+  <data name="UgcsPort" xml:space="preserve">
+    <value>Wrong UGCS port address. Please provide correct port.</value>
+  </data>
+  <data name="VideoServerIp" xml:space="preserve">
+    <value>Wrong VideoServer IP address. Please provide correct IP.</value>
+  </data>
+  <data name="VideoServerPort" xml:space="preserve">
+    <value>Wrong VideoServer port address. Please provide correct port.</value>
   </data>
 </root>

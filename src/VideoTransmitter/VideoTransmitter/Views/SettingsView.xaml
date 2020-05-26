@@ -8,48 +8,84 @@
         xmlns:p="clr-namespace:VideoTransmitter.Properties"
         mc:Ignorable="d"
         x:Name="SettingsWindow"
-        Title="{x:Static p:Resources.SettingsWindowTitle}" Height="320" Width="400"
+        ResizeMode="NoResize"
+        Title="{x:Static p:Resources.SettingsWindowTitle}" Height="485" Width="464"
+        Style="{StaticResource MainWindowStyle}"
         Loaded="Window_Loaded">
-    <Grid>
+    <Grid Margin="32 0 32 0">
         <Grid.RowDefinitions>
-            <RowDefinition Height="50"></RowDefinition>
-            <RowDefinition Height="50"></RowDefinition>
-            <RowDefinition Height="50"></RowDefinition>
-            <RowDefinition Height="50"></RowDefinition>
-            <RowDefinition Height="50"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="76"></RowDefinition>
+            <RowDefinition Height="75"></RowDefinition>
+            <RowDefinition Height="64"></RowDefinition>
+            <RowDefinition Height="75"></RowDefinition>
+            <RowDefinition Height="64"></RowDefinition>
+            <RowDefinition Height="104"></RowDefinition>
         </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" VerticalAlignment="Center" Margin="10 0 10 0">
-            <TextBox Text="{Binding TailNumber}" MaxLength="100"></TextBox>
+        <StackPanel Grid.Row="0" VerticalAlignment="Center" Margin="0 26 0 0" Height="48">
+            <Border Style="{StaticResource SettingsBorder}">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="{x:Static p:Resources.Videosourcename}" Style="{StaticResource SettingsTextBlock}"></TextBlock>
+                    <TextBox Text="{Binding TailNumber, UpdateSourceTrigger=PropertyChanged}" MaxLength="100" Style="{StaticResource SettingsTextBox}"></TextBox>
+                </StackPanel>
+            </Border>
         </StackPanel>
-        <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="10 0 10 0" Orientation="Vertical">
-            <StackPanel Margin="0 10 0 0">
-                <TextBlock Text="{x:Static p:Resources.UgCSServer}" Margin="0 0 0 10"></TextBlock>
+        <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0 24 0 0" Orientation="Vertical">
+            <StackPanel Height="19">
+                <TextBlock Text="{x:Static p:Resources.UgCSServer}" Style="{StaticResource SettingsTextBlockHeader}"></TextBlock>
             </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <RadioButton GroupName="UgcsConnection" Content="{x:Static p:Resources.Autodiscovery}" IsChecked="{Binding UgcsAutomatic}" />
-                <RadioButton GroupName="UgcsConnection" Content="{x:Static p:Resources.DirectIP}" Margin="10 0 10 0" IsChecked="{Binding UgcsDirectConnection}" />
-            </StackPanel>
-        </StackPanel>
-        <StackPanel Grid.Row="2" VerticalAlignment="Center" Margin="10 0 10 0" Orientation="Horizontal">
-            <TextBox Text="{Binding UcgsAddress, UpdateSourceTrigger=PropertyChanged}" Width="200" IsEnabled="{Binding UgcsDirectConnection}" MaxLength="15" Margin="0 0 10 0"></TextBox>
-            <TextBox Text="{Binding UcgsPort, UpdateSourceTrigger=PropertyChanged}" Width="50" IsEnabled="{Binding UgcsDirectConnection}" PreviewTextInput="TextBox_KeyDownNumeric" DataObject.Pasting="DisablePasting" MaxLength="5"></TextBox>
-        </StackPanel>
-        <StackPanel Grid.Row="3" VerticalAlignment="Center" Margin="10 0 10 0" Orientation="Vertical">
-            <StackPanel Margin="0 10 0 0">
-                <TextBlock Text="{x:Static p:Resources.VideoServer}" Margin="0,0,0,10"></TextBlock>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <RadioButton GroupName="VideoServerConnection" Content="{x:Static p:Resources.Autodiscovery}" IsChecked="{Binding VideoServerAutomatic}" />
-                <RadioButton GroupName="VideoServerConnection" Content="{x:Static p:Resources.DirectIP}" Margin="10 0 10 0" IsChecked="{Binding VideoServerDirectConnection}" />
+            <StackPanel Orientation="Horizontal" Height="16" Margin="0 16 0 0">
+                <RadioButton Style="{StaticResource SettingsTextBlockRadio}" GroupName="UgcsConnection" Content="{x:Static p:Resources.Autodiscovery}" IsChecked="{Binding UgcsAutomatic}" />
+                <RadioButton Style="{StaticResource SettingsTextBlockRadio}" GroupName="UgcsConnection" Content="{x:Static p:Resources.DirectIP}" Margin="16 0 0 0" IsChecked="{Binding UgcsDirectConnection}" />
             </StackPanel>
         </StackPanel>
-        <StackPanel Grid.Row="4" VerticalAlignment="Center" Margin="10 0 10 0" Orientation="Horizontal">
-            <TextBox Text="{Binding VideoServerAddress, UpdateSourceTrigger=PropertyChanged}" Width="200" IsEnabled="{Binding VideoServerDirectConnection}" MaxLength="15" Margin="0 0 10 0"></TextBox>
-            <TextBox Text="{Binding VideoServerPort, UpdateSourceTrigger=PropertyChanged}" Width="50" IsEnabled="{Binding VideoServerDirectConnection}" PreviewTextInput="TextBox_KeyDownNumeric" DataObject.Pasting="DisablePasting" MaxLength="5"></TextBox>
+        <StackPanel Grid.Row="2" VerticalAlignment="Center" Margin="0 16 0 0" Orientation="Horizontal" Height="48">
+            <StackPanel Width="248">
+                <Border Style="{StaticResource SettingsBorder}">
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="{x:Static p:Resources.IPAddress}" Style="{StaticResource SettingsTextBlock}"></TextBlock>
+                        <TextBox Text="{Binding UcgsAddress, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding UgcsDirectConnection}" PreviewKeyDown="TextBox_PreviewKeyDown" MaxLength="15" Margin="0 0 10 0" Style="{StaticResource SettingsTextBox}"></TextBox>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+            <StackPanel Margin="16 0 0 0" Width="120">
+                <Border Style="{StaticResource SettingsBorder}">
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="{x:Static p:Resources.Port}" Style="{StaticResource SettingsTextBlock}"></TextBlock>
+                        <TextBox Text="{Binding UcgsPort, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" IsEnabled="{Binding UgcsDirectConnection}" PreviewKeyDown="TextBox_PreviewKeyDown"  PreviewTextInput="TextBox_KeyDownNumeric" DataObject.Pasting="DisablePasting" MaxLength="5" Style="{StaticResource SettingsTextBox}"></TextBox>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
         </StackPanel>
-        <StackPanel Grid.Row="5" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10 0 10 0" Orientation="Horizontal">
-            <Button Content="{x:Static p:Resources.Apply}" Margin="10 0 10 0" IsEnabled="{Binding IsApplyEnabled}">
+        <StackPanel Grid.Row="3" VerticalAlignment="Center" Margin="0 24 0 0" Orientation="Vertical">
+            <StackPanel Height="19">
+                <TextBlock Text="{x:Static p:Resources.VideoServer}" Style="{StaticResource SettingsTextBlockHeader}"></TextBlock>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Height="16" Margin="0 16 0 0">
+                <RadioButton Style="{StaticResource SettingsTextBlockRadio}" GroupName="VideoServerConnection" Content="{x:Static p:Resources.Autodiscovery}" IsChecked="{Binding VideoServerAutomatic}" />
+                <RadioButton Style="{StaticResource SettingsTextBlockRadio}" GroupName="VideoServerConnection" Content="{x:Static p:Resources.DirectIP}" Margin="16 0 0 0" IsChecked="{Binding VideoServerDirectConnection}" />
+            </StackPanel>
+        </StackPanel>
+        <StackPanel Grid.Row="4" VerticalAlignment="Center" Margin="0 16 0 0" Orientation="Horizontal">
+            <StackPanel Width="248">
+                <Border Style="{StaticResource SettingsBorder}">
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="{x:Static p:Resources.IPAddress}" Style="{StaticResource SettingsTextBlock}"></TextBlock>
+                        <TextBox Text="{Binding VideoServerAddress, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding VideoServerDirectConnection}" PreviewKeyDown="TextBox_PreviewKeyDown" MaxLength="15" Style="{StaticResource SettingsTextBox}"></TextBox>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+            <StackPanel Margin="16 0 0 0" Width="120">
+                <Border Style="{StaticResource SettingsBorder}">
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="{x:Static p:Resources.Port}" Style="{StaticResource SettingsTextBlock}"></TextBlock>
+                        <TextBox Text="{Binding VideoServerPort, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" IsEnabled="{Binding VideoServerDirectConnection}" PreviewKeyDown="TextBox_PreviewKeyDown" PreviewTextInput="TextBox_KeyDownNumeric" DataObject.Pasting="DisablePasting" MaxLength="5" Style="{StaticResource SettingsTextBox}"></TextBox>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </StackPanel>
+        <StackPanel Grid.Row="5" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 32 0 0" Orientation="Horizontal">
+            <Button Content="{x:Static p:Resources.Cancel}" IsCancel="True" Margin="0 0 10 0" Click="Close_Click" Style="{StaticResource CancelButton}"></Button>
+            <Button Content="{x:Static p:Resources.Apply}" IsDefault="True" Style="{StaticResource ApplyButton}">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="Click">
                         <cal:ActionMessage MethodName="SaveSettings">
@@ -58,7 +94,6 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </Button>
-            <Button Content="{x:Static p:Resources.Cancel}" Click="Close_Click"></Button>
         </StackPanel>
     </Grid>
 </Window>
