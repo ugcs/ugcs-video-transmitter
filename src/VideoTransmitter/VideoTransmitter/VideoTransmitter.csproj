@@ -7,9 +7,10 @@
     <AssemblyName>video-transmitter</AssemblyName>
     <RootNamespace>VideoTransmitter</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <ApplicationIcon />
+    <ApplicationIcon>appicon.ico</ApplicationIcon>
     <StartupObject />
     <Platforms>x64</Platforms>
+    <Win32Resource />
   </PropertyGroup>
 
   <ItemGroup>
