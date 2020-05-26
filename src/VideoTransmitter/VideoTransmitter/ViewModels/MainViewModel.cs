@@ -58,8 +58,6 @@ namespace VideoTransmitter.ViewModels
         private VideoSourcesService _videoSourcesService;
         private Unosquare.FFME.MediaElement m_MediaElement;
         private IWindowManager _iWindowManager;
-        private long _lastPacketRead = 0;
-        private int _lastPacketReadTimeout = 5000;
         private MispVideoStreamer _mispStreamer;
         private EncodingPipeline _encoding;
         private FrameRateCollector _frameRateCollector;
@@ -154,30 +152,10 @@ namespace VideoTransmitter.ViewModels
                 return;
             }
             isRunningMediaCheck = true;
-            if (MediaElement != null && MediaElement.MediaState != MediaPlaybackState.Close)
-            {
-                if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _lastPacketReadTimeout > _lastPacketRead && _lastPacketRead > 0)
-                {
-                    _log.Info("Media will close due packet timeout");
-                    await MediaElement.Close();
-                    _lastPacketRead = 0;
-                    if (SelectedVideoSource != null && SelectedVideoSource.Id != EMPTY_DEVICE_ID)
-                    {
-                        VideoMessage = string.Format(Resources.Videostoppedfrom, SelectedVideoSource.Name);
-                    }
-                    else
-                    {
-                        VideoMessage = string.Format(Resources.Videostoppedfrom, _lastKnownName);
-                    }
-                    VideoMessageVisibility = Visibility.Visible;
-                    VideoReady = CamVideo.NOT_READY;
-                    updateVideoAndTelemetryStatuses();
-                }
-            }
-            else if (MediaElement != null && MediaElement.MediaState == MediaPlaybackState.Close)
+            if (MediaElement != null && MediaElement.MediaState == MediaPlaybackState.Close)
             {
                 _log.Info("Try start new media");
-                await StartScreenStreaming();
+                await startScreenStreaming();
             }
             isRunningMediaCheck = false;
         }
@@ -568,9 +546,9 @@ namespace VideoTransmitter.ViewModels
             }
         }
 
-        private async Task StartScreenStreaming()
+        private async Task startScreenStreaming()
         {
-            _log.Debug("StartScreenStreaming called");
+            _log.Debug("startScreenStreaming called");
             if (MediaElement == null || SelectedVideoSource == null || SelectedVideoSource.Id == EMPTY_DEVICE_ID)
             {
                 return;
@@ -579,7 +557,7 @@ namespace VideoTransmitter.ViewModels
             {
                 if (!await MediaElement.Open(new Uri($"device://dshow/?video={SelectedVideoSource.Name}")))
                 {
-                    _log.Info(string.Format("StartScreenStreaming cant open stream on {0}", SelectedVideoSource.Name));
+                    _log.Info(string.Format("startScreenStreaming cant open stream on {0}", SelectedVideoSource.Name));
                     VideoMessage = string.Format(Resources.Failedtoloadvideofrom, SelectedVideoSource.Name);
                     VideoMessageVisibility = Visibility.Visible;
                     VideoReady = CamVideo.NOT_READY;
@@ -754,10 +732,6 @@ namespace VideoTransmitter.ViewModels
 
         private unsafe void onVideoFrameDecoded(object sender, FrameDecodedEventArgs e)
         {
-            if (MediaElement.MediaState == MediaPlaybackState.Play)
-            {
-                _lastPacketRead = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-            }
             _frameRateCollector.FrameReceived();            
 
             if (_mispStreamer != null && (_mispStreamer.State == MispVideoStreamerState.Initial || _mispStreamer.State == MispVideoStreamerState.Operational))
