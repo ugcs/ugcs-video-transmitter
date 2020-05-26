@@ -273,12 +273,14 @@ namespace UcsService
             if (!IsConnected)
                 throw new InvalidOperationException("Connection is not established.");
 
-            Execute<LogoutResponse>(
-                new LogoutRequest
-                {
-                    ClientId = ClientId,
-                });
-
+            if (_clientId != null)
+            {
+                Execute<LogoutResponse>(
+                    new LogoutRequest
+                    {
+                        ClientId = _clientId.Value,
+                    });
+            }
             try
             {
                 _tcpClient.Close();
