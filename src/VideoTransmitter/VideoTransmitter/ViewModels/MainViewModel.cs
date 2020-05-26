@@ -304,7 +304,7 @@ namespace VideoTransmitter.ViewModels
 
         private void ucsConnection_onConnected(object sender, EventArgs args)
         {
-            _log.Info("ucsConnection_onConnected called");
+            _log.Debug("ucsConnection_onConnected called");
             var cs = sender as ConnectionService;
             updateVideoAndTelemetryStatuses();
             updateVehicleList(() =>
@@ -318,7 +318,7 @@ namespace VideoTransmitter.ViewModels
         }
         private void videoSources_onChanged(object sender, EventArgs e)
         {
-            _log.Info("videoSources_onChanged called");
+            _log.Debug("videoSources_onChanged called");
             List<VideoSourceDTO> sources = sender as List<VideoSourceDTO>;
             Execute.OnUIThreadAsync(() =>
             {
@@ -570,7 +570,7 @@ namespace VideoTransmitter.ViewModels
 
         private async Task StartScreenStreaming()
         {
-            _log.Info("StartScreenStreaming called");
+            _log.Debug("StartScreenStreaming called");
             if (MediaElement == null || SelectedVideoSource == null || SelectedVideoSource.Id == EMPTY_DEVICE_ID)
             {
                 return;
@@ -605,10 +605,10 @@ namespace VideoTransmitter.ViewModels
                     };
                     _mispStreamer = new MispVideoStreamer(mispParams);
                     _mispStreamer.StateChanged += onMispStreamerStateChanged;
-                    _log.Info("startMisp called");
+                    _log.Debug("startMisp called");
                     _mispStreamer.Start();
                     _isStreaming = true;
-                    _log.Info("startMisp success");
+                    _log.Debug("startMisp success");
                 }
                 catch (Exception e)
                 {
@@ -634,7 +634,7 @@ namespace VideoTransmitter.ViewModels
                     {
                         _mispStreamer.StateChanged -= onMispStreamerStateChanged;
                     }
-                    _log.Info("stopMisp called");
+                    _log.Debug("stopMisp called");
                     _isStreaming = false;
                     _mispStreamer.Stop();
                     if (!stopWithoutStateChange)
@@ -643,7 +643,7 @@ namespace VideoTransmitter.ViewModels
                     }
                     _mispStreamer.Dispose();
                     _mispStreamer = null;
-                    _log.Info("stopMisp success");
+                    _log.Debug("stopMisp success");
                 }
                 catch (Exception e)
                 {
@@ -656,7 +656,7 @@ namespace VideoTransmitter.ViewModels
         
         public void StartStreaming()
         {
-            _log.Info("StartStreaming called");
+            _log.Debug("StartStreaming called");
             Task.Factory.StartNew(() =>
             {
                 if (!_isStreaming)
@@ -735,7 +735,7 @@ namespace VideoTransmitter.ViewModels
         private bool viewLoaded = false;
         public void ViewLoaded()
         {
-            _log.Info("ViewLoaded called");
+            _log.Debug("ViewLoaded called");
             viewLoaded = true;
             m_MediaElement = (Application.Current.MainWindow as MainView)?.Media;
             MediaElement.VideoFrameDecoded += onVideoFrameDecoded;
@@ -838,7 +838,7 @@ namespace VideoTransmitter.ViewModels
 
         public void SettingsWindows()
         {
-            _log.Info("SettingsWindows called");
+            _log.Debug("SettingsWindows called");
             _iWindowManager.ShowDialog(new SettingsViewModel(onSettingsSaved));
         }
 
