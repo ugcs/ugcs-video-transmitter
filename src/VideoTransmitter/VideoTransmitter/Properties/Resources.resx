@@ -252,4 +252,13 @@
   <data name="VideoServerPort" xml:space="preserve">
     <value>Wrong VideoServer port address. Please provide correct port.</value>
   </data>
+  <data name="ConnectionfailedtoVideoServer" xml:space="preserve">
+    <value>Connection failed to VideoServer, ready to start new</value>
+  </data>
+  <data name="FailedtostartstreamtoVideoServer" xml:space="preserve">
+    <value>Failed to start stream to VideoServer</value>
+  </data>
+  <data name="ReconnectingtoVideoServer" xml:space="preserve">
+    <value>Reconnecting to VideoServer</value>
+  </data>
 </root>

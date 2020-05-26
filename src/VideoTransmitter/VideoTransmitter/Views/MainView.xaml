@@ -135,6 +135,14 @@
                                 <MultiDataTrigger>
                                     <MultiDataTrigger.Conditions>
                                         <Condition Binding="{Binding IsStreaming}" Value="False" />
+                                        <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.RECONNECTING}" />
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Content" Value="{x:Static p:Resources.StopStreaming}"/>
+                                    <Setter Property="IsEnabled" Value="True"/>
+                                </MultiDataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsStreaming}" Value="False" />
                                         <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FAILED}" />
                                     </MultiDataTrigger.Conditions>
                                     <Setter Property="Content" Value="{x:Static p:Resources.StartStreaming}"/>
@@ -247,7 +255,7 @@
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FINISHED}">
                                             <Setter Property="Text" Value="{x:Static p:Resources.Readytostream}"/>
-                                            <Setter Property="Foreground" Value="#cc671e" />
+                                            <Setter Property="Foreground" Value="#f5f9fc" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.CONNECTION_FAILED}">
                                             <Setter Property="Text" Value="{x:Static p:Resources.Connectionfailed}"/>

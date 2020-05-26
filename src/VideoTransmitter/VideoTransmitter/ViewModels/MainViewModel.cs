@@ -30,7 +30,7 @@ namespace VideoTransmitter.ViewModels
     {
         private const long BITRATE = 6 * 1024 * 1024;
 
-        private log4net.ILog logger = log4net.LogManager.GetLogger(typeof(MainViewModel));
+        private log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MainViewModel));
 
         private Timer telemetryTimer;
 
@@ -64,6 +64,12 @@ namespace VideoTransmitter.ViewModels
         private EncodingPipeline _encoding;
         private FrameRateCollector _frameRateCollector;
 
+        //VideoServer internal statuses
+        private VideoServerStatus _videoStreamingStatus = VideoServerStatus.NOT_READY_TO_STREAM;
+        private bool _isStreaming;
+        private bool _hasConnected = false;
+        private object _startStopLocker = new object();
+
         public unsafe MainViewModel(DiscoveryService ds,
             ConnectionService cs,
             VehicleListener vl,
@@ -72,7 +78,7 @@ namespace VideoTransmitter.ViewModels
             VideoSourcesService vss,
             IWindowManager manager)
         {
-            logger.Info("Application started");
+            _log.Info("Application started");
             _iWindowManager = manager;
             _videoSourcesService = vss;
             _vehicleService = vs;
@@ -152,7 +158,7 @@ namespace VideoTransmitter.ViewModels
             {
                 if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _lastPacketReadTimeout > _lastPacketRead && _lastPacketRead > 0)
                 {
-                    logger.Info("Media will close due packet timeout");
+                    _log.Info("Media will close due packet timeout");
                     await MediaElement.Close();
                     _lastPacketRead = 0;
                     if (SelectedVideoSource != null && SelectedVideoSource.Id != EMPTY_DEVICE_ID)
@@ -170,7 +176,7 @@ namespace VideoTransmitter.ViewModels
             }
             else if (MediaElement != null && MediaElement.MediaState == MediaPlaybackState.Close)
             {
-                logger.Info("Try start new media");
+                _log.Info("Try start new media");
                 await StartScreenStreaming();
             }
             isRunningMediaCheck = false;
@@ -189,9 +195,12 @@ namespace VideoTransmitter.ViewModels
                         {
                             if (Settings.Default.VideoServerAutomatic)
                             {
-                                urtpServer = location;
+                                lock (_startStopLocker)
+                                {
+                                    urtpServer = location;
+                                }
                                 updateVideoAndTelemetryStatuses();
-                                logger.Info(string.Format("Found new videoserver {0}", urtpServer.AbsolutePath));
+                                _log.Info(string.Format("Found new videoserver {0}", urtpServer.AbsolutePath));
                             }
                             searhing = false;
                         });
@@ -199,8 +208,11 @@ namespace VideoTransmitter.ViewModels
                 }
                 else
                 {
-                    urtpServer = new Uri("urtp+connect://" + Settings.Default.VideoServerAddress + ":" + Settings.Default.VideoServerPort);
-                    logger.Info(string.Format("Direct connection used to videoserver {0}", urtpServer.AbsolutePath));
+                    lock (_startStopLocker)
+                    {
+                        urtpServer = new Uri("urtp+connect://" + Settings.Default.VideoServerAddress + ":" + Settings.Default.VideoServerPort);
+                    }
+                    _log.Info(string.Format("Direct connection used to videoserver {0}", urtpServer.AbsolutePath));
                     updateVideoAndTelemetryStatuses();
                 }
             }
@@ -236,12 +248,12 @@ namespace VideoTransmitter.ViewModels
             {
                 _ucsConnectionService.Connect(address, new UcsCredentials(string.Empty, string.Empty));
                 updateVideoAndTelemetryStatuses();
-                logger.Error("UgCS connected");
+                _log.Error("UgCS connected");
             }
             catch (Exception e)
             {
-                logger.Error("Could not connect to UgCS");
-                logger.Error(e);
+                _log.Error("Could not connect to UgCS");
+                _log.Error(e);
                 ucsConnection_onDisconnected(null, null);
             }
         }
@@ -259,7 +271,7 @@ namespace VideoTransmitter.ViewModels
                 }
                 NotifyOfPropertyChange(() => VehicleList);
             });
-            logger.Info("UgCS server disconnected");
+            _log.Info("UgCS server disconnected");
             updateVideoAndTelemetryStatuses();
         }
 
@@ -275,7 +287,7 @@ namespace VideoTransmitter.ViewModels
                     {
                         if (Settings.Default.UgcsAutomatic)
                         {
-                            logger.Info(string.Format("Found new UgCS server {0}", location.OriginalString));
+                            _log.Info(string.Format("Found new UgCS server {0}", location.OriginalString));
                             Connect(location);
                         }
                         searhing = false;
@@ -285,14 +297,14 @@ namespace VideoTransmitter.ViewModels
             else
             {
                 var uri = new Uri("tcp://" + Settings.Default.UcgsAddress + ":" + Settings.Default.UcgsPort);
-                logger.Info(string.Format("Direct connection used to UgCS server {0}", uri.OriginalString));
+                _log.Info(string.Format("Direct connection used to UgCS server {0}", uri.OriginalString));
                 Connect(uri);
             }
         }
 
         private void ucsConnection_onConnected(object sender, EventArgs args)
         {
-            logger.Info("ucsConnection_onConnected called");
+            _log.Debug("ucsConnection_onConnected called");
             var cs = sender as ConnectionService;
             updateVideoAndTelemetryStatuses();
             updateVehicleList(() =>
@@ -306,7 +318,7 @@ namespace VideoTransmitter.ViewModels
         }
         private void videoSources_onChanged(object sender, EventArgs e)
         {
-            logger.Info("videoSources_onChanged called");
+            _log.Debug("videoSources_onChanged called");
             List<VideoSourceDTO> sources = sender as List<VideoSourceDTO>;
             Execute.OnUIThreadAsync(() =>
             {
@@ -365,7 +377,10 @@ namespace VideoTransmitter.ViewModels
                 && serviceType == UGCS_VIDEOSERVER_URTP_ST 
                 && location == urtpServer.OriginalString)
             {
-                urtpServer = null;
+                lock (_startStopLocker)
+                {
+                    urtpServer = null;
+                }
                 stopMisp();
             }
         }
@@ -402,7 +417,7 @@ namespace VideoTransmitter.ViewModels
         private Object vehicleUpdateLocked = new Object();
         private void updateVehicle(ClientVehicleDTO vehicle, ModificationTypeDTO modType)
         {
-            logger.Info(string.Format("Vehicle update call {0} {1}", vehicle.Name, modType.ToString()));
+            _log.Info(string.Format("Vehicle update call {0} {1}", vehicle.Name, modType.ToString()));
             Execute.OnUIThreadAsync(() =>
             {
                 bool mod = false;
@@ -438,7 +453,7 @@ namespace VideoTransmitter.ViewModels
 
         private void updateVehicleList(System.Action callback = null)
         {
-            logger.Info("Vehicle list update call");
+            _log.Info("Vehicle list update call");
             Task.Factory.StartNew(() =>
             {
                 var vehicleList = _vehicleService.GetVehicles();
@@ -501,11 +516,11 @@ namespace VideoTransmitter.ViewModels
                 NotifyOfPropertyChange(() => SelectedVehicle);
                 if (_selectedVehicle != null && _selectedVehicle.VehicleId != EMPTY_VEHICLE_ID)
                 {
-                    logger.Info(string.Format("Vehicle selected {0}", _selectedVehicle.Name));
+                    _log.Info(string.Format("Vehicle selected {0}", _selectedVehicle.Name));
                 }
                 else
                 {
-                    logger.Info("Empty vehicle selected");
+                    _log.Info("Empty vehicle selected");
                 }
                 updateVideoAndTelemetryStatuses();
             }
@@ -555,7 +570,7 @@ namespace VideoTransmitter.ViewModels
 
         private async Task StartScreenStreaming()
         {
-            logger.Info("StartScreenStreaming called");
+            _log.Debug("StartScreenStreaming called");
             if (MediaElement == null || SelectedVideoSource == null || SelectedVideoSource.Id == EMPTY_DEVICE_ID)
             {
                 return;
@@ -564,7 +579,7 @@ namespace VideoTransmitter.ViewModels
             {
                 if (!await MediaElement.Open(new Uri($"device://dshow/?video={SelectedVideoSource.Name}")))
                 {
-                    logger.Info(string.Format("StartScreenStreaming cant open stream on {0}", SelectedVideoSource.Name));
+                    _log.Info(string.Format("StartScreenStreaming cant open stream on {0}", SelectedVideoSource.Name));
                     VideoMessage = string.Format(Resources.Failedtoloadvideofrom, SelectedVideoSource.Name);
                     VideoMessageVisibility = Visibility.Visible;
                     VideoReady = CamVideo.NOT_READY;
@@ -574,54 +589,13 @@ namespace VideoTransmitter.ViewModels
         }
         private void startMisp()
         {
-            if (_mispStreamer == null)
+            lock (_startStopLocker)
             {
-                logger.Info("startMisp called but mispStreamer is null");
-                return;
-            }
-            try
-            {
-                logger.Info("startMisp called");
-                _mispStreamer.Start();
-                _isStreaming = true;
-                logger.Info("startMisp success");
-            }
-            catch (Exception e)
-            {
-                logger.Info("startMisp error");
-                throw e;
-            }
-        }
-
-        public void stopMisp()
-        {
-            if (_mispStreamer == null)
-            {
-                logger.Info("stopMisp called but mispStreamer is null");
-                return;
-            }
-            try
-            {
-                logger.Info("stopMisp called");
-                _isStreaming = false;
-                _mispStreamer.Stop();
-                logger.Info("stopMisp success");
-            }
-            catch (Exception e)
-            {
-                logger.Info("stopMisp error");
-                throw e;
-            }
-        }
-
-        private VideoServerStatus videoStreamingStatus = VideoServerStatus.NOT_READY_TO_STREAM;
-        private bool _isStreaming = false;
-        public void StartStreaming()
-        {
-            logger.Info("StartStreaming called");
-            Task.Factory.StartNew(() =>
-            {
-                if (!_isStreaming)
+                if (urtpServer == null)
+                {
+                    throw new Exception("urtpServer is null");
+                }
+                try
                 {
                     MispStreamerParameters mispParams = new MispStreamerParameters()
                     {
@@ -630,59 +604,128 @@ namespace VideoTransmitter.ViewModels
                         VehicleId = Settings.Default.InstallationId,
                     };
                     _mispStreamer = new MispVideoStreamer(mispParams);
-                    _mispStreamer.StateChanged += stateChanged;
+                    _mispStreamer.StateChanged += onMispStreamerStateChanged;
+                    _log.Debug("startMisp called");
+                    _mispStreamer.Start();
+                    _isStreaming = true;
+                    _log.Debug("startMisp success");
+                }
+                catch (Exception e)
+                {
+                    _log.Info("startMisp error");
+                    _log.Error(e);
+                    throw;
+                }
+            }
+        }
+
+        public void stopMisp(bool stopWithoutStateChange = false)
+        {
+            lock (_startStopLocker)
+            {
+                if (_mispStreamer == null)
+                {
+                    _log.Info("stopMisp called but mispStreamer is null");
+                    return;
+                }
+                try
+                {
+                    if (stopWithoutStateChange)
+                    {
+                        _mispStreamer.StateChanged -= onMispStreamerStateChanged;
+                    }
+                    _log.Debug("stopMisp called");
+                    _isStreaming = false;
+                    _mispStreamer.Stop();
+                    if (!stopWithoutStateChange)
+                    {
+                        _mispStreamer.StateChanged -= onMispStreamerStateChanged;
+                    }
+                    _mispStreamer.Dispose();
+                    _mispStreamer = null;
+                    _log.Debug("stopMisp success");
+                }
+                catch (Exception e)
+                {
+                    _log.Info("stopMisp error");
+                    _log.Error(e);
+                    throw;
+                }
+            }
+        }
+        
+        public void StartStreaming()
+        {
+            _log.Debug("StartStreaming called");
+            Task.Factory.StartNew(() =>
+            {
+                if (!_isStreaming)
+                {
                     startMisp();
-                    logger.Info(string.Format("new misp started {0}", urtpServer.OriginalString));
+                    _log.Info(string.Format("new misp started {0}", urtpServer.OriginalString));
                 }
                 else
                 {
                     stopMisp();
                 }
-                hasConnected = false;
+                _hasConnected = false;
                 updateVideoAndTelemetryStatuses();
             });
         }
-        bool hasConnected = false;
-        private void stateChanged(object sender, EventArgs e)
+
+        private void onMispStreamerStateChanged(object sender, EventArgs e)
         {
             new System.Threading.Thread((data) =>
             {
                 MispVideoStreamer state = (MispVideoStreamer)sender;
                 if (state != null)
                 {
-                    logger.Info(string.Format("misp new status {0}", state.State.ToString()));
+                    _log.Info(string.Format("misp new status {0}", state.State.ToString()));
                     switch (state.State)
                     {
                         case MispVideoStreamerState.NotStarted:
-                            videoStreamingStatus = VideoServerStatus.READY_TO_STREAM;
+                            _videoStreamingStatus = VideoServerStatus.READY_TO_STREAM;
                             break;
                         case MispVideoStreamerState.Initial:
-                            videoStreamingStatus = VideoServerStatus.INITIALIZING;
+                            if (_videoStreamingStatus != VideoServerStatus.RECONNECTING)
+                            {
+                                _videoStreamingStatus = VideoServerStatus.INITIALIZING;
+                            }
                             break;
                         case MispVideoStreamerState.Operational:
-                            videoStreamingStatus = VideoServerStatus.STREAMING;
-                            hasConnected = true;
+                            _videoStreamingStatus = VideoServerStatus.STREAMING;
+                            _hasConnected = true;
                             break;
                         case MispVideoStreamerState.ConnectFailure:
-                            videoStreamingStatus = VideoServerStatus.CONNECTION_FAILED;
+                            _videoStreamingStatus = VideoServerStatus.CONNECTION_FAILED;
                             break;
                         case MispVideoStreamerState.ProtocolBadVersion:
                         case MispVideoStreamerState.OtherFailure:
-                            videoStreamingStatus = VideoServerStatus.FAILED;
+                            _videoStreamingStatus = VideoServerStatus.FAILED;
                             break;
                         case MispVideoStreamerState.Finished:
-                            videoStreamingStatus = VideoServerStatus.FAILED;
+                            _videoStreamingStatus = VideoServerStatus.FINISHED;
                             break;
                         default:
                             throw new Exception(string.Format("Unknown state submitted: {0}", state));
                     }
                     //ensure start stop in other thread.
                     if (_isStreaming &&
-                            (videoStreamingStatus == VideoServerStatus.FAILED || videoStreamingStatus == VideoServerStatus.CONNECTION_FAILED) && hasConnected)
+                            (state.State == MispVideoStreamerState.OtherFailure
+                            || state.State == MispVideoStreamerState.ConnectFailure) 
+                            && _hasConnected
+                            && _videoStreamingStatus != VideoServerStatus.RECONNECTING)
                     {
-                        videoStreamingStatus = VideoServerStatus.RECONNECTING;
-                        stopMisp();
-                        startMisp();
+                        stopMisp(true);
+                        if (urtpServer != null)
+                        {
+                            _videoStreamingStatus = VideoServerStatus.RECONNECTING;
+                            startMisp();
+                        }
+                    }
+                    else if (state.State == MispVideoStreamerState.ConnectFailure || state.State == MispVideoStreamerState.OtherFailure)
+                    {
+                        stopMisp(true);
                     }
                     updateVideoAndTelemetryStatuses();
                 }
@@ -692,7 +735,7 @@ namespace VideoTransmitter.ViewModels
         private bool viewLoaded = false;
         public void ViewLoaded()
         {
-            logger.Info("ViewLoaded called");
+            _log.Debug("ViewLoaded called");
             viewLoaded = true;
             m_MediaElement = (Application.Current.MainWindow as MainView)?.Media;
             MediaElement.VideoFrameDecoded += onVideoFrameDecoded;
@@ -741,7 +784,7 @@ namespace VideoTransmitter.ViewModels
                     catch (Exception err)
                     {
                         // TODO: Log error 
-                        // <here>
+                        _log.Error("Encoder initialization error.", err);
 
                         stopMisp();
                         Execute.OnUIThreadAsync(() =>
@@ -762,18 +805,32 @@ namespace VideoTransmitter.ViewModels
                 }
                 catch (ObjectDisposedException err)
                 {
-                    // Stream is finished and object is disposed.
-                    // TODO: Log verbose.
+                    // Streamer or encoder may be disposed from another stream.
+                    _log.Warn("Disposed object usage detected.", err);
                 }
                 catch (InvalidOperationException err)
                 {
-                    // Looks lile streamer was closed. It's ok to do nothing
-                    // TODO: Log verbose
+                    // Looks like streamer was closed. Let's close encoder.
+                    _encoding?.Dispose();
+                    _encoding = null;
+                    _log.Warn("Closed misp streamer usage detected.", err);
                 }
                 catch (Exception err)
                 {
-                    // TODO: Log error
-                    throw;
+                    _log.Error("Unexpected error occured during during encoding.", err);
+                    _encoding?.Dispose();
+                    _encoding = null;
+                    stopMisp();
+
+                    Execute.OnUIThreadAsync(() =>
+                    {
+                        MessageBox.Show(
+                            App.Current.MainWindow,
+                            "Unexpected error occured during encoding, streaming is stopped. Error: " + err.Message, 
+                            "Error",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                    });
                 }
             }
         }
@@ -781,7 +838,7 @@ namespace VideoTransmitter.ViewModels
 
         public void SettingsWindows()
         {
-            logger.Info("SettingsWindows called");
+            _log.Debug("SettingsWindows called");
             _iWindowManager.ShowDialog(new SettingsViewModel(onSettingsSaved));
         }
 
@@ -797,7 +854,10 @@ namespace VideoTransmitter.ViewModels
 
             if (changed.Contains("VideoServerAutomatic") || changed.Contains("VideoServerAddress"))
             {
-                urtpServer = null;
+                lock (_startStopLocker)
+                {
+                    urtpServer = null;
+                }
                 updateVideoAndTelemetryStatuses();
 
             }
@@ -816,7 +876,7 @@ namespace VideoTransmitter.ViewModels
                 VideoMessage = Resources.Loadingvideo;
                 VideoMessageVisibility = Visibility.Visible;
             });
-            logger.Info("OnMediaOpening - CamVideo.NOT_READY");
+            _log.Info("OnMediaOpening - CamVideo.NOT_READY");
             VideoReady = CamVideo.NOT_READY;
             updateVideoAndTelemetryStatuses();
             _frameRateCollector = new FrameRateCollector(15);
@@ -828,7 +888,7 @@ namespace VideoTransmitter.ViewModels
                 VideoMessage = string.Empty;
                 VideoMessageVisibility = Visibility.Hidden;
             });
-            logger.Info("OnMediaOpened - CamVideo.READY");
+            _log.Info("OnMediaOpened - CamVideo.READY");
             VideoReady = CamVideo.READY;
             updateVideoAndTelemetryStatuses();
         }
@@ -842,7 +902,7 @@ namespace VideoTransmitter.ViewModels
                 VideoMessage = Resources.Loadingvideo;
                 VideoMessageVisibility = Visibility.Visible;
             });
-            logger.Info("OnMediaInitializing - CamVideo.NOT_READY");
+            _log.Info("OnMediaInitializing - CamVideo.NOT_READY");
             VideoReady = CamVideo.NOT_READY;
             updateVideoAndTelemetryStatuses();
         }
@@ -900,11 +960,11 @@ namespace VideoTransmitter.ViewModels
                 }
                 else if (_isStreaming)
                 {
-                    if (videoStreamingStatus == VideoServerStatus.INITIALIZING)
+                    if (_videoStreamingStatus == VideoServerStatus.STREAMING)
                     {
-                        return TelemetryStatus.READY_TO_STREAM;
+                        return TelemetryStatus.STREAMING;
                     }
-                    return TelemetryStatus.STREAMING;
+                    return TelemetryStatus.READY_TO_STREAM;
                 }
                 else
                 {
@@ -924,21 +984,29 @@ namespace VideoTransmitter.ViewModels
                 {
                     return VideoServerStatus.NOT_READY_TO_STREAM;
                 }
-                else if (videoStreamingStatus == VideoServerStatus.RECONNECTING)
+                else if (_videoStreamingStatus == VideoServerStatus.RECONNECTING)
                 {
                     return VideoServerStatus.RECONNECTING;
                 }
-                else if (videoStreamingStatus == VideoServerStatus.INITIALIZING)
+                else if (_videoStreamingStatus == VideoServerStatus.INITIALIZING)
                 {
                     return VideoServerStatus.INITIALIZING;
                 }
-                else if (videoStreamingStatus == VideoServerStatus.FINISHED)
+                else if (_videoStreamingStatus == VideoServerStatus.FINISHED)
                 {
                     return VideoServerStatus.FINISHED;
                 }
-                else if (videoStreamingStatus == VideoServerStatus.STREAMING)
+                else if (_videoStreamingStatus == VideoServerStatus.STREAMING)
                 {
                     return VideoServerStatus.STREAMING;
+                }
+                else if (_videoStreamingStatus == VideoServerStatus.FAILED)
+                {
+                    return VideoServerStatus.FAILED;
+                }
+                else if (_videoStreamingStatus == VideoServerStatus.CONNECTION_FAILED)
+                {
+                    return VideoServerStatus.CONNECTION_FAILED;
                 }
                 else
                 {
@@ -969,7 +1037,7 @@ namespace VideoTransmitter.ViewModels
                 {
                     return Resources.Vehicleisnotselected;
                 }
-                if (_isStreaming && videoStreamingStatus == VideoServerStatus.STREAMING)
+                if (_isStreaming && _videoStreamingStatus == VideoServerStatus.STREAMING)
                 {
                     return Resources.Streaming;
                 }
@@ -992,11 +1060,23 @@ namespace VideoTransmitter.ViewModels
                 {
                     return Resources.Videosourceisnotstreamingvideo;
                 }
-                if (videoStreamingStatus == VideoServerStatus.INITIALIZING)
+                if (_videoStreamingStatus == VideoServerStatus.INITIALIZING)
                 {
                     return Resources.Streaminitializing;
                 }
-                if (_isStreaming && videoStreamingStatus == VideoServerStatus.STREAMING)
+                if (_videoStreamingStatus == VideoServerStatus.RECONNECTING)
+                {
+                    return Resources.ReconnectingtoVideoServer;
+                }
+                if (_videoStreamingStatus == VideoServerStatus.FAILED)
+                {
+                    return Resources.FailedtostartstreamtoVideoServer;
+                }
+                if (_videoStreamingStatus == VideoServerStatus.CONNECTION_FAILED)
+                {
+                    return Resources.ConnectionfailedtoVideoServer;
+                }
+                if (_isStreaming && _videoStreamingStatus == VideoServerStatus.STREAMING)
                 {
                     return Resources.Streaming;
                 }
