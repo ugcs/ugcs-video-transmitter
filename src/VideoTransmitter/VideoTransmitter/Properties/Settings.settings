@@ -9,7 +9,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="UcgsPort" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">0</Value>
+      <Value Profile="(Default)">3334</Value>
     </Setting>
     <Setting Name="VideoServerAutomatic" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
@@ -18,7 +18,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="VideoServerPort" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">0</Value>
+      <Value Profile="(Default)">3341</Value>
     </Setting>
     <Setting Name="TailNumber" Type="System.String" Scope="User">
       <Value Profile="(Default)">UgCS video transmitter</Value>

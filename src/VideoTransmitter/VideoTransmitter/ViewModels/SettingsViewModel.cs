@@ -53,7 +53,7 @@ namespace VideoTransmitter.ViewModels
             {
                 if (value && !_ugcsAutomatic)
                 {
-                    if (!IPAddress.TryParse(UcgsAddress, out var ip))
+                    if (!IPAddress.TryParse(UcgsAddress, out var ip) || UcgsAddress.Split('.').Length != 4)
                     {
                         UcgsAddress = Settings.Default.UcgsAddress;
                     }
@@ -120,7 +120,7 @@ namespace VideoTransmitter.ViewModels
             {
                 if (value && !_videoServerAutomatic)
                 {
-                    if (!IPAddress.TryParse(VideoServerAddress, out var ip))
+                    if (!IPAddress.TryParse(VideoServerAddress, out var ip) || VideoServerAddress.Split('.').Length != 4)
                     {
                         VideoServerAddress = Settings.Default.VideoServerAddress;
                     }
@@ -184,9 +184,9 @@ namespace VideoTransmitter.ViewModels
             }
             if (UgcsAutomatic == false)
             {
-                if (!IPAddress.TryParse(UcgsAddress, out var ip))
+                if (!IPAddress.TryParse(UcgsAddress, out var ip) || UcgsAddress.Split('.').Length != 4)
                 {
-                    return Resources.UgcsIp;;
+                    return Resources.UgcsIp;
                 }
                 if (UcgsPort == null || UcgsPort < 1 || UcgsPort > 65535)
                 {
@@ -195,7 +195,7 @@ namespace VideoTransmitter.ViewModels
             }
             if (VideoServerAutomatic == false)
             {
-                if (!IPAddress.TryParse(VideoServerAddress, out var ip))
+                if (!IPAddress.TryParse(VideoServerAddress, out var ip) || VideoServerAddress.Split('.').Length != 4)
                 {
                     return Resources.VideoServerIp;
                 }
