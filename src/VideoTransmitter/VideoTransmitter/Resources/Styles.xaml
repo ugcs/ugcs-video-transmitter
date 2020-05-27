@@ -17,7 +17,6 @@
         <Setter Property="Foreground" Value="#e6edf2"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="FontSize" Value="16"/>
-
     </Style>
     <Style x:Key="SettingsTextBlockRadio" TargetType="{x:Type RadioButton}">
         <Setter Property="Foreground" Value="#e6edf2"/>
@@ -92,8 +91,18 @@
         <Setter Property="BorderBrush" Value="#4b5762"/>
         <Setter Property="Height" Value="48"/>
         <Setter Property="Width" Value="268"/>
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False" >
+                <Setter Property="Background" Value="#333333" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
     <Style x:Key="ComboBoxSelectorDevice" TargetType="{x:Type ComboBox}">
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False" >
+                <Setter Property="Foreground" Value="#888888" />
+            </Trigger>
+        </Style.Triggers>
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="FontSize" Value="16" />

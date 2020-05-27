@@ -353,6 +353,7 @@ namespace VideoTransmitter.ViewModels
         {
             if (Settings.Default.VideoServerAutomatic == true 
                 && serviceType == UGCS_VIDEOSERVER_URTP_ST 
+                && urtpServer != null
                 && location == urtpServer.OriginalString)
             {
                 lock (_startStopLocker)
