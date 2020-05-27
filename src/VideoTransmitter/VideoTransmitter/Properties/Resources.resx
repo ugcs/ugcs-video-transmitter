@@ -156,8 +156,8 @@
   <data name="Streamfinished" xml:space="preserve">
     <value>Stream finished</value>
   </data>
-  <data name="Streaming" xml:space="preserve">
-    <value>Streaming</value>
+  <data name="StreamingTo" xml:space="preserve">
+    <value>Streaming to {0}</value>
   </data>
   <data name="Streaminitializing" xml:space="preserve">
     <value>Stream initializing</value>
@@ -266,5 +266,8 @@
   </data>
   <data name="Shutdownconfirmation" xml:space="preserve">
     <value>Shutdown confirmation</value>
+  </data>
+  <data name="Streaming" xml:space="preserve">
+    <value>Streaming</value>
   </data>
 </root>

@@ -27,6 +27,7 @@
             <TextBlock Text="{x:Static p:Resources.NoVehiclesFound}" Foreground="White" FontSize="20" />
         </ControlTemplate>
         <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+        <helpers:OppositeBool x:Key="OppositeBool" />
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -43,7 +44,7 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Column="0">
-                <Border Style="{StaticResource ComboPadding}" Margin="16 0 0 0">
+                <Border Style="{StaticResource ComboPadding}" Margin="16 0 0 0" IsEnabled="{Binding IsStreaming, Converter={StaticResource OppositeBool}}">
                     <Grid>
                         <ComboBox    
                           Style="{StaticResource ComboBoxSelectorDevice}"                           
@@ -51,7 +52,8 @@
                           Height="48" 
                           x:Name="SelectedVideoSourceElement"
                           DisplayMemberPath="Name" 
-                          SelectedValuePath="Name"                       
+                          SelectedValuePath="Name"    
+                          IsEnabled="{Binding IsStreaming, Converter={StaticResource OppositeBool}}"
                           SelectedValue="{Binding Path=Name}"
                           ItemsSource="{Binding Path=VideoSourcesList, Mode=OneWay}" >
                             <ComboBox.ItemContainerStyle>
@@ -72,7 +74,7 @@
                         Text="{x:Static p:Resources.Selectvideosource}" />
                     </Grid>
                 </Border>
-                <Border Style="{StaticResource ComboPadding}" Margin="16 0 0 0">
+                <Border Style="{StaticResource ComboPadding}" Margin="16 0 0 0" IsEnabled="{Binding IsStreaming, Converter={StaticResource OppositeBool}}">
                     <Grid>
                         <ComboBox            
                         Style="{StaticResource ComboBoxSelectorVehicle}"
@@ -80,7 +82,8 @@
                         x:Name="SelectedVehicleElement"
                         Height="48" 
                         DisplayMemberPath="Name" 
-                        SelectedValuePath="VehicleId"             
+                        SelectedValuePath="VehicleId"   
+                        IsEnabled="{Binding IsStreaming, Converter={StaticResource OppositeBool}}"          
                         SelectedValue="{Binding Path=VehicleId}"
                         ItemsSource="{Binding Path=VehicleList}" Grid.ColumnSpan="3" >
                             <ComboBox.ItemContainerStyle>
@@ -112,37 +115,7 @@
             </StackPanel>
             
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="16 0 16 0" Grid.Column="2">
-                <Button>
-                    <Button.Style>
-                        <Style TargetType="{x:Type Button}" BasedOn="{StaticResource SettingsButton}">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.NOT_READY_TO_STREAM}">
-                                    <Setter Property="IsEnabled" Value="True"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.READY_TO_STREAM}">
-                                    <Setter Property="IsEnabled" Value="True"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.STREAMING}">
-                                    <Setter Property="IsEnabled" Value="False"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.INITIALIZING}">
-                                    <Setter Property="IsEnabled" Value="False"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.RECONNECTING}">
-                                    <Setter Property="IsEnabled" Value="False"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FAILED}">
-                                    <Setter Property="IsEnabled" Value="True"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FINISHED}">
-                                    <Setter Property="IsEnabled" Value="True"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.CONNECTION_FAILED}">
-                                    <Setter Property="IsEnabled" Value="True"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
+                <Button Style="{StaticResource SettingsButton}" IsEnabled="{Binding IsStreaming, Converter={StaticResource OppositeBool}}">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="Click">
                             <cal:ActionMessage MethodName="SettingsWindows">

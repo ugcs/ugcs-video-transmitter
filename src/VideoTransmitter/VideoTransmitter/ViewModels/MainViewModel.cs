@@ -96,7 +96,7 @@ namespace VideoTransmitter.ViewModels
                 Id = EMPTY_DEVICE_ID
             };
             VideoSourcesList.Add(_defaultVideoDevice);
-            SelectedVideoSource = _defaultVideoDevice;
+            resetDefaultVideoSeource(_defaultVideoDevice);
             
             _defaultVehicle = new ClientVehicleDTO()
             {
@@ -327,7 +327,7 @@ namespace VideoTransmitter.ViewModels
                 }
                 if (updateToDefault)
                 {
-                    SelectedVideoSource = _defaultVideoDevice;
+                    resetDefaultVideoSeource(_defaultVideoDevice);
                 }
                 if (mod)
                 {
@@ -353,6 +353,7 @@ namespace VideoTransmitter.ViewModels
         {
             if (Settings.Default.VideoServerAutomatic == true 
                 && serviceType == UGCS_VIDEOSERVER_URTP_ST 
+                && urtpServer != null
                 && location == urtpServer.OriginalString)
             {
                 lock (_startStopLocker)
@@ -519,7 +520,7 @@ namespace VideoTransmitter.ViewModels
                     return;
                 }
                 _selectedVideoSource = value;
-                if (_selectedVideoSource != null && _selectedVideoSource.Id != EMPTY_DEVICE_ID)
+                if (_selectedVideoSource != null)
                 {
                     Settings.Default.LastCapureDevice = _selectedVideoSource.Name;
                     Settings.Default.Save();
@@ -536,6 +537,18 @@ namespace VideoTransmitter.ViewModels
                 }
                 NotifyOfPropertyChange(() => SelectedVideoSource);
             }
+        }
+
+        public void resetDefaultVideoSeource(VideoSourceDTO videoSource)
+        {
+            _selectedVideoSource = videoSource;
+            VideoReady = CamVideo.NOT_READY;
+            if (viewLoaded)
+            {
+                MediaElement.Close();
+            }
+            updateVideoAndTelemetryStatuses();
+            NotifyOfPropertyChange(() => SelectedVideoSource);
         }
 
         public Unosquare.FFME.MediaElement MediaElement
@@ -932,13 +945,9 @@ namespace VideoTransmitter.ViewModels
                 {
                     return TelemetryStatus.NOT_READY_TO_STREAM;
                 }
-                else if (_isStreaming)
+                else if (_videoStreamingStatus == VideoServerStatus.STREAMING)
                 {
-                    if (_videoStreamingStatus == VideoServerStatus.STREAMING)
-                    {
-                        return TelemetryStatus.STREAMING;
-                    }
-                    return TelemetryStatus.READY_TO_STREAM;
+                    return TelemetryStatus.STREAMING;
                 }
                 else
                 {
@@ -1013,7 +1022,7 @@ namespace VideoTransmitter.ViewModels
                 }
                 if (_isStreaming && _videoStreamingStatus == VideoServerStatus.STREAMING)
                 {
-                    return Resources.Streaming;
+                    return string.Format(Resources.StreamingTo, urtpServer.Host + ":" + urtpServer.Port);
                 }
                 return string.Format(Resources.ReadytostreamtoVideoServer, urtpServer.Host + ":" + urtpServer.Port);
             }
@@ -1052,7 +1061,7 @@ namespace VideoTransmitter.ViewModels
                 }
                 if (_isStreaming && _videoStreamingStatus == VideoServerStatus.STREAMING)
                 {
-                    return Resources.Streaming;
+                    return string.Format(Resources.StreamingTo, urtpServer.Host + ":" + urtpServer.Port);
                 }
                 return string.Format(Resources.ReadytostreamtoVideoServer, urtpServer.Host + ":" + urtpServer.Port);
             }

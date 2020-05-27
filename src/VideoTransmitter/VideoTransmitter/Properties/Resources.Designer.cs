@@ -349,6 +349,15 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Streaming to {0}.
+        /// </summary>
+        public static string StreamingTo {
+            get {
+                return ResourceManager.GetString("StreamingTo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Stream initializing.
         /// </summary>
         public static string Streaminitializing {
