@@ -1022,7 +1022,7 @@ namespace VideoTransmitter.ViewModels
                 }
                 if (_isStreaming && _videoStreamingStatus == VideoServerStatus.STREAMING)
                 {
-                    return Resources.Streaming;
+                    return string.Format(Resources.StreamingTo, urtpServer.Host + ":" + urtpServer.Port);
                 }
                 return string.Format(Resources.ReadytostreamtoVideoServer, urtpServer.Host + ":" + urtpServer.Port);
             }
@@ -1061,7 +1061,7 @@ namespace VideoTransmitter.ViewModels
                 }
                 if (_isStreaming && _videoStreamingStatus == VideoServerStatus.STREAMING)
                 {
-                    return Resources.Streaming;
+                    return string.Format(Resources.StreamingTo, urtpServer.Host + ":" + urtpServer.Port);
                 }
                 return string.Format(Resources.ReadytostreamtoVideoServer, urtpServer.Host + ":" + urtpServer.Port);
             }
