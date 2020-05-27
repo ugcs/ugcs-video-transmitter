@@ -327,7 +327,7 @@ namespace VideoTransmitter.ViewModels
                 }
                 if (updateToDefault)
                 {
-                    SelectedVideoSource = _defaultVideoDevice;
+                    resetDefaultVideoSeource(_defaultVideoDevice);
                 }
                 if (mod)
                 {
@@ -519,7 +519,7 @@ namespace VideoTransmitter.ViewModels
                     return;
                 }
                 _selectedVideoSource = value;
-                if (_selectedVideoSource != null && _selectedVideoSource.Id != EMPTY_DEVICE_ID)
+                if (_selectedVideoSource != null)
                 {
                     Settings.Default.LastCapureDevice = _selectedVideoSource.Name;
                     Settings.Default.Save();
@@ -536,6 +536,18 @@ namespace VideoTransmitter.ViewModels
                 }
                 NotifyOfPropertyChange(() => SelectedVideoSource);
             }
+        }
+
+        public void resetDefaultVideoSeource(VideoSourceDTO videoSource)
+        {
+            _selectedVideoSource = videoSource;
+            VideoReady = CamVideo.NOT_READY;
+            if (viewLoaded)
+            {
+                MediaElement.Close();
+            }
+            updateVideoAndTelemetryStatuses();
+            NotifyOfPropertyChange(() => SelectedVideoSource);
         }
 
         public Unosquare.FFME.MediaElement MediaElement
@@ -932,13 +944,9 @@ namespace VideoTransmitter.ViewModels
                 {
                     return TelemetryStatus.NOT_READY_TO_STREAM;
                 }
-                else if (_isStreaming)
+                else if (_videoStreamingStatus == VideoServerStatus.STREAMING)
                 {
-                    if (_videoStreamingStatus == VideoServerStatus.STREAMING)
-                    {
-                        return TelemetryStatus.STREAMING;
-                    }
-                    return TelemetryStatus.READY_TO_STREAM;
+                    return TelemetryStatus.STREAMING;
                 }
                 else
                 {
