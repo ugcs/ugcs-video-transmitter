@@ -24,7 +24,7 @@
     <PackageReference Include="FFME.Windows" Version="4.2.330" />
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Ninject" Version="3.3.4" />
-    <PackageReference Include="Ugcs.Video.MispStreamer" Version="4.0.0-alfa7" />
+    <PackageReference Include="Ugcs.Video.MispStreamer" Version="4.0.0-alfa8" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="App.xaml" />

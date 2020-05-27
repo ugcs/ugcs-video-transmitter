@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -28,7 +29,7 @@ namespace VideoTransmitter.ViewModels
 {
     public partial class MainViewModel : Caliburn.Micro.PropertyChangedBase
     {
-        private const long BITRATE = 6 * 1024 * 1024;
+        private readonly long? BITRATE = null; // null - auto, example: 1 * 1024 * 1024;
 
         private log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MainViewModel));
 
@@ -59,8 +60,7 @@ namespace VideoTransmitter.ViewModels
         private Unosquare.FFME.MediaElement m_MediaElement;
         private IWindowManager _iWindowManager;
         private MispVideoStreamer _mispStreamer;
-        private EncodingPipeline _encoding;
-        private FrameRateCollector _frameRateCollector;
+        private EncodingWorker _encoding;
 
         //VideoServer internal statuses
         private VideoServerStatus _videoStreamingStatus = VideoServerStatus.NOT_READY_TO_STREAM;
@@ -607,13 +607,34 @@ namespace VideoTransmitter.ViewModels
                     _log.Error(e);
                     throw;
                 }
+
+                _encoding = new EncodingWorker(null);
+                _encoding.Output = _mispStreamer.VideoStream;
+                _encoding.Error += encoding_Error;
             }
+        }
+
+        private void encoding_Error(object sender, Exception e)
+        {
+            _log.Error("Encoding error.", e);
+            stopMisp();
+            Execute.OnUIThreadAsync(() =>
+            {
+                MessageBox.Show(
+                    App.Current.MainWindow,
+                    "Unexpected error occured during encoding, streaming is stopped. Error: " + e.Message,
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            });
         }
 
         public void stopMisp(bool stopWithoutStateChange = false)
         {
             lock (_startStopLocker)
             {
+                disposeEncoding();
+
                 if (_mispStreamer == null)
                 {
                     _log.Info("stopMisp called but mispStreamer is null");
@@ -739,74 +760,33 @@ namespace VideoTransmitter.ViewModels
         private void onMediaClosed(object sender, EventArgs e)
         {
             // No picture on the screen - no more encoder required because new picture may be in different size
-            _encoding?.Dispose();
-            _encoding = null;
+            disposeEncoding();
+        }
+
+        private void disposeEncoding()
+        {
+            EncodingWorker encoding = _encoding;
+            if (encoding != null)
+            {
+                encoding.Error -= encoding_Error;
+                encoding.Dispose();
+                _encoding = null;
+            }
         }
 
         private unsafe void onVideoFrameDecoded(object sender, FrameDecodedEventArgs e)
         {
-            _frameRateCollector.FrameReceived();            
-
-            if (_mispStreamer != null && (_mispStreamer.State == MispVideoStreamerState.Initial || _mispStreamer.State == MispVideoStreamerState.Operational))
+            var sw = Stopwatch.StartNew();
+            if (_mispStreamer != null && _encoding != null && (_mispStreamer.State == MispVideoStreamerState.Initial || _mispStreamer.State == MispVideoStreamerState.Operational))
             {
-                if (_encoding == null)
-                {
-                    // We don't know the image size and frame rate before the first frame is decoded, 
-                    // this is why here is a good place to initialize encoder
-
-                    if (!_frameRateCollector.FrameRate.HasValue)
-                        return;
-
-                    try
-                    {
-                        _encoding = new EncodingPipeline(
-                            "libx264",
-                            e.Frame->width,
-                            e.Frame->height,
-                            (AVPixelFormat)e.Frame->format,
-                            BITRATE,
-                            _frameRateCollector.FrameRate.Value);
-                        
-                    }
-                    catch (Exception err)
-                    {
-                        // TODO: Log error 
-                        _log.Error("Encoder initialization error.", err);
-
-                        stopMisp();
-                        Execute.OnUIThreadAsync(() =>
-                        {
-                            MessageBox.Show(
-                                App.Current.MainWindow,
-                                "Encoder initialization error: " + err.Message,
-                                "Error",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Error);
-                        });
-                    }
-                }
-
                 try
                 {
-                    _encoding.Encode(e.Frame, _mispStreamer.VideoStream);
-                }
-                catch (ObjectDisposedException err)
-                {
-                    // Streamer or encoder may be disposed from another stream.
-                    _log.Warn("Disposed object usage detected.", err);
-                }
-                catch (InvalidOperationException err)
-                {
-                    // Looks like streamer was closed. Let's close encoder.
-                    _encoding?.Dispose();
-                    _encoding = null;
-                    _log.Warn("Closed misp streamer usage detected.", err);
+                    Debug.WriteLine("Decoding");
+                    _encoding.Feed(e.Frame);
                 }
                 catch (Exception err)
                 {
                     _log.Error("Unexpected error occured during during encoding.", err);
-                    _encoding?.Dispose();
-                    _encoding = null;
                     stopMisp();
 
                     Execute.OnUIThreadAsync(() =>
@@ -820,6 +800,7 @@ namespace VideoTransmitter.ViewModels
                     });
                 }
             }
+            Debug.WriteLine(sw.Elapsed);
         }
 
 
@@ -858,6 +839,7 @@ namespace VideoTransmitter.ViewModels
             e.Options.VideoBlockCache = 0;
             e.Options.IsTimeSyncDisabled = true;
 
+
             Execute.OnUIThreadAsync(() =>
             {
                 VideoMessage = Resources.Loadingvideo;
@@ -866,7 +848,6 @@ namespace VideoTransmitter.ViewModels
             _log.Info("OnMediaOpening - CamVideo.NOT_READY");
             VideoReady = CamVideo.NOT_READY;
             updateVideoAndTelemetryStatuses();
-            _frameRateCollector = new FrameRateCollector(15);
         }
         private void OnMediaOpened(object sender, MediaOpenedEventArgs e)
         {

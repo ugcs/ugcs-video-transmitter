@@ -21,6 +21,7 @@ namespace VideoTransmitter.Views
 
         protected override void OnClosing(CancelEventArgs e)
         {
+#if !DEBUG // Skip annoing confirmation during debugging
             MessageBoxResult result = MessageBox.Show(Properties.Resources.Doyouwanttocloseapplication, Properties.Resources.Shutdownconfirmation, MessageBoxButton.OKCancel, MessageBoxImage.Question);
             if (result == MessageBoxResult.OK)
             {
@@ -30,6 +31,7 @@ namespace VideoTransmitter.Views
             {
                 e.Cancel = true;
             }
+#endif
         }
 
     }

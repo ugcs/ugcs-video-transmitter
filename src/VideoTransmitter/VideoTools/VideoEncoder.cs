@@ -60,7 +60,16 @@ namespace Ugcs.Video.Tools
             c->max_b_frames = 1;
             c->pix_fmt = srcPxfmt;
 
-            ffmpeg.av_opt_set(c->priv_data, "preset", "ultrafast", 0);
+            const string preset = "ultrafast";
+            int rc = ffmpeg.av_opt_set(c->priv_data, "preset", preset, 0);
+            if (rc < 0)
+                throw new FfmpegException($"Can't set codec preset '{preset}'.");
+
+            
+            const string tune = "zerolatency";
+            rc = ffmpeg.av_opt_set(c->priv_data, "tune", tune, 0);
+            if (rc < 0)
+                throw new FfmpegException($"Can't set tune '{tune}.");
 
             int resultCode = ffmpeg.avcodec_open2(c, avCodec, null);
             if (resultCode < 0)

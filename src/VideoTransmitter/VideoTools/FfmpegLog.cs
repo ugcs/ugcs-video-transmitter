@@ -1,6 +1,7 @@
 ﻿using FFmpeg.AutoGen;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -8,7 +9,7 @@ namespace Ugcs.Video.Tools
 {
     public static class FfmpegLog
     {
-        public class LogEventArgs: EventArgs
+        public class LogEventArgs : EventArgs
         {
             public LogEventArgs(string message, int level)
             {
@@ -43,7 +44,7 @@ namespace Ugcs.Video.Tools
             get { return _level; }
             set
             {
-                
+
             }
         }
 
@@ -58,7 +59,7 @@ namespace Ugcs.Video.Tools
                 return;
 
             _level = level;
-                InitFfmpegLog(_level.Value);
+            InitFfmpegLog(_level.Value);
         }
 
         public static void Disable()
