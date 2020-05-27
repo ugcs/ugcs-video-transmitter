@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:p="clr-namespace:VideoTransmitter.Properties">
+                    xmlns:p="clr-namespace:VideoTransmitter.Properties"                 
+	                xmlns:enum="clr-namespace:VideoTransmitter.Enums">
 
     <Style x:Key="SettingsBorder" TargetType="{x:Type Border}">
         <Setter Property="Padding" Value="5"/>
@@ -228,10 +229,10 @@
 
     <Style x:Key="PlayButton" TargetType="{x:Type ButtonBase}">
         <Setter Property="Foreground" Value="White" />
-        <Setter Property="Background" Value="#76b82a" />
+        <Setter Property="Background" Value="#262d33" />
         <Setter Property="BorderBrush" Value="Black" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="FontSize" Value="18" />
+        <Setter Property="FontSize" Value="20" />
         <Setter Property="Width" Value="230" />
         <Setter Property="Height" Value="48" />
         <Setter Property="FontWeight" Value="Bold" />
@@ -239,9 +240,9 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Grid x:Name="grid">
-                        <Border x:Name="border" Background="#76b82a" CornerRadius="4" BorderBrush="Transparent" BorderThickness="0">
+                        <Border x:Name="border" Background="#262d33" CornerRadius="4" BorderBrush="Transparent" BorderThickness="0">
                             <StackPanel Orientation="Horizontal">
-                                <Image Source="/Resources/streaming-live-2-24-px3x.png" Width="24" Height="24" Margin="24 0 24 0" />
+                                <Image x:Name="image" Source="/Resources/play.png" Width="24" Height="24" Margin="24 0 12 0" />
                                 <ContentPresenter HorizontalAlignment="Center"
                                           VerticalAlignment="Center"
                                           TextElement.FontWeight="Normal" Margin="0 -3 0 0">
@@ -253,6 +254,120 @@
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Background" TargetName="border" Value="Gray"/>
                         </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsMouseOver" Value="True" />
+                                <Condition Property="IsEnabled" Value="True" />
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Background" TargetName="border" Value="#76b82a"/>
+                        </MultiTrigger>
+                        <DataTrigger Binding="{Binding IsStreaming}" Value="True">
+                            <Setter Property="Content" Value="{x:Static p:Resources.StopStreaming}"/>
+                            <Setter Property="Source" TargetName="image" Value="/Resources/stop.png"/>
+                        </DataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsStreaming}" Value="False" />
+                                <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.NOT_READY_TO_STREAM}" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Content" Value="{x:Static p:Resources.StartStreaming}"/>
+                            <Setter Property="IsEnabled" Value="False"/>
+                            <Setter Property="Source" TargetName="image" Value="/Resources/play.png"/>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsStreaming}" Value="False" />
+                                <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.READY_TO_STREAM}" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Content" Value="{x:Static p:Resources.StartStreaming}"/>
+                            <Setter Property="IsEnabled" Value="True"/>
+                            <Setter Property="Source" TargetName="image" Value="/Resources/play.png"/>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsStreaming}" Value="False" />
+                                <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.READY_TO_STREAM}" />
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Content" Value="{x:Static p:Resources.StartStreaming}"/>
+                            <Setter Property="IsEnabled" Value="True"/>
+                            <Setter Property="Source" TargetName="image" Value="/Resources/play-hover.png"/>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsStreaming}" Value="False" />
+                                <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.STREAMING}" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Content" Value="{x:Static p:Resources.StopStreaming}"/>
+                            <Setter Property="IsEnabled" Value="True"/>
+                            <Setter Property="Source" TargetName="image" Value="/Resources/stop.png"/>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsStreaming}" Value="False" />
+                                <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.RECONNECTING}" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Content" Value="{x:Static p:Resources.StopStreaming}"/>
+                            <Setter Property="IsEnabled" Value="True"/>
+                            <Setter Property="Source" TargetName="image" Value="/Resources/stop.png"/>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsStreaming}" Value="False" />
+                                <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FAILED}" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Content" Value="{x:Static p:Resources.StartStreaming}"/>
+                            <Setter Property="IsEnabled" Value="True"/>
+                            <Setter Property="Source" TargetName="image" Value="/Resources/play.png"/>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsStreaming}" Value="False" />
+                                <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FAILED}" />
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Content" Value="{x:Static p:Resources.StartStreaming}"/>
+                            <Setter Property="IsEnabled" Value="True"/>
+                            <Setter Property="Source" TargetName="image" Value="/Resources/play-hover.png"/>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsStreaming}" Value="False" />
+                                <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FINISHED}" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Content" Value="{x:Static p:Resources.StartStreaming}"/>
+                            <Setter Property="IsEnabled" Value="True"/>
+                            <Setter Property="Source" TargetName="image" Value="/Resources/play.png"/>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsStreaming}" Value="False" />
+                                <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FINISHED}" />
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Content" Value="{x:Static p:Resources.StartStreaming}"/>
+                            <Setter Property="IsEnabled" Value="True"/>
+                            <Setter Property="Source" TargetName="image" Value="/Resources/play-hover.png"/>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsStreaming}" Value="False" />
+                                <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.CONNECTION_FAILED}" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Content" Value="{x:Static p:Resources.StartStreaming}"/>
+                            <Setter Property="IsEnabled" Value="True"/>
+                            <Setter Property="Source" TargetName="image" Value="/Resources/play.png"/>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsStreaming}" Value="False" />
+                                <Condition Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.CONNECTION_FAILED}" />
+                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Content" Value="{x:Static p:Resources.StartStreaming}"/>
+                            <Setter Property="IsEnabled" Value="True"/>
+                            <Setter Property="Source" TargetName="image" Value="/Resources/play-hover.png"/>
+                        </MultiDataTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
