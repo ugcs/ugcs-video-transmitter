@@ -96,7 +96,7 @@ namespace VideoTransmitter.ViewModels
                 Id = EMPTY_DEVICE_ID
             };
             VideoSourcesList.Add(_defaultVideoDevice);
-            SelectedVideoSource = _defaultVideoDevice;
+            resetDefaultVideoSeource(_defaultVideoDevice);
             
             _defaultVehicle = new ClientVehicleDTO()
             {
