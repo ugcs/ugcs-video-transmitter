@@ -130,7 +130,7 @@
             <ffme:MediaElement x:Name="Media" LoadedBehavior="Play" UnloadedBehavior="Manual" MediaOpening="Media_MediaOpening"/>
             <TextBlock Text="{Binding VideoMessage}" Foreground="White" FontSize="16" VerticalAlignment="Center" x:Name="LoadingVideo" HorizontalAlignment="Center" Visibility="{Binding VideoMessageVisibility}" />
             <StackPanel HorizontalAlignment="Right" Orientation="Vertical" VerticalAlignment="Top" Margin="0 4 4 0">
-                <Border Style="{StaticResource BorderPanelStatus}" Height="24">
+                <Border Style="{StaticResource BorderPanelStatus}" Height="30">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" ToolTip="{Binding Path=VideoServerStatusText}">
                         <TextBlock Style="{StaticResource TextBlockStatus}" x:Name="VideoServerStatusTextFieldLabel" Text="{x:Static p:Resources.VideoLabel}" />
                         <TextBlock x:Name="VideoServerStatusTextField" Margin="0 0 10 0">
@@ -175,7 +175,7 @@
                         </TextBlock>
                     </StackPanel>
                 </Border>
-                <Border Style="{StaticResource BorderPanelStatus}" Height="24" Margin="0 4 0 0">
+                <Border Style="{StaticResource BorderPanelStatus}" Height="30" Margin="0 4 0 0">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" ToolTip="{Binding Path=TelemetryStatusText}">
                         <TextBlock Style="{StaticResource TextBlockStatus}" x:Name="TelemetryStatusTextFieldLabel" Text="{x:Static p:Resources.TelemetryLabel}" />
                         <TextBlock ToolTip="{Binding Path=TelemetryStatusText}" x:Name="TelemetryStatusTextField" HorizontalAlignment="Right" Visibility="Visible" Margin="0 0 10 0">
