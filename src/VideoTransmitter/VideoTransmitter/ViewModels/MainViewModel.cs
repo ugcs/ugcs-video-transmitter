@@ -621,10 +621,18 @@ namespace VideoTransmitter.ViewModels
                     throw;
                 }
 
-                _encoding = new EncodingWorker(null);
+                _encoding = new EncodingWorker(getBitrateFromConfig());
                 _encoding.Output = _mispStreamer.VideoStream;
                 _encoding.Error += encoding_Error;
             }
+        }
+
+        private long? getBitrateFromConfig()
+        {
+            if (Settings.Default.BitrateAutomatic)
+                return null;
+
+            return Settings.Default.Bitrate * 1000 * 1000;
         }
 
         private void encoding_Error(object sender, Exception e)
@@ -879,7 +887,7 @@ namespace VideoTransmitter.ViewModels
             VideoReady = CamVideo.READY;
             if (_mispStreamer != null && _isStreaming && _encoding == null)
             {
-                _encoding = new EncodingWorker(null);
+                _encoding = new EncodingWorker(getBitrateFromConfig());
                 _encoding.Error += encoding_Error;
                 _encoding.Output = _mispStreamer.VideoStream;
             }
