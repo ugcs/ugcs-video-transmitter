@@ -767,13 +767,6 @@ namespace VideoTransmitter.ViewModels
             MediaElement.MediaInitializing += OnMediaInitializing;
             MediaElement.MediaOpening += OnMediaOpening;
             MediaElement.MediaOpened += OnMediaOpened;
-            MediaElement.MediaClosed += onMediaClosed;
-        }
-
-        private void onMediaClosed(object sender, EventArgs e)
-        {
-            // No picture on the screen - no more encoder required because new picture may be in different size
-            disposeEncoding();
         }
 
         private void disposeEncoding()
@@ -932,6 +925,7 @@ namespace VideoTransmitter.ViewModels
             {
                 if (SelectedVehicle == null
                     || SelectedVehicle.VehicleId == EMPTY_VEHICLE_ID
+                    || urtpServer == null
                     || !_ucsConnectionService.IsConnected)
                 {
                     return TelemetryStatus.NOT_READY_TO_STREAM;
@@ -995,6 +989,10 @@ namespace VideoTransmitter.ViewModels
         {
             get
             {
+                if (urtpServer == null)
+                {
+                    return Resources.VideoServernotdiscovered;
+                }
                 if (!_ucsConnectionService.IsConnected)
                 {
                     return Resources.UgCSServerisnotconnected;
