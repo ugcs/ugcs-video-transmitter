@@ -13,7 +13,8 @@ namespace Ugcs.Video.Tools
     /// </summary>
     public sealed class EncodingWorker : IDisposable
     {
-        private const int POOL_SIZE = 10;
+        private const int POOL_SIZE = 3;
+        private const int MAX_QUEUE_SIZE = 3;
         private readonly ConcurrentBag<IntPtr> _framePool = new ConcurrentBag<IntPtr>();
         private readonly Thread _workingThread;
         private readonly ConcurrentQueue<IntPtr> _framesToEncode = new ConcurrentQueue<IntPtr>();
@@ -49,6 +50,10 @@ namespace Ugcs.Video.Tools
 
             _frameRateCollector.FrameReceived();
 
+
+            while (_framesToEncode.Count >= MAX_QUEUE_SIZE)
+                reduceQueue();
+
             IntPtr frameCopy;
             if (!_framePool.TryTake(out frameCopy))
                 frameCopy = (IntPtr)allocFrame(frame);
@@ -63,6 +68,16 @@ namespace Ugcs.Video.Tools
             _framesToEncode.Enqueue(frameCopy);
         }
 
+        private void reduceQueue()
+        {
+            if (_framesToEncode.TryDequeue(out IntPtr frameFromQueue))
+            {
+                if (_framePool.Count < POOL_SIZE)
+                    _framePool.Add(frameFromQueue);
+                else
+                    free(frameFromQueue);
+            }
+        }
 
         private unsafe bool tryCopy(AVFrame* src, AVFrame* dst, out int errorCode)
         {
