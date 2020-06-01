@@ -98,7 +98,7 @@
             <Border Style="{StaticResource SettingsBorder}">
                 <StackPanel Orientation="Vertical">
                     <TextBlock Text="{x:Static p:Resources.BitrateTextMbit}" Style="{StaticResource SettingsTextBlock}"></TextBlock>
-                    <TextBox Text="{Binding Bitrate, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding BitrateManual}" PreviewKeyDown="TextBox_PreviewKeyDown" PreviewTextInput="TextBox_KeyDownNumeric" MaxLength="2" Style="{StaticResource SettingsTextBox}"></TextBox>
+                    <TextBox Text="{Binding Bitrate, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" IsEnabled="{Binding BitrateManual}" PreviewKeyDown="TextBox_PreviewKeyDown" PreviewTextInput="TextBox_KeyDownNumeric" MaxLength="2" Style="{StaticResource SettingsTextBox}"></TextBox>
                 </StackPanel>
             </Border>
         </StackPanel>

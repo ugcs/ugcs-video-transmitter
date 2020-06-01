@@ -259,7 +259,7 @@ namespace VideoTransmitter.ViewModels
             }
             if (BitrateAutomatic == false)
             {
-                if (Bitrate < 1 || Bitrate > 25)
+                if (Bitrate == null ||  Bitrate < 1 || Bitrate > 25)
                 {
                     return Resources.BitrateError;
                 }
