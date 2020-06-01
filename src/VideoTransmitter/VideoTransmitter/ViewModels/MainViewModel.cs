@@ -767,6 +767,13 @@ namespace VideoTransmitter.ViewModels
             MediaElement.MediaInitializing += OnMediaInitializing;
             MediaElement.MediaOpening += OnMediaOpening;
             MediaElement.MediaOpened += OnMediaOpened;
+            MediaElement.MediaClosed += onMediaClosed;
+        }
+
+        private void onMediaClosed(object sender, EventArgs e)
+        {
+            // No picture on the screen - no more encoder required because new picture may be in different size
+            disposeEncoding();
         }
 
         private void disposeEncoding()
@@ -864,6 +871,12 @@ namespace VideoTransmitter.ViewModels
             });
             _log.Info("OnMediaOpened - CamVideo.READY");
             VideoReady = CamVideo.READY;
+            if (_mispStreamer != null && _isStreaming && _encoding == null)
+            {
+                _encoding = new EncodingWorker(null);
+                _encoding.Error += encoding_Error;
+                _encoding.Output = _mispStreamer.VideoStream;
+            }
             updateVideoAndTelemetryStatuses();
         }
         private void OnMediaInitializing(object sender, MediaInitializingEventArgs e)
