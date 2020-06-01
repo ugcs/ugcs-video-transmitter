@@ -862,6 +862,9 @@ namespace VideoTransmitter.ViewModels
         }
         private void OnMediaInitializing(object sender, MediaInitializingEventArgs e)
         {
+            e.Configuration.GlobalOptions.EnableReducedBuffering = true;
+            e.Configuration.GlobalOptions.FlagNoBuffer = true;
+
             // Ffme subscribes on ffmpeg log. To get log messages we should subscribe after ffme. Here is a good place.
             FfmpegLog.Enable(ffmpeg.AV_LOG_WARNING);
 

@@ -16,7 +16,7 @@ namespace Ugcs.Video.Tools
         private unsafe AVCodecContext* _codecContext;
         private object _disposeSyncObj = new Object();
         private bool _isDisposed;
-        private ILog _logger = LogManager.GetLogger(typeof(VideoEncoder));
+        private static ILog _log = LogManager.GetLogger(typeof(VideoEncoder));
         private FrameConverter _scaler;
 
 
@@ -32,8 +32,6 @@ namespace Ugcs.Video.Tools
         public unsafe VideoEncoder(int srcWidth, int srcHeight, AVPixelFormat srcPxfmt, long? bitrate, AVRational framerate,
             Codec codec)
         {
-            _logger.Info($"[{nameof(srcPxfmt)}:{srcPxfmt}] Initializing...");
-
             AVCodec* avCodec = (AVCodec*)((IAVObjectWrapper)codec).WrappedObject;
             AVCodecContext* c = ffmpeg.avcodec_alloc_context3(avCodec);
             if ((IntPtr)c == IntPtr.Zero)
@@ -81,6 +79,8 @@ namespace Ugcs.Video.Tools
 
             _pkt = pkt;
             _codecContext = c;
+            _log.Info($"[width: {c->width}; height: {c->height}; pxfmt: {c->pix_fmt}; " +
+                $"bitrate: {c->bit_rate}] Video encoder initialized.");
         }
 
 
@@ -124,7 +124,7 @@ namespace Ugcs.Video.Tools
                 else if (resultCode < 0)
                     throw new FfmpegException($"Error during encoding. Error code: {resultCode}.");
 
-                Debug.Write(String.Format("Tncoded frame %{0} (size={1})\n", pkt->pts, pkt->size));
+                _log.DebugFormat("Encoded frame {0} (size={1}).", pkt->pts, pkt->size);
                 var data = new byte[pkt->size];
                 Marshal.Copy((IntPtr)pkt->data, data, 0, pkt->size);
 
