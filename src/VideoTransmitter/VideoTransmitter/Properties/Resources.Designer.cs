@@ -79,6 +79,42 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Auto.
+        /// </summary>
+        public static string BitrateAuto {
+            get {
+                return ResourceManager.GetString("BitrateAuto", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bitrate must be in range between 1 and 25.
+        /// </summary>
+        public static string BitrateError {
+            get {
+                return ResourceManager.GetString("BitrateError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Manual.
+        /// </summary>
+        public static string BitrateManual {
+            get {
+                return ResourceManager.GetString("BitrateManual", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bitrate.
+        /// </summary>
+        public static string BitrateText {
+            get {
+                return ResourceManager.GetString("BitrateText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cancel.
         /// </summary>
         public static string Cancel {

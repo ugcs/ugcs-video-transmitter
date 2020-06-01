@@ -842,6 +842,12 @@ namespace VideoTransmitter.ViewModels
                 updateVideoAndTelemetryStatuses();
 
             }
+            if (changed.Contains("BitrateAutomatic") || changed.Contains("Bitrate"))
+            {
+                //update bitrate here
+                //Settings.Default.BitrateAutomatic;
+                //Settings.Default.Bitrate
+            }
         }
 
         private void OnMediaOpening(object sender, MediaOpeningEventArgs e)

@@ -151,5 +151,29 @@ namespace VideoTransmitter.Properties {
                 this["InstallationId"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool BitrateAutomatic {
+            get {
+                return ((bool)(this["BitrateAutomatic"]));
+            }
+            set {
+                this["BitrateAutomatic"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        public int Bitrate {
+            get {
+                return ((int)(this["Bitrate"]));
+            }
+            set {
+                this["Bitrate"] = value;
+            }
+        }
     }
 }

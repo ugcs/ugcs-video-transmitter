@@ -270,4 +270,16 @@
   <data name="Streaming" xml:space="preserve">
     <value>Streaming</value>
   </data>
+  <data name="BitrateAuto" xml:space="preserve">
+    <value>Auto</value>
+  </data>
+  <data name="BitrateError" xml:space="preserve">
+    <value>Bitrate must be in range between 1 and 25</value>
+  </data>
+  <data name="BitrateManual" xml:space="preserve">
+    <value>Manual</value>
+  </data>
+  <data name="BitrateText" xml:space="preserve">
+    <value>Bitrate</value>
+  </data>
 </root>

@@ -26,6 +26,10 @@ namespace VideoTransmitter.ViewModels
             VideoServerPort = Settings.Default.VideoServerPort;
             VideoServerAutomatic = Settings.Default.VideoServerAutomatic;
             VideoServerDirectConnection = !Settings.Default.VideoServerAutomatic;
+
+            Bitrate = Settings.Default.Bitrate;
+            BitrateAutomatic = Settings.Default.BitrateAutomatic;
+            BitrateManual = !Settings.Default.BitrateAutomatic;
         }        
 
         public string _tailNumber;
@@ -176,6 +180,55 @@ namespace VideoTransmitter.ViewModels
             }
         }
 
+        public bool _bitrateAutomatic;
+        public bool BitrateAutomatic
+        {
+            get
+            {
+                return _bitrateAutomatic;
+            }
+            set
+            {
+                if (value && !_bitrateAutomatic)
+                {
+                    if (Bitrate < 1 || Bitrate > 25)
+                    {
+                        Bitrate = Settings.Default.Bitrate;
+                    }
+                }
+                _bitrateAutomatic = value;
+                NotifyOfPropertyChange(() => BitrateAutomatic);
+            }
+        }
+
+        public bool _bitrateManual;
+        public bool BitrateManual
+        {
+            get
+            {
+                return _bitrateManual;
+            }
+            set
+            {
+                _bitrateManual = value;
+                NotifyOfPropertyChange(() => BitrateManual);
+            }
+        }
+
+        public int? _bitrate;
+        public int? Bitrate
+        {
+            get
+            {
+                return _bitrate;
+            }
+            set
+            {
+                _bitrate = value;
+                NotifyOfPropertyChange(() => Bitrate);
+            }
+        }
+
         private string GetError()
         {
             if (TailNumber == null || string.IsNullOrEmpty(TailNumber.Trim()))
@@ -202,6 +255,13 @@ namespace VideoTransmitter.ViewModels
                 if (VideoServerPort == null || VideoServerPort < 1 || VideoServerPort > 65535)
                 {
                     return Resources.VideoServerPort;
+                }
+            }
+            if (BitrateAutomatic == false)
+            {
+                if (Bitrate < 1 || Bitrate > 25)
+                {
+                    return Resources.BitrateError;
                 }
             }
             return string.Empty;
@@ -247,6 +307,19 @@ namespace VideoTransmitter.ViewModels
                 if (!VideoServerAutomatic)
                 {
                     changed.Add("VideoServerAddress");
+                }
+            }
+            if (BitrateAutomatic != Settings.Default.BitrateAutomatic)
+            {
+                Settings.Default.BitrateAutomatic = BitrateAutomatic;
+                changed.Add("BitrateAutomatic");
+            }
+            if (Bitrate != Settings.Default.Bitrate)
+            {
+                Settings.Default.Bitrate = Bitrate.GetValueOrDefault();
+                if (!BitrateAutomatic)
+                {
+                    changed.Add("Bitrate");
                 }
             }
 
