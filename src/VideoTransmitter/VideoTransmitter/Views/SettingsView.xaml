@@ -97,7 +97,7 @@
         <StackPanel Grid.Row="6" VerticalAlignment="Center" Margin="0 16 0 0" Height="48">
             <Border Style="{StaticResource SettingsBorder}">
                 <StackPanel Orientation="Vertical">
-                    <TextBlock Text="{x:Static p:Resources.BitrateText}" Style="{StaticResource SettingsTextBlock}"></TextBlock>
+                    <TextBlock Text="{x:Static p:Resources.BitrateTextMbit}" Style="{StaticResource SettingsTextBlock}"></TextBlock>
                     <TextBox Text="{Binding Bitrate, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding BitrateManual}" PreviewKeyDown="TextBox_PreviewKeyDown" PreviewTextInput="TextBox_KeyDownNumeric" MaxLength="2" Style="{StaticResource SettingsTextBox}"></TextBox>
                 </StackPanel>
             </Border>

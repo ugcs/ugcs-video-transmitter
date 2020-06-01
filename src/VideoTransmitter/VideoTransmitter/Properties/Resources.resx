@@ -282,4 +282,7 @@
   <data name="BitrateText" xml:space="preserve">
     <value>Bitrate</value>
   </data>
+  <data name="BitrateTextMbit" xml:space="preserve">
+    <value>Mbit/s</value>
+  </data>
 </root>

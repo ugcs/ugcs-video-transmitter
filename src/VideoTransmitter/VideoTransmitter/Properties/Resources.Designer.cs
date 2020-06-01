@@ -115,6 +115,15 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Mbit/s.
+        /// </summary>
+        public static string BitrateTextMbit {
+            get {
+                return ResourceManager.GetString("BitrateTextMbit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cancel.
         /// </summary>
         public static string Cancel {
