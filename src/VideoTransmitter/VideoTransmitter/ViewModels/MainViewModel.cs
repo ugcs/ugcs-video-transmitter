@@ -151,7 +151,25 @@ namespace VideoTransmitter.ViewModels
             telemetryTimer.AutoReset = true;
             telemetryTimer.Enabled = true;
 
+            loadMediaFileList();
+        }
 
+        private void loadMediaFileList()
+        {
+            string mediaPath = Path.Combine(
+                Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+                "Media");
+            if (!Directory.Exists(mediaPath))
+                return;
+
+            foreach (string filePath in Directory.GetFiles(mediaPath))
+            {
+                VideoSources.Add(
+                    new VideoSource(
+                        name: Path.GetFileName(filePath),
+                        uri: new Uri("file://" + filePath)
+                    ));
+            }
         }
 
         private static VideoSource toVideoSource(VideoDeviceDTO device)
@@ -358,7 +376,10 @@ namespace VideoTransmitter.ViewModels
                 lock (videoSourcesListLocker)
                 {
                     var added = devices.Except(VideoSources);
-                    var removed = VideoSources.Skip(1).Except(devices);
+                    var removed = VideoSources
+                                    .Skip(1)
+                                    .Where(x => x.Uri.Scheme != "file")
+                                    .Except(devices);
 
                     foreach (var d in added)
                         VideoSources.Add(d);
