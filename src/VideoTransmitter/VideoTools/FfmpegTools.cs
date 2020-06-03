@@ -21,6 +21,10 @@ namespace Ugcs.Video.Tools
                 throw new FfmpegException("Can't allocat buffer.");
             }
 
+            f->width = width;
+            f->height = height;
+            f->format = (int)pxfmt;
+
             ffmpeg.avpicture_fill((AVPicture*)f, buffer, pxfmt, width, height);
             return f;
         }
