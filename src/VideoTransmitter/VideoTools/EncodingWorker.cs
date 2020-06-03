@@ -65,10 +65,12 @@ namespace Ugcs.Video.Tools
                 throw new FfmpegException($"Can't copy frame. Error code: {errorCode}");
             }
 
-            var frameCopy = (AVFrame*)frameCopyPtr;
+            
             // If pts is not equeal to zero then the result stream has too high bitrate.
             // Becouse encoder produces packages which contains i-frames only ignoring 
             // 'keyint' parameter.
+
+            var frameCopy = (AVFrame*)frameCopyPtr;
             frameCopy->pts = 0;
             frameCopy->pict_type = AVPictureType.AV_PICTURE_TYPE_NONE;
 

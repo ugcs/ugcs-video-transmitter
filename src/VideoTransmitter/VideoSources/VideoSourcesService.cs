@@ -15,7 +15,7 @@ namespace VideoSources
     {
         public event EventHandler SourcesChanged;
         private object _locker = new object(); 
-        private List<VideoSourceDTO> _videoSourceList = new List<VideoSourceDTO>();
+        private List<VideoDeviceDTO> _videoSourceList = new List<VideoDeviceDTO>();
         private Timer videoSourcesTimer;
 
         public VideoSourcesService()
@@ -26,7 +26,7 @@ namespace VideoSources
             videoSourcesTimer.Enabled = true;
         }
 
-        public List<VideoSourceDTO> GetVideoSources()
+        public List<VideoDeviceDTO> GetVideoSources()
         {
             lock (_locker)
             {
@@ -46,22 +46,22 @@ namespace VideoSources
 
             lock (_locker)
             {
-                List<VideoSourceDTO> exists = new List<VideoSourceDTO>();
+                List<VideoDeviceDTO> exists = new List<VideoDeviceDTO>();
                 foreach (FilterInfo VideoCaptureDevice in VideoCaptureDevices)
                 {
-                    var vsd = new VideoSourceDTO()
+                    var vsd = new VideoDeviceDTO()
                     {
                         Name = VideoCaptureDevice.Name,
                         Id = VideoCaptureDevice.MonikerString
                     };
                     exists.Add(vsd);
                 }
-                foreach (VideoSourceDTO videoCaptureDevice in exists)
+                foreach (VideoDeviceDTO videoCaptureDevice in exists)
                 {
                     var found = _videoSourceList.FirstOrDefault(v => v.Name == videoCaptureDevice.Name);
                     if (found == null)
                     {
-                        var vsd = new VideoSourceDTO()
+                        var vsd = new VideoDeviceDTO()
                         {
                             Name = videoCaptureDevice.Name,
                             Id = videoCaptureDevice.Id
@@ -70,7 +70,7 @@ namespace VideoSources
                         changed = true;
                     }
                 }
-                foreach (VideoSourceDTO device in _videoSourceList.ToList())
+                foreach (VideoDeviceDTO device in _videoSourceList.ToList())
                 {
                     if (!exists.Any(d => d.Name == device.Name))
                     {

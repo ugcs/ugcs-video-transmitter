@@ -46,8 +46,8 @@ namespace VideoTransmitter.ViewModels
         private Uri urtpServer = null;
         public const string UGCS_VIDEOSERVER_URTP_ST = "ugcs:video-server:input:urtp";
 
-        private VideoSourceDTO _defaultVideoDevice;
-        private const string EMPTY_DEVICE_ID = "empty_device";
+        private VideoSource _defaultVideoDevice;
+        private static readonly Uri EMPTY_DEVICE_URI = new Uri("device://empty");
 
         private ClientVehicleDTO _defaultVehicle;
         private const int EMPTY_VEHICLE_ID = 0;
@@ -72,7 +72,8 @@ namespace VideoTransmitter.ViewModels
         private Bitrate _encodingBitrate;
 
 
-        public Bitrate EncodingBitrate {
+        public Bitrate EncodingBitrate
+        {
             get
             {
                 return _encodingBitrate;
@@ -109,14 +110,14 @@ namespace VideoTransmitter.ViewModels
             _discoveryService.ServiceLost += onSsdpServiceLost;
 
 
-            _defaultVideoDevice = new VideoSourceDTO()
-            {
-                Name = Resources.Nodevice,
-                Id = EMPTY_DEVICE_ID
-            };
-            VideoSourcesList.Add(_defaultVideoDevice);
+            _defaultVideoDevice = new VideoSource
+            (
+                name: Resources.Nodevice,
+                uri: EMPTY_DEVICE_URI
+            );
+            VideoSources.Add(_defaultVideoDevice);
             resetDefaultVideoSeource(_defaultVideoDevice);
-            
+
             _defaultVehicle = new ClientVehicleDTO()
             {
                 Name = Resources.Novehicle,
@@ -152,6 +153,14 @@ namespace VideoTransmitter.ViewModels
 
 
         }
+
+        private static VideoSource toVideoSource(VideoDeviceDTO device)
+        {
+            return new VideoSource(
+                name: device.Name,
+                uri: new Uri($"device://dshow/?video={device.Name}"));
+        }
+
         private bool isConnecting = false;
         private void OnUcsConnection(Object source, ElapsedEventArgs e)
         {
@@ -222,7 +231,7 @@ namespace VideoTransmitter.ViewModels
                 if (telemetry != null)
                 {
                     double? pitch = null;
-                    if (telemetry.Pitch != null 
+                    if (telemetry.Pitch != null
                         && telemetry.Pitch.Value > -0.34906
                         && telemetry.Pitch.Value < 0.34906)
                     {
@@ -338,50 +347,38 @@ namespace VideoTransmitter.ViewModels
         private void videoSources_onChanged(object sender, EventArgs e)
         {
             _log.Debug("videoSources_onChanged called");
-            List<VideoSourceDTO> sources = sender as List<VideoSourceDTO>;
+
+            VideoSource[] devices = ((List<VideoDeviceDTO>)sender)
+                .Select(d => toVideoSource(d))
+                .ToArray();
+
             Execute.OnUIThreadAsync(() =>
             {
-                bool mod = false;
                 bool updateToDefault = false;
                 lock (videoSourcesListLocker)
                 {
-                    foreach (var source in sources)
-                    {
-                        if (!VideoSourcesList.Any(v => v.Name == source.Name))
-                        {
-                            VideoSourcesList.Add(source);
-                            mod = true;
-                        }
-                    }
-                    foreach (var source in _videoSourcesList.Skip(1).ToList())
-                    {
-                        if (!sources.Any(v => v.Name == source.Name))
-                        {
-                            if (SelectedVideoSource != null && SelectedVideoSource.Id == source.Id)
-                            {
-                                updateToDefault = true;
-                            }
-                            VideoSourcesList.Remove(source);
-                            mod = true;
-                        }
-                    }
+                    var added = devices.Except(VideoSources);
+                    var removed = VideoSources.Skip(1).Except(devices);
+
+                    foreach (var d in added)
+                        VideoSources.Add(d);
+
+                    foreach (var d in removed)
+                        VideoSources.Remove(d);                    
                 }
+
                 if (updateToDefault)
                 {
                     resetDefaultVideoSeource(_defaultVideoDevice);
                 }
-                if (mod)
-                {
-                    NotifyOfPropertyChange(() => VideoSourcesList);
-                }
-                var defaultVideo = VideoSourcesList.FirstOrDefault(v => v.Name == Settings.Default.LastCapureDevice);
+                var defaultVideo = VideoSources.FirstOrDefault(v => v.Name == Settings.Default.LastCapureDevice);
                 if (defaultVideo != null)
                 {
                     SelectedVideoSource = defaultVideo;
                 }
                 else
                 {
-                    var defaultVideoLastKnown = VideoSourcesList.FirstOrDefault(v => v.Name == _lastKnownName);
+                    var defaultVideoLastKnown = VideoSources.FirstOrDefault(v => v.Name == _lastKnownName);
                     if (defaultVideoLastKnown != null)
                     {
                         SelectedVideoSource = defaultVideoLastKnown;
@@ -392,8 +389,8 @@ namespace VideoTransmitter.ViewModels
 
         private void onSsdpServiceLost(string serviceType, string location)
         {
-            if (Settings.Default.VideoServerAutomatic == true 
-                && serviceType == UGCS_VIDEOSERVER_URTP_ST 
+            if (Settings.Default.VideoServerAutomatic == true
+                && serviceType == UGCS_VIDEOSERVER_URTP_ST
                 && urtpServer != null
                 && location == urtpServer.OriginalString)
             {
@@ -419,19 +416,7 @@ namespace VideoTransmitter.ViewModels
         }
 
         private object videoSourcesListLocker = new object();
-        private ObservableCollection<VideoSourceDTO> _videoSourcesList = new ObservableCollection<VideoSourceDTO>();
-        public ObservableCollection<VideoSourceDTO> VideoSourcesList
-        {
-            get
-            {
-                return _videoSourcesList;
-            }
-            set
-            {
-                _videoSourcesList = value;
-                NotifyOfPropertyChange(() => VideoSourcesList);
-            }
-        }
+        public ObservableCollection<VideoSource> VideoSources { get; } = new ObservableCollection<VideoSource>();
 
 
         private Object vehicleUpdateLocked = new Object();
@@ -557,8 +542,8 @@ namespace VideoTransmitter.ViewModels
         }
 
         private string _lastKnownName = string.Empty;
-        private VideoSourceDTO _selectedVideoSource;
-        public VideoSourceDTO SelectedVideoSource
+        private VideoSource _selectedVideoSource;
+        public VideoSource SelectedVideoSource
         {
             get
             {
@@ -578,7 +563,7 @@ namespace VideoTransmitter.ViewModels
                 }
                 VideoReady = CamVideo.NOT_READY;
                 updateVideoAndTelemetryStatuses();
-                if (_selectedVideoSource != null && _selectedVideoSource.Id != EMPTY_DEVICE_ID)
+                if (_selectedVideoSource != null && _selectedVideoSource.Uri != EMPTY_DEVICE_URI)
                 {
                     _lastKnownName = _selectedVideoSource.Name;
                 }
@@ -590,7 +575,7 @@ namespace VideoTransmitter.ViewModels
             }
         }
 
-        public void resetDefaultVideoSeource(VideoSourceDTO videoSource)
+        public void resetDefaultVideoSeource(VideoSource videoSource)
         {
             _selectedVideoSource = videoSource;
             VideoReady = CamVideo.NOT_READY;
@@ -613,13 +598,13 @@ namespace VideoTransmitter.ViewModels
         private async Task startScreenStreaming()
         {
             _log.Debug("startScreenStreaming called");
-            if (MediaElement == null || SelectedVideoSource == null || SelectedVideoSource.Id == EMPTY_DEVICE_ID)
+            if (MediaElement == null || SelectedVideoSource == null || SelectedVideoSource.Uri == EMPTY_DEVICE_URI)
             {
                 return;
             }
             if (MediaElement != null)
             {
-                if (!await MediaElement.Open(new Uri($"device://dshow/?video={SelectedVideoSource.Name}")))
+                if (!await MediaElement.Open(SelectedVideoSource.Uri))
                 {
                     _log.Info(string.Format("startScreenStreaming cant open stream on {0}", SelectedVideoSource.Name));
                     VideoMessage = string.Format(Resources.Failedtoloadvideofrom, SelectedVideoSource.Name);
@@ -726,7 +711,7 @@ namespace VideoTransmitter.ViewModels
                 }
             }
         }
-        
+
         public void StartStreaming()
         {
             _log.Debug("StartStreaming called");
@@ -785,7 +770,7 @@ namespace VideoTransmitter.ViewModels
                     //ensure start stop in other thread.
                     if (_isStreaming &&
                             (state.State == MispVideoStreamerState.OtherFailure
-                            || state.State == MispVideoStreamerState.ConnectFailure) 
+                            || state.State == MispVideoStreamerState.ConnectFailure)
                             && _hasConnected
                             && _videoStreamingStatus != VideoServerStatus.RECONNECTING)
                     {
@@ -858,7 +843,7 @@ namespace VideoTransmitter.ViewModels
                     {
                         MessageBox.Show(
                             App.Current.MainWindow,
-                            "Unexpected error occured during encoding, streaming is stopped. Error: " + err.Message, 
+                            "Unexpected error occured during encoding, streaming is stopped. Error: " + err.Message,
                             "Error",
                             MessageBoxButton.OK,
                             MessageBoxImage.Error);
@@ -991,7 +976,7 @@ namespace VideoTransmitter.ViewModels
 
         private void FfmpegLog_MessageReceived(object sender, FfmpegLog.LogEventArgs e)
         {
-            _log.Info(e.Message) ;
+            _log.Info(e.Message);
         }
 
         private string _videoMessage = string.Empty;
@@ -1059,7 +1044,7 @@ namespace VideoTransmitter.ViewModels
             get
             {
                 if (SelectedVideoSource == null
-                    || SelectedVideoSource.Id == EMPTY_DEVICE_ID
+                    || SelectedVideoSource.Uri == EMPTY_DEVICE_URI
                     || urtpServer == null
                     || VideoReady == CamVideo.NOT_READY)
                 {
@@ -1129,7 +1114,7 @@ namespace VideoTransmitter.ViewModels
                 {
                     return Resources.VideoServernotdiscovered;
                 }
-                if (SelectedVideoSource == null || SelectedVideoSource.Id == EMPTY_DEVICE_ID)
+                if (SelectedVideoSource == null || SelectedVideoSource.Uri == EMPTY_DEVICE_URI)
                 {
                     return Resources.Videosourceisnotselected;
                 }

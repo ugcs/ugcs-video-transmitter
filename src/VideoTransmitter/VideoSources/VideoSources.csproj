@@ -12,8 +12,5 @@
     <PackageReference Include="AForge.Video.DirectShow" Version="2.2.5" />
     <PackageReference Include="FFmpeg.AutoGen" Version="4.2.0" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="DTO\" />
-  </ItemGroup>
 
 </Project>

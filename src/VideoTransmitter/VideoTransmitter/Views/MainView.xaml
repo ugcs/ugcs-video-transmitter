@@ -55,7 +55,7 @@
                           SelectedValuePath="Name"    
                           IsEnabled="{Binding IsStreaming, Converter={StaticResource OppositeBool}}"
                           SelectedValue="{Binding Path=Name}"
-                          ItemsSource="{Binding Path=VideoSourcesList, Mode=OneWay}" >
+                          ItemsSource="{Binding Path=VideoSources, Mode=OneWay}" >
                             <ComboBox.ItemContainerStyle>
                                 <Style TargetType="ComboBoxItem">
                                     <Setter Property="Height" Value="30" />

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace VideoSources.DTO
 {
-    public class VideoSourceDTO
+    public class VideoDeviceDTO
     {
         public string Id { get; set; }
         public string Name { get; set; }

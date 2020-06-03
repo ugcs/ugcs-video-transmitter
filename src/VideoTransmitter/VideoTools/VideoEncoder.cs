@@ -84,7 +84,6 @@ namespace Ugcs.Video.Tools
                 throw new FfmpegException($"Could not prepare options dictionnary. Error code: {resultCode}");
             }
 
-
             resultCode = ffmpeg.avcodec_open2(c, avCodec, &opts);
             if (resultCode < 0)
             {
