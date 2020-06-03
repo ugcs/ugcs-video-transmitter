@@ -30,6 +30,7 @@ namespace VideoTransmitter.ViewModels
     public partial class MainViewModel : Caliburn.Micro.PropertyChangedBase
     {
         private readonly long? BITRATE = null; // null - auto, example: 1 * 1024 * 1024;
+        private static readonly TimeSpan BPS_MEASURE_INTERVAL = TimeSpan.FromSeconds(3);
 
         private log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MainViewModel));
 
@@ -61,12 +62,30 @@ namespace VideoTransmitter.ViewModels
         private IWindowManager _iWindowManager;
         private MispVideoStreamer _mispStreamer;
         private EncodingWorker _encoding;
+        private StreamWithBitrateControl _speedometer;
 
         //VideoServer internal statuses
         private VideoServerStatus _videoStreamingStatus = VideoServerStatus.NOT_READY_TO_STREAM;
         private bool _isStreaming;
         private bool _hasConnected = false;
         private object _startStopLocker = new object();
+        private Bitrate _encodingBitrate;
+
+
+        public Bitrate EncodingBitrate {
+            get
+            {
+                return _encodingBitrate;
+            }
+            set
+            {
+                if (value.Equals(_encodingBitrate))
+                    return;
+                _encodingBitrate = value;
+                NotifyOfPropertyChange(() => EncodingBitrate);
+            }
+        }
+
 
         public unsafe MainViewModel(DiscoveryService ds,
             ConnectionService cs,
@@ -622,12 +641,14 @@ namespace VideoTransmitter.ViewModels
                 }
 
                 _encoding = new EncodingWorker(getBitrateFromConfig());
-                _encoding.Output = _mispStreamer.VideoStream;
                 _encoding.Error += encoding_Error;
+                _speedometer = new StreamWithBitrateControl(_mispStreamer.VideoStream, BPS_MEASURE_INTERVAL);
+                _speedometer.PropertyChanged += speedControl_PropertyChanged;
+                _encoding.Output = _speedometer;
             }
         }
 
-        private long? getBitrateFromConfig()
+        private static long? getBitrateFromConfig()
         {
             if (Settings.Default.BitrateAutomatic)
                 return null;
@@ -792,6 +813,10 @@ namespace VideoTransmitter.ViewModels
                 encoding.Error -= encoding_Error;
                 encoding.Dispose();
                 _encoding = null;
+
+                _speedometer?.Dispose();
+                _speedometer = null;
+                EncodingBitrate = new Bitrate();
             }
         }
 
@@ -860,12 +885,13 @@ namespace VideoTransmitter.ViewModels
 
         private void OnMediaOpening(object sender, MediaOpeningEventArgs e)
         {
+            tryToEnableHardwareDecoding(e);
             e.Options.MinimumPlaybackBufferPercent = 0;
             e.Options.DecoderParams.EnableFastDecoding = true;
             e.Options.DecoderParams.EnableLowDelayDecoding = true;
             e.Options.VideoBlockCache = 0;
             e.Options.IsTimeSyncDisabled = true;
-
+            e.Options.IsAudioDisabled = true;
 
             Execute.OnUIThreadAsync(() =>
             {
@@ -876,6 +902,24 @@ namespace VideoTransmitter.ViewModels
             VideoReady = CamVideo.NOT_READY;
             updateVideoAndTelemetryStatuses();
         }
+
+        private void tryToEnableHardwareDecoding(MediaOpeningEventArgs e)
+        {
+            var videoStream = e.Info.Streams.Where(x => x.Value.CodecType == AVMediaType.AVMEDIA_TYPE_VIDEO).FirstOrDefault();
+            if (videoStream.Value.HardwareDecoders.Count > 0)
+            {
+                string hardwareDecoder = videoStream.Value.HardwareDecoders.First();
+                _log.InfoFormat("Hardware decoders found: {0}. {1} will be used.",
+                    String.Join("; ", e.Info.Streams[0].HardwareDecoders),
+                    hardwareDecoder);
+                e.Options.DecoderCodec.Add(videoStream.Key, hardwareDecoder);
+            }
+            else
+            {
+                _log.Info("No hardware decoders found.");
+            }
+        }
+
         private void OnMediaOpened(object sender, MediaOpenedEventArgs e)
         {
             Execute.OnUIThreadAsync(() =>
@@ -889,17 +933,32 @@ namespace VideoTransmitter.ViewModels
             {
                 _encoding = new EncodingWorker(getBitrateFromConfig());
                 _encoding.Error += encoding_Error;
-                _encoding.Output = _mispStreamer.VideoStream;
+                _speedometer = new StreamWithBitrateControl(_mispStreamer.VideoStream, BPS_MEASURE_INTERVAL);
+                _speedometer.PropertyChanged += speedControl_PropertyChanged;
+                _encoding.Output = _speedometer;
             }
             updateVideoAndTelemetryStatuses();
         }
+
+        private void speedControl_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(StreamWithBitrateControl.WriteSpeed))
+            {
+                EncodingBitrate = new Bitrate
+                {
+                    BitsPerSecond = ((StreamWithBitrateControl)sender).WriteSpeed * 8
+                };
+            }
+        }
+
         private void OnMediaInitializing(object sender, MediaInitializingEventArgs e)
         {
             e.Configuration.GlobalOptions.EnableReducedBuffering = true;
             e.Configuration.GlobalOptions.FlagNoBuffer = true;
 
             // Ffme subscribes on ffmpeg log. To get log messages we should subscribe after ffme. Here is a good place.
-            FfmpegLog.Enable(ffmpeg.AV_LOG_WARNING);
+            FfmpegLog.Enable(ffmpeg.AV_LOG_INFO);
+            FfmpegLog.MessageReceived += FfmpegLog_MessageReceived;
 
             Execute.OnUIThreadAsync(() =>
             {
@@ -909,6 +968,11 @@ namespace VideoTransmitter.ViewModels
             _log.Info("OnMediaInitializing - CamVideo.NOT_READY");
             VideoReady = CamVideo.NOT_READY;
             updateVideoAndTelemetryStatuses();
+        }
+
+        private void FfmpegLog_MessageReceived(object sender, FfmpegLog.LogEventArgs e)
+        {
+            _log.Info(e.Message) ;
         }
 
         private string _videoMessage = string.Empty;

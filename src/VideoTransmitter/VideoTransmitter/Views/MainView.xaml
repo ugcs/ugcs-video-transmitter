@@ -133,7 +133,7 @@
                 <Border Style="{StaticResource BorderPanelStatus}" Height="30">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" ToolTip="{Binding Path=VideoServerStatusText}">
                         <TextBlock Style="{StaticResource TextBlockStatus}" x:Name="VideoServerStatusTextFieldLabel" Text="{x:Static p:Resources.VideoLabel}" />
-                        <TextBlock x:Name="VideoServerStatusTextField" Margin="0 0 10 0">
+                        <TextBlock x:Name="VideoServerStatusTextField" Margin="0 0 0 0">
                             <TextBlock.Style>
                                 <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource TextBlockStatus}">
                                     <Style.Triggers>
@@ -167,6 +167,46 @@
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.CONNECTION_FAILED}">
                                             <Setter Property="Text" Value="{x:Static p:Resources.Connectionfailed}"/>
+                                            <Setter Property="Foreground" Value="#ff3b30" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <TextBlock Text="{Binding Path=EncodingBitrate, StringFormat=' ({0})'}" Margin="0 0 10 0">
+                            <TextBlock.Style>
+                                <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource TextBlockStatus}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.NOT_READY_TO_STREAM}">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Setter Property="Foreground" Value="#cc671e" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.READY_TO_STREAM}">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Setter Property="Foreground" Value="#f5f9fc" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.STREAMING}">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                            <Setter Property="Foreground" Value="#83cc2f" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.INITIALIZING}">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                            <Setter Property="Foreground" Value="#f5f9fc" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.RECONNECTING}">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Setter Property="Foreground" Value="#f5f9fc" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FAILED}">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Setter Property="Foreground" Value="#ff3b30" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.FINISHED}">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Setter Property="Foreground" Value="#f5f9fc" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding VideoServerStatus}" Value="{x:Static enum:VideoServerStatus.CONNECTION_FAILED}">
+                                            <Setter Property="Visibility" Value="Collapsed" />
                                             <Setter Property="Foreground" Value="#ff3b30" />
                                         </DataTrigger>
                                     </Style.Triggers>
