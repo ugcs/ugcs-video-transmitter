@@ -54,18 +54,25 @@ namespace Ugcs.Video.Tools
             while (_framesToEncode.Count >= MAX_QUEUE_SIZE)
                 reduceQueue();
 
-            IntPtr frameCopy;
-            if (!_framePool.TryTake(out frameCopy))
-                frameCopy = (IntPtr)allocFrame(frame);
+            IntPtr frameCopyPtr;
+            if (!_framePool.TryTake(out frameCopyPtr))
+                frameCopyPtr = (IntPtr)allocFrame(frame);
 
 
-            if (!tryCopy(frame, (AVFrame*)frameCopy, out int errorCode))
+            if (!tryCopy(frame, (AVFrame*)frameCopyPtr, out int errorCode))
             {
-                free(frameCopy);
+                free(frameCopyPtr);
                 throw new FfmpegException($"Can't copy frame. Error code: {errorCode}");
             }
 
-            _framesToEncode.Enqueue(frameCopy);
+            var frameCopy = (AVFrame*)frameCopyPtr;
+            // If pts is not equeal to zero then the result stream has too high bitrate.
+            // Becouse encoder produces packages which contains i-frames only ignoring 
+            // 'keyint' parameter.
+            frameCopy->pts = 0;
+            frameCopy->pict_type = AVPictureType.AV_PICTURE_TYPE_NONE;
+
+            _framesToEncode.Enqueue(frameCopyPtr);
         }
 
         private void reduceQueue()
@@ -77,6 +84,7 @@ namespace Ugcs.Video.Tools
                 else
                     free(frameFromQueue);
             }
+            _log.Debug("Frame dropped.");
         }
 
         private unsafe bool tryCopy(AVFrame* src, AVFrame* dst, out int errorCode)

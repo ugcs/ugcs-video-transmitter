@@ -54,8 +54,6 @@ namespace Ugcs.Video.Tools
             c->time_base = new AVRational { num = framerate.den, den = framerate.num };
             c->framerate = framerate;
 
-            c->gop_size = 5;
-            c->max_b_frames = 1;
             c->pix_fmt = srcPxfmt;
 
             const string preset = "ultrafast";
@@ -69,7 +67,25 @@ namespace Ugcs.Video.Tools
             if (rc < 0)
                 throw new FfmpegException($"Can't set tune '{tune}.");
 
-            int resultCode = ffmpeg.avcodec_open2(c, avCodec, null);
+            AVDictionary* opts = null;
+            int keyInt;
+            const int SECONDS_BEFORE_I = 5;
+            const int DEFAULT_FRAME_PER_SEC = 25;
+            if (framerate.den > 0)
+                keyInt = (int)(SECONDS_BEFORE_I * (double)framerate.num / framerate.den);
+            else
+                keyInt = SECONDS_BEFORE_I * DEFAULT_FRAME_PER_SEC;
+
+            int resultCode = ffmpeg.av_dict_set(&opts, "x264-params", $"scenecut=0:keyint={keyInt}", 0);
+            if (resultCode < 0)
+            {
+                ffmpeg.avcodec_free_context(&c);
+                ffmpeg.av_packet_free(&pkt);
+                throw new FfmpegException($"Could not prepare options dictionnary. Error code: {resultCode}");
+            }
+
+
+            resultCode = ffmpeg.avcodec_open2(c, avCodec, &opts);
             if (resultCode < 0)
             {
                 ffmpeg.avcodec_free_context(&c);
