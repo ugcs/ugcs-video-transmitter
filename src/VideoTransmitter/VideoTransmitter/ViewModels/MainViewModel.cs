@@ -221,15 +221,34 @@ namespace VideoTransmitter.ViewModels
                 var telemetry = _telemetryListener.GetTelemetryById(SelectedVehicle.VehicleId);
                 if (telemetry != null)
                 {
+                    double? pitch = null;
+                    if (telemetry.Pitch != null 
+                        && telemetry.Pitch.Value > -0.34906
+                        && telemetry.Pitch.Value < 0.34906)
+                    {
+                        pitch = telemetry.Pitch.Value;
+                    }
+                    double? roll = null;
+                    if (telemetry.Roll != null
+                        && telemetry.Roll.Value > -55.5555
+                        && telemetry.Roll.Value < 55.5555)
+                    {
+                        roll = telemetry.Roll.Value;
+                    }
+                    double? heading = null;
+                    if (telemetry.Heading != null)
+                    {
+                        heading = (telemetry.Heading + 2 * Math.PI) % (2 * Math.PI);
+                    }
                     MispTelemetry tlm = new MispTelemetry()
                     {
                         Altitude = telemetry.AltitudeAMSL,
                         Longitude = telemetry.Longitude,
                         Latitude = telemetry.Latitude,
-                        Heading = telemetry.Heading,
+                        Heading = heading,
                         PlatformDesignation = SelectedVehicle.Name,
-                        Pitch = telemetry.Pitch,
-                        Roll = telemetry.Roll,
+                        Pitch = pitch,
+                        Roll = roll,
                         SensorRelativeAzimuth = telemetry.PayloadHeading,
                         SensorRelativeElevation = telemetry.PayloadPitch,
                         SensorRelativeRoll = telemetry.PayloadRoll
