@@ -69,7 +69,7 @@ namespace Ugcs.Video.Tools
 
             AVDictionary* opts = null;
             int keyInt;
-            const int SECONDS_BEFORE_I = 5;
+            const int SECONDS_BEFORE_I = 1;
             const int DEFAULT_FRAME_PER_SEC = 25;
             if (framerate.den > 0)
                 keyInt = (int)(SECONDS_BEFORE_I * (double)framerate.num / framerate.den);
