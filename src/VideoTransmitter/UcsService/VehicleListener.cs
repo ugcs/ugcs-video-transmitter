@@ -60,20 +60,26 @@ namespace UcsService
             var subscribeEventResponse = responce.Value;
 
             SubscriptionToken st = new SubscriptionToken(subscribeEventResponse.SubscriptionId, _getObjectNotificationHandler<Vehicle>(
-                (token, exception, vehicle) =>
+                (token, vehicleId, vehicle) =>
                 {
-                    var newCvd = new ClientVehicleDTO()
-                    {
-                        VehicleId = vehicle.Id,
-                        Name = vehicle.Name,
-                        TailNumber = vehicle.SerialNumber
-                    };
                     if (token == ModificationType.MT_UPDATE || token == ModificationType.MT_CREATE)
-                    {                        
+                    {
+                        var newCvd = new ClientVehicleDTO()
+                        {
+                            VehicleId = vehicle.Id,
+                            Name = vehicle.Name,
+                            TailNumber = vehicle.SerialNumber
+                        };
                         _messageReceived(callBack, newCvd, ModificationTypeDTO.UPDATED);
                     }
                     else
                     {
+                        var newCvd = new ClientVehicleDTO()
+                        {
+                            VehicleId = vehicleId,
+                            Name = string.Empty,
+                            TailNumber = string.Empty
+                        };
                         _messageReceived(callBack, newCvd, ModificationTypeDTO.DELETED);
                     }
                 }), _eventSubscriptionWrapper);
