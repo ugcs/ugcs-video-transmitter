@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Caliburn.Micro;
+using FFmpeg.AutoGen;
+using SSDPDiscoveryService;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -9,9 +12,6 @@ using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
-using Caliburn.Micro;
-using FFmpeg.AutoGen;
-using SSDPDiscoveryService;
 using UcsService;
 using UcsService.DTO;
 using UcsService.Enums;
@@ -248,24 +248,27 @@ namespace VideoTransmitter.ViewModels
                 var telemetry = _telemetryListener.GetTelemetryById(SelectedVehicle.VehicleId);
                 if (telemetry != null)
                 {
-                    double? pitch = null;
-                    if (telemetry.Pitch != null
-                        && telemetry.Pitch.Value > -0.34906
-                        && telemetry.Pitch.Value < 0.34906)
-                    {
-                        pitch = telemetry.Pitch.Value;
-                    }
-                    double? roll = null;
-                    if (telemetry.Roll != null
-                        && telemetry.Roll.Value > -55.5555
-                        && telemetry.Roll.Value < 55.5555)
-                    {
-                        roll = telemetry.Roll.Value;
-                    }
                     double? heading = null;
                     if (telemetry.Heading != null)
                     {
                         heading = (telemetry.Heading + 2 * Math.PI) % (2 * Math.PI);
+                    }
+                    double? payloadHeading = null;
+                    if (telemetry.PayloadHeading != null)
+                    {
+                        payloadHeading = (telemetry.PayloadHeading + 2 * Math.PI) % (2 * Math.PI);
+                    }
+                    double? payloadPitch = null;
+                    if (telemetry.PayloadPitch != null)
+                    {
+                        payloadPitch = telemetry.PayloadPitch;
+                        while (payloadPitch > Math.PI) payloadPitch -= 2 * Math.PI;
+                        while (payloadPitch < -Math.PI) payloadPitch += 2 * Math.PI;
+                    }
+                    double? payloadRoll = null;
+                    if (telemetry.PayloadRoll != null)
+                    {
+                        payloadRoll = (telemetry.PayloadRoll + 2 * Math.PI) % (2 * Math.PI);
                     }
                     MispTelemetry tlm = new MispTelemetry()
                     {
@@ -274,11 +277,11 @@ namespace VideoTransmitter.ViewModels
                         Latitude = telemetry.Latitude,
                         Heading = heading,
                         PlatformDesignation = SelectedVehicle.Name,
-                        Pitch = pitch,
-                        Roll = roll,
-                        SensorRelativeAzimuth = telemetry.PayloadHeading,
-                        SensorRelativeElevation = telemetry.PayloadPitch,
-                        SensorRelativeRoll = telemetry.PayloadRoll
+                        Pitch = telemetry.Pitch,
+                        Roll = telemetry.Roll,
+                        SensorRelativeAzimuth = payloadHeading,
+                        SensorRelativeElevation = payloadPitch,
+                        SensorRelativeRoll = payloadRoll
                     };
                     _mispStreamer.FeedTelemetry(tlm);
                 }
