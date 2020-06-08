@@ -302,6 +302,7 @@ namespace VideoTransmitter.ViewModels
         }
         private void ucsConnection_onDisconnected(object sender, EventArgs e)
         {
+            _vehicleListener.UnsubscribeAll();
             Execute.OnUIThreadAsync(() =>
             {
                 if (SelectedVehicle == null || _defaultVehicle.VehicleId != SelectedVehicle.VehicleId)
@@ -452,6 +453,7 @@ namespace VideoTransmitter.ViewModels
                     switch (modType)
                     {
                         case ModificationTypeDTO.CREATED:
+                        case ModificationTypeDTO.UPDATED:
                             if (!_vehicleList.Any(v => v.VehicleId == vehicle.VehicleId))
                             {
                                 _vehicleList.Add(vehicle);
@@ -472,6 +474,10 @@ namespace VideoTransmitter.ViewModels
                 }
                 if (mod)
                 {
+                    if (SelectedVehicle == null)
+                    {
+                        resetDefaultSelectedVehicle(_defaultVehicle);
+                    }
                     NotifyOfPropertyChange(() => VehicleList);
                 }
             });
