@@ -8,6 +8,7 @@ namespace UcsService.DTO
 {
     public class ServiceTelemetryDTO
     {
+        public bool DownlinkPresent { get; set; }
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
         public double? AltitudeAMSL { get; set; }

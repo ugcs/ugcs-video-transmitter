@@ -76,8 +76,7 @@
                 </Border>
                 <Border Style="{StaticResource ComboPadding}" Margin="16 0 0 0" IsEnabled="{Binding IsStreaming, Converter={StaticResource OppositeBool}}">
                     <Grid>
-                        <ComboBox            
-                        Style="{StaticResource ComboBoxSelectorVehicle}"
+                        <ComboBox        
                         SelectedItem="{Binding SelectedVehicle}"
                         x:Name="SelectedVehicleElement"
                         Height="48" 
@@ -90,8 +89,28 @@
                                 <Style TargetType="ComboBoxItem">
                                     <Setter Property="Height" Value="30" />
                                     <Setter Property="VerticalContentAlignment" Value="Center" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsConnected}" Value="False">
+                                            <Setter Property="Foreground" Value="Gray"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsConnected}" Value="True">
+                                            <Setter Property="Foreground" Value="White"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
                                 </Style>
                             </ComboBox.ItemContainerStyle>
+                            <ComboBox.Style>
+                                <Style TargetType="ComboBox" BasedOn="{StaticResource ComboBoxSelectorVehicle}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedVehicle.IsConnected}" Value="False">
+                                            <Setter Property="Foreground" Value="Gray"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding SelectedVehicle.IsConnected}" Value="True">
+                                            <Setter Property="Foreground" Value="White"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ComboBox.Style>
                         </ComboBox>
                         <TextBlock
                         Margin="16,16,0,7"

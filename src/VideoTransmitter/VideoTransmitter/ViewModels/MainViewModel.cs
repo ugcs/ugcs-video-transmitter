@@ -21,6 +21,7 @@ using Unosquare.FFME.Common;
 using VideoSources;
 using VideoSources.DTO;
 using VideoTransmitter.Enums;
+using VideoTransmitter.Models;
 using VideoTransmitter.Properties;
 using VideoTransmitter.Views;
 
@@ -49,7 +50,7 @@ namespace VideoTransmitter.ViewModels
         private VideoSource _defaultVideoDevice;
         private static readonly Uri EMPTY_DEVICE_URI = new Uri("device://empty");
 
-        private ClientVehicleDTO _defaultVehicle;
+        private ClientVehicle _defaultVehicle;
         private const int EMPTY_VEHICLE_ID = 0;
 
         private IDiscoveryService _discoveryService;
@@ -118,10 +119,11 @@ namespace VideoTransmitter.ViewModels
             VideoSources.Add(_defaultVideoDevice);
             resetDefaultVideoSeource(_defaultVideoDevice);
 
-            _defaultVehicle = new ClientVehicleDTO()
+            _defaultVehicle = new ClientVehicle()
             {
                 Name = Resources.Novehicle,
-                VehicleId = EMPTY_VEHICLE_ID
+                VehicleId = EMPTY_VEHICLE_ID,
+                IsConnected = true
             };
             VehicleList.Add(_defaultVehicle);
             resetDefaultSelectedVehicle(_defaultVehicle);
@@ -362,7 +364,7 @@ namespace VideoTransmitter.ViewModels
                 Task.Factory.StartNew(() =>
                 {
                     _vehicleListener.SubscribeVehicle(updateVehicle);
-                    _telemetryListener.SubscribeTelemtry();
+                    _telemetryListener.SubscribeTelemtry(downlinkUpdated);
                 });
             });
         }
@@ -427,8 +429,8 @@ namespace VideoTransmitter.ViewModels
             }
         }
 
-        private ObservableCollection<ClientVehicleDTO> _vehicleList = new ObservableCollection<ClientVehicleDTO>();
-        public ObservableCollection<ClientVehicleDTO> VehicleList
+        private ObservableCollection<ClientVehicle> _vehicleList = new ObservableCollection<ClientVehicle>();
+        public ObservableCollection<ClientVehicle> VehicleList
         {
             get
             {
@@ -443,7 +445,19 @@ namespace VideoTransmitter.ViewModels
         private object videoSourcesListLocker = new object();
         public ObservableCollection<VideoSource> VideoSources { get; } = new ObservableCollection<VideoSource>();
 
-
+        private void downlinkUpdated(int vehicleId, bool downlink)
+        {
+            _log.Info(string.Format("Vehicle downlink updated id:{0}  downlink:{1}", vehicleId, downlink.ToString()));
+            Task.Factory.StartNew(() =>
+            {
+                var vh = _vehicleList.FirstOrDefault(v => v.VehicleId == vehicleId);
+                if (vh != null)
+                {
+                    vh.IsConnected = downlink;
+                    updateVideoAndTelemetryStatuses();
+                }
+            });
+        }
         private Object vehicleUpdateLocked = new Object();
         private void updateVehicle(ClientVehicleDTO vehicle, ModificationTypeDTO modType)
         {
@@ -457,9 +471,26 @@ namespace VideoTransmitter.ViewModels
                     {
                         case ModificationTypeDTO.CREATED:
                         case ModificationTypeDTO.UPDATED:
-                            if (!_vehicleList.Any(v => v.VehicleId == vehicle.VehicleId))
+                            var vh = _vehicleList.FirstOrDefault(v => v.VehicleId == vehicle.VehicleId);
+                            if (vh == null)
                             {
-                                _vehicleList.Add(vehicle);
+                                
+                                ClientVehicle cv = new ClientVehicle()
+                                {
+                                    Name = vehicle.Name,
+                                    TailNumber = vehicle.TailNumber,
+                                    VehicleId = vehicle.VehicleId
+                                };
+                                var telemetry = _telemetryListener.GetTelemetryById(cv.VehicleId);
+                                if (telemetry != null)
+                                {
+                                    cv.IsConnected = telemetry.DownlinkPresent;
+                                }
+                                _vehicleList.Add(cv);
+                            }
+                            else
+                            {
+                                vh.Name = vehicle.Name;
                             }
                             mod = true;
                             break;
@@ -481,7 +512,9 @@ namespace VideoTransmitter.ViewModels
                     {
                         resetDefaultSelectedVehicle(_defaultVehicle);
                     }
+                    updateVideoAndTelemetryStatuses();
                     NotifyOfPropertyChange(() => VehicleList);
+                    NotifyOfPropertyChange(() => SelectedVehicle);
                 }
             });
         }
@@ -499,7 +532,18 @@ namespace VideoTransmitter.ViewModels
                     {
                         if (!_vehicleList.Any(v => v.VehicleId == vInList.VehicleId))
                         {
-                            _vehicleList.Add(vInList);
+                            ClientVehicle cv = new ClientVehicle()
+                            {
+                                Name = vInList.Name,
+                                TailNumber = vInList.TailNumber,
+                                VehicleId = vInList.VehicleId
+                            };
+                            var telemetry = _telemetryListener.GetTelemetryById(cv.VehicleId);
+                            if (telemetry != null)
+                            {
+                                cv.IsConnected = telemetry.DownlinkPresent;
+                            }
+                            _vehicleList.Add(cv);
                         }
                         list.Add(vInList.VehicleId);
                     }
@@ -523,6 +567,7 @@ namespace VideoTransmitter.ViewModels
                             SelectedVehicle = defaultVehicle;
                         }
                     }
+                    updateVideoAndTelemetryStatuses();
                     NotifyOfPropertyChange(() => VehicleList);
                     if (callback != null)
                     {
@@ -532,8 +577,8 @@ namespace VideoTransmitter.ViewModels
             });
         }
 
-        private ClientVehicleDTO _selectedVehicle;
-        public ClientVehicleDTO SelectedVehicle
+        private ClientVehicle _selectedVehicle;
+        public ClientVehicle SelectedVehicle
         {
             get
             {
@@ -564,7 +609,7 @@ namespace VideoTransmitter.ViewModels
             }
         }
 
-        public void resetDefaultSelectedVehicle(ClientVehicleDTO videoSource)
+        public void resetDefaultSelectedVehicle(ClientVehicle videoSource)
         {
             _selectedVehicle = videoSource;
             updateVideoAndTelemetryStatuses();
@@ -1054,7 +1099,8 @@ namespace VideoTransmitter.ViewModels
                 if (SelectedVehicle == null
                     || SelectedVehicle.VehicleId == EMPTY_VEHICLE_ID
                     || urtpServer == null
-                    || !_ucsConnectionService.IsConnected)
+                    || !_ucsConnectionService.IsConnected
+                    || !SelectedVehicle.IsConnected)
                 {
                     return TelemetryStatus.NOT_READY_TO_STREAM;
                 }
@@ -1128,6 +1174,10 @@ namespace VideoTransmitter.ViewModels
                 if (SelectedVehicle == null || SelectedVehicle.VehicleId == EMPTY_VEHICLE_ID)
                 {
                     return Resources.Vehicleisnotselected;
+                }
+                if (!SelectedVehicle.IsConnected)
+                {
+                    return Resources.DroneOffline;
                 }
                 if (_videoStreamingStatus == VideoServerStatus.STREAMING)
                 {

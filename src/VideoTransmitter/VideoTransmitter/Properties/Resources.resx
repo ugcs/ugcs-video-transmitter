@@ -285,4 +285,7 @@
   <data name="BitrateTextMbit" xml:space="preserve">
     <value>Mbit/s</value>
   </data>
+  <data name="DroneOffline" xml:space="preserve">
+    <value>Vehicle is offline</value>
+  </data>
 </root>

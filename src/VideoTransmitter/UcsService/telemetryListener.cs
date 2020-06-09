@@ -12,6 +12,7 @@ namespace UcsService
         public delegate void TelemetryBatchSubscriptionCallback(List<VehicleTelemetry> telemetry);
         private ConnectionService _connectionService;
         private EventSubscriptionWrapper _eventSubscriptionWrapper;
+        private Action<int, bool> _downlinkCb;
         private Dictionary<int, ServiceActionTelemetry> _telemetryDTOList = new Dictionary<int, ServiceActionTelemetry>();
         private object vehicleTelemetryLocker = new object();
 
@@ -20,8 +21,9 @@ namespace UcsService
             _connectionService = connect;
             _eventSubscriptionWrapper = new EventSubscriptionWrapper();
         }
-        public void SubscribeTelemtry()
+        public void SubscribeTelemtry(Action<int, bool> downlinkCallback)
         {
+            _downlinkCb = downlinkCallback;
             _eventSubscriptionWrapper.TelemetryBatchSubscription = new TelemetryBatchSubscription()
             {
                 PollingPeriodMilliseconds = POLLING_INTERVAL,
@@ -136,6 +138,14 @@ namespace UcsService
             {
                 foreach (Telemetry t in telemetry)
                 {
+
+                    if (t.TelemetryField.Code == "downlink_present" && t.TelemetryField.Semantic == Semantic.S_BOOL && t.TelemetryField.Subsystem == Subsystem.S_FLIGHT_CONTROLLER)
+                    {
+                        //case TelemetryType.TT_DOWNLINK_CONNECTED:
+                        var value = GetValueOrNull<bool>(t.Value).GetValueOrDefault();
+                        _telemetryDTOList[vehicleId].ServiceTelemetryDTO.DownlinkPresent = value;
+                        _downlinkCb(vehicleId, value);
+                    }
                     if (t.TelemetryField.Code == "altitude_amsl" && t.TelemetryField.Semantic == Semantic.S_ALTITUDE_AMSL && t.TelemetryField.Subsystem == Subsystem.S_FLIGHT_CONTROLLER)
                     {
                         //case TelemetryType.TT_MSL_ALTITUDE:

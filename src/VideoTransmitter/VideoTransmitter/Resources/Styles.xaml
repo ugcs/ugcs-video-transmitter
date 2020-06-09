@@ -195,7 +195,7 @@
                         </ToggleButton>
                         <StackPanel Orientation="Vertical" IsHitTestVisible="False" Margin="16 4 0 0">
                             <TextBlock Text="{x:Static p:Resources.Selecttelemetrysource}" Style="{StaticResource SettingsTextBlock}"></TextBlock>
-                            <ContentPresenter Name="ContentSite" IsHitTestVisible="False" Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" />
+                            <ContentPresenter Name="ContentSite" IsHitTestVisible="False" Width="215" HorizontalAlignment="Left" Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" />
                         </StackPanel>
                         <TextBox x:Name="PART_EditableTextBox" Visibility="Hidden" IsReadOnly="{TemplateBinding IsReadOnly}"/>
                         <Popup x:Name="PART_Popup"

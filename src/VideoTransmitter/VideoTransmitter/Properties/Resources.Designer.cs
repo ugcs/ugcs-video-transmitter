@@ -169,6 +169,15 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Vehicle is offline.
+        /// </summary>
+        public static string DroneOffline {
+            get {
+                return ResourceManager.GetString("DroneOffline", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Tail number could not be empty string..
         /// </summary>
         public static string ErrorTail {
