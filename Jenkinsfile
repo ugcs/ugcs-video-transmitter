@@ -5,20 +5,15 @@ pipeline {
 			agent { node { label 'windows-node-3' }}
 			steps {
 				dir('') {
-					configFileProvider([configFile(fileId: '70b23fed-a083-4c12-84a8-17d03a111512', targetLocation: 'versions-cc', )]) {
-						script {
-							def xml = readFile "${WORKSPACE}/versions-cc"
-							def versions = new XmlSlurper().parseText(xml)
-							env.GIT_BRANCH_CLEARED = "${GIT_BRANCH}".replace("origin/", "")
-							echo "Branch name used for getting version number = '${GIT_BRANCH_CLEARED}'"
-							env.version_major = versions.ugcs_video_transmitter."${GIT_BRANCH_CLEARED}".text()
-							env.version_build = "${BUILD_NUMBER}"
-							env.version = "${env.version_major}" + "." + "${env.version_build}"
-							env.git_branch_ugcs_video_transmitter = "${GIT_BRANCH}"
-							env.git_commit_ugcs_video_transmitter = "${GIT_COMMIT}"
-						}
+					script {
+						env.version_short = (bat(script: "@echo off && gitversion /showvariable MajorMinorPatch", returnStdout: true)).trim()
+						env.version = (bat(script: '@echo off && gitversion /showvariable FullSemVer', returnStdout: true)).trim()
+						env.AssemblySemFileVer = (bat(script: '@echo off && gitversion /showvariable AssemblySemFileVer', returnStdout: true)).trim()
+						env.AssemblySemVer = (bat(script: '@echo off && gitversion /showvariable AssemblySemVer', returnStdout: true)).trim()
+
+						env.git_branch_ugcs_video_transmitter = "${GIT_BRANCH}"
+						env.git_commit_ugcs_video_transmitter = "${GIT_COMMIT}"
 					}
-					echo "Component version for branch = '${GIT_BRANCH}' is '${env.version_major}'"
 				}
 			}
 		}
@@ -31,29 +26,21 @@ pipeline {
 git_branch_ugcs_video_transmitter=${git_branch_ugcs_video_transmitter}
 git_commit_ugcs_video_transmitter=${git_commit_ugcs_video_transmitter} " > build/version.ini '''
 
-					cifsPublisher alwaysPublishFromMaster: false, continueOnError: false, failOnError: false, publishers: [[
-						configName: 'binaries_repo', transfers: [[
-							cleanRemote: true, excludes: '', 
-							flatten: false, makeEmptyDirs: false, 
-							noDefaultExcludes: false, patternSeparator: '[, ]+', 
-							remoteDirectory: "ugcs-video-transmitter/${version_major}/${version}", remoteDirectorySDF: false,
-							removePrefix: 'build', 
-							sourceFiles: 'build/version.ini']], 
-						usePromotionTimestamp: false, 
-						useWorkspaceInPromotion: false, 
-						verbose: true
-					]]
-					cifsPublisher alwaysPublishFromMaster: false, continueOnError: false, failOnError: false, publishers: [[
-						configName: 'binaries_repo', transfers: [[
-							cleanRemote: true, excludes: '', 
-							flatten: false, makeEmptyDirs: false, 
-							noDefaultExcludes: false, patternSeparator: '[, ]+', 
-							remoteDirectory: "ugcs-video-transmitter/${version_major}/latest", remoteDirectorySDF: false, 
-							removePrefix: 'build', 
-							sourceFiles: 'build/version.ini']], 
-						usePromotionTimestamp: false, 
-						useWorkspaceInPromotion: false, 
-						verbose: true
+					cifsPublisher publishers: [[
+						configName: 'binaries_repo',
+						verbose: true,
+						transfers: [
+							[
+								cleanRemote: true, excludes: '', 
+								remoteDirectory: "ugcs-video-transmitter/${version_short}/${version}", remoteDirectorySDF: false,
+								removePrefix: 'build',
+								sourceFiles: 'build/version.ini'
+							], [
+								cleanRemote: true, excludes: '', 
+								remoteDirectory: "ugcs-video-transmitter/${version_short}/latest", remoteDirectorySDF: false, 
+								removePrefix: 'build',
+								sourceFiles: 'build/version.ini'
+							]]
 					]]
 				}
 			}
@@ -64,34 +51,26 @@ git_commit_ugcs_video_transmitter=${git_commit_ugcs_video_transmitter} " > build
 				bat ''' 
 					mkdir build
 					cd src/VideoTransmitter
-					"%DOTNET_PATH_15%/msbuild.exe" /t:restore;build /p:Configuration=Release;Version="%version%";FileVersion="%version%";AssemblyVersion="%version%"
+					"%DOTNET_PATH_15%/msbuild.exe" /t:restore;build /p:Configuration=Release;Version="%version%";FileVersion="%AssemblySemFileVer%";AssemblyVersion="%AssemblySemVer%"
 					if ERRORLEVEL 1 exit 1
 					"%ARCHIVATOR_7z_PATH%/7z.exe" a -tzip %WORKSPACE%/build/ugcs-video-transmitter-win.zip %WORKSPACE%/src/VideoTransmitter/VideoTransmitter/bin/x64/Release/net4.7.2/* 
 					if ERRORLEVEL 1 exit 1 '''
 
-				cifsPublisher alwaysPublishFromMaster: false, continueOnError: false, failOnError: false, publishers: [[
-					configName: 'binaries_repo', transfers: [[
-						cleanRemote: false, excludes: '', 
-						flatten: false, makeEmptyDirs: false, 
-						noDefaultExcludes: false, patternSeparator: '[, ]+', 
-						remoteDirectory: "ugcs-video-transmitter/${version_major}/${version}", remoteDirectorySDF: false,
-						removePrefix: 'build', 
-						sourceFiles: 'build/*.zip']], 
-					usePromotionTimestamp: false, 
-					useWorkspaceInPromotion: false, 
-					verbose: true
-				]]
-				cifsPublisher alwaysPublishFromMaster: false, continueOnError: false, failOnError: false, publishers: [[
-					configName: 'binaries_repo', transfers: [[
-						cleanRemote: false, excludes: '', 
-						flatten: false, makeEmptyDirs: false, 
-						noDefaultExcludes: false, patternSeparator: '[, ]+', 
-						remoteDirectory: "ugcs-video-transmitter/${version_major}/latest", remoteDirectorySDF: false, 
-						removePrefix: 'build', 
-						sourceFiles: 'build/*.zip']], 
-					usePromotionTimestamp: false, 
-					useWorkspaceInPromotion: false, 
-					verbose: true
+				cifsPublisher publishers: [[
+					configName: 'binaries_repo',
+					verbose: true,
+					transfers: [
+						[
+							cleanRemote: false, excludes: '', 
+							remoteDirectory: "ugcs-video-transmitter/${version_short}/${version}", remoteDirectorySDF: false,
+							removePrefix: 'build',
+							sourceFiles: 'build/*.zip'
+						], [
+							cleanRemote: false, excludes: '', 
+							remoteDirectory: "ugcs-video-transmitter/${version_short}/latest", remoteDirectorySDF: false, 
+							removePrefix: 'build',
+							sourceFiles: 'build/*.zip'
+						]]
 				]]
 			}
 		}
@@ -148,7 +127,7 @@ def notifyBuild(String buildStatus) {
 					</tr>
 					<tr>
 						<td>Synplicity path</td>
-						<td>"Binaries/UgCS-CC/ugcs-video-transmitter/${version_major}"</td>
+						<td>"Binaries/UgCS-CC/ugcs-video-transmitter/${version_short}"</td>
 					</tr>
 				</table>
 			</p>
