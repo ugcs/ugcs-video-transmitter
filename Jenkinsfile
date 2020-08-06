@@ -77,12 +77,9 @@ git_commit_ugcs_video_transmitter=${git_commit_ugcs_video_transmitter} " > build
 	}
 	post { 
 		always {
-			slackSend message: "Build UgCS-CC video-transmitter ${version} - ${currentBuild.result}. (<${env.BUILD_URL}|Open>)"
+			slackSend message: "Build UgCS video-transmitter ${version} - ${currentBuild.result}. (<${env.BUILD_URL}|Open>)"
 		}
-		success { 
-			notifyBuild('SUCCESSFUL') 
-			build job: 'build_cc_ugcs_installer', parameters: [gitParameter(name: 'git_branch', value: 'master')], propagate: false, wait: false
-		}
+		success { notifyBuild('SUCCESSFUL') }
 		failure { notifyBuild('FAILED') }
 		aborted { notifyBuild('FAILED') }
 	}
