@@ -62,12 +62,12 @@ git_commit_ugcs_video_transmitter=${git_commit_ugcs_video_transmitter} " > build
 					transfers: [
 						[
 							cleanRemote: false, excludes: '', 
-							remoteDirectory: "ugcs-video-transmitter/${version_short}/${version}", remoteDirectorySDF: false,
+							remoteDirectory: "ugcs-video-transmitter/${version_short}/${version}",
 							removePrefix: 'build',
 							sourceFiles: 'build/*.zip'
 						], [
 							cleanRemote: false, excludes: '', 
-							remoteDirectory: "ugcs-video-transmitter/${version_short}/latest", remoteDirectorySDF: false, 
+							remoteDirectory: "ugcs-video-transmitter/${version_short}/latest",
 							removePrefix: 'build',
 							sourceFiles: 'build/*.zip'
 						]]
@@ -136,8 +136,8 @@ def notifyBuild(String buildStatus) {
 	</body> 
 </html>"""
 
-	bitbucketStatusNotify(buildState: buildStatus )
-	emailext (
+	bitbucketStatusNotify(buildState: buildStatus)
+	emailext(
 		subject: subject, mimeType: 'text/html', body: details,
 		to: 'ugcs_dev_cc@googlegroups.com'
 	)
