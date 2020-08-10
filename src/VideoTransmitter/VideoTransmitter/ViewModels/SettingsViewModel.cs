@@ -30,6 +30,8 @@ namespace VideoTransmitter.ViewModels
             Bitrate = Settings.Default.Bitrate;
             BitrateAutomatic = Settings.Default.BitrateAutomatic;
             BitrateManual = !Settings.Default.BitrateAutomatic;
+            HardwareDecodingEnable = Settings.Default.HardwareDecodingEnable;
+            HardwareDecodingDisable = !Settings.Default.HardwareDecodingEnable;
         }        
 
         public string _tailNumber;
@@ -229,6 +231,34 @@ namespace VideoTransmitter.ViewModels
             }
         }
 
+        public bool _hardwareDecodingEnable;
+        public bool HardwareDecodingEnable
+        {
+            get
+            {
+                return _hardwareDecodingEnable;
+            }
+            set
+            {
+                _hardwareDecodingEnable = value;
+                NotifyOfPropertyChange(() => HardwareDecodingEnable);
+            }
+        }
+
+        public bool _hardwareDecodingDisable;
+        public bool HardwareDecodingDisable
+        {
+            get
+            {
+                return _hardwareDecodingDisable;
+            }
+            set
+            {
+                _hardwareDecodingDisable = value;
+                NotifyOfPropertyChange(() => HardwareDecodingDisable);
+            }
+        }
+
         private string GetError()
         {
             if (TailNumber == null || string.IsNullOrEmpty(TailNumber.Trim()))
@@ -321,6 +351,11 @@ namespace VideoTransmitter.ViewModels
                 {
                     changed.Add("Bitrate");
                 }
+            }
+            if (HardwareDecodingEnable != Settings.Default.HardwareDecodingEnable)
+            {
+                Settings.Default.HardwareDecodingEnable = HardwareDecodingEnable;
+                changed.Add("HardwareDecodingEnable");
             }
 
             Settings.Default.Save();

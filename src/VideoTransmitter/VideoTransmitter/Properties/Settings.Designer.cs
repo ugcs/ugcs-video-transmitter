@@ -175,5 +175,17 @@ namespace VideoTransmitter.Properties {
                 this["Bitrate"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool HardwareDecodingEnable {
+            get {
+                return ((bool)(this["HardwareDecodingEnable"]));
+            }
+            set {
+                this["HardwareDecodingEnable"] = value;
+            }
+        }
     }
 }

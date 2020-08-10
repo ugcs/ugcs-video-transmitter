@@ -10,9 +10,11 @@ namespace UcsService
     {
         private const int POLLING_INTERVAL = 100;
         public delegate void TelemetryBatchSubscriptionCallback(List<VehicleTelemetry> telemetry);
+        public delegate void VideoChanged(VideoSourceChangedDTO videoSource);
         private ConnectionService _connectionService;
         private EventSubscriptionWrapper _eventSubscriptionWrapper;
         private Action<int, bool> _downlinkCb;
+        public event VideoChanged TelemetryVideoUrlChanged;
         private Dictionary<int, ServiceActionTelemetry> _telemetryDTOList = new Dictionary<int, ServiceActionTelemetry>();
         private object vehicleTelemetryLocker = new object();
 
@@ -184,7 +186,19 @@ namespace UcsService
                     if (t.TelemetryField.Code == "roll" && t.TelemetryField.Semantic == Semantic.S_ROLL && t.TelemetryField.Subsystem == Subsystem.S_GIMBAL)
                     {
                         _telemetryDTOList[vehicleId].ServiceTelemetryDTO.PayloadRoll = GetValueOrDefault<double>(t.Value);
-                    }
+                    }                    
+                    if (t.TelemetryField.Code == "video_stream_uri" && t.TelemetryField.Semantic == Semantic.S_STRING && t.TelemetryField.Subsystem == Subsystem.S_CAMERA)
+                    {
+                        _telemetryDTOList[vehicleId].ServiceTelemetryDTO.VideoStreamUrl = t.Value.StringValue;
+                        if (TelemetryVideoUrlChanged != null)
+                        {
+                            TelemetryVideoUrlChanged.Invoke(new VideoSourceChangedDTO()
+                            {
+                                VehicleId = vehicleId,
+                                VideoSourceName = t.Value.StringValue
+                            });
+                        }
+                    }     
 
                 }
             }

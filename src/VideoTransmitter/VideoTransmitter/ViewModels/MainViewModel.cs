@@ -106,6 +106,7 @@ namespace VideoTransmitter.ViewModels
             _ucsConnectionService = cs;
             _discoveryService = ds;
 
+            _telemetryListener.TelemetryVideoUrlChanged += telemetryVideo_onChanged;
             _discoveryService.AddToListen(UCS_SERVER_TYPE);
             _discoveryService.AddToListen(UGCS_VIDEOSERVER_URTP_ST);
             _discoveryService.ServiceLost += onSsdpServiceLost;
@@ -176,9 +177,18 @@ namespace VideoTransmitter.ViewModels
 
         private static VideoSource toVideoSource(VideoDeviceDTO device)
         {
-            return new VideoSource(
-                name: device.Name,
-                uri: new Uri($"device://dshow/?video={device.Name}"));
+            if (device.Type == SourceType.VEHICLE)
+            {
+                return new VideoSource(
+                    name: device.Id,
+                    uri: new Uri(device.Name));
+            }
+            else
+            {
+                return new VideoSource(
+                    name: device.Name,
+                    uri: new Uri($"device://dshow/?video={device.Name}"));
+            }
         }
 
         private bool isConnecting = false;
@@ -385,13 +395,20 @@ namespace VideoTransmitter.ViewModels
                     var removed = VideoSources
                                     .Skip(1)
                                     .Where(x => x.Uri.Scheme != "file")
-                                    .Except(devices);
+                                    .Except(devices).ToList();
 
                     foreach (var d in added)
+                    {
                         VideoSources.Add(d);
-
+                    }
                     foreach (var d in removed)
-                        VideoSources.Remove(d);                    
+                    {
+                        if (SelectedVideoSource != null && SelectedVideoSource.Name == d.Name)
+                        {
+                            updateToDefault = true;
+                        }
+                        VideoSources.Remove(d);
+                    }
                 }
 
                 if (updateToDefault)
@@ -411,6 +428,16 @@ namespace VideoTransmitter.ViewModels
                         SelectedVideoSource = defaultVideoLastKnown;
                     }
                 }
+            });
+        }
+        private void telemetryVideo_onChanged(VideoSourceChangedDTO vsc)
+        {
+            _videoSourcesService.AddOrUpdateVehicleVideoSource(new VideoDeviceDTO()
+            {
+                Id = VideoDeviceDTO.GenerateId(vsc.VehicleId.ToString(), vsc.VideoSourceName),
+                VehicleId = vsc.VehicleId,
+                Name = vsc.VideoSourceName,
+                Type = SourceType.VEHICLE
             });
         }
 
@@ -474,7 +501,7 @@ namespace VideoTransmitter.ViewModels
                             var vh = _vehicleList.FirstOrDefault(v => v.VehicleId == vehicle.VehicleId);
                             if (vh == null)
                             {
-                                
+
                                 ClientVehicle cv = new ClientVehicle()
                                 {
                                     Name = vehicle.Name,
@@ -600,6 +627,15 @@ namespace VideoTransmitter.ViewModels
                 if (_selectedVehicle != null && _selectedVehicle.VehicleId != EMPTY_VEHICLE_ID)
                 {
                     _log.Info(string.Format("Vehicle selected {0}", _selectedVehicle.Name));
+                    var telemetry = _telemetryListener.GetTelemetryById(SelectedVehicle.VehicleId);
+                    if (telemetry != null && !string.IsNullOrEmpty(telemetry.VideoStreamUrl))
+                    {
+                        var videoSource = VideoSources.FirstOrDefault(v => v.Name == VideoDeviceDTO.GenerateId(SelectedVehicle.VehicleId.ToString(), telemetry.VideoStreamUrl));
+                        if (videoSource != null)
+                        {
+                            SelectedVideoSource = videoSource;
+                        }
+                    }
                 }
                 else
                 {
@@ -960,11 +996,18 @@ namespace VideoTransmitter.ViewModels
                 //Settings.Default.BitrateAutomatic;
                 //Settings.Default.Bitrate
             }
+            if (changed.Contains("HardwareDecodingEnable"))
+            {
+                MediaElement.Close();
+            }
         }
 
         private void OnMediaOpening(object sender, MediaOpeningEventArgs e)
         {
-            tryToEnableHardwareDecoding(e);
+            if (Settings.Default.HardwareDecodingEnable)
+            {
+                tryToEnableHardwareDecoding(e);
+            }
             e.Options.MinimumPlaybackBufferPercent = 0;
             e.Options.DecoderParams.EnableFastDecoding = true;
             e.Options.DecoderParams.EnableLowDelayDecoding = true;
@@ -1032,8 +1075,8 @@ namespace VideoTransmitter.ViewModels
 
         private void OnMediaInitializing(object sender, MediaInitializingEventArgs e)
         {
-            e.Configuration.GlobalOptions.EnableReducedBuffering = true;
-            e.Configuration.GlobalOptions.FlagNoBuffer = true;
+      //      e.Configuration.GlobalOptions.EnableReducedBuffering = true;
+       //     e.Configuration.GlobalOptions.FlagNoBuffer = true;
 
             // Ffme subscribes on ffmpeg log. To get log messages we should subscribe after ffme. Here is a good place.
             FfmpegLog.Enable(ffmpeg.AV_LOG_INFO);

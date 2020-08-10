@@ -74,6 +74,9 @@
     <ProjectReference Include="..\VideoTools\VideoTools.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="mscorlib" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
