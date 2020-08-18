@@ -333,6 +333,7 @@ namespace VideoTransmitter.ViewModels
                 }
                 NotifyOfPropertyChange(() => VehicleList);
             });
+            _videoSourcesService.ClearVehicleVideoSource();
             _log.Info("UgCS server disconnected");
             updateVideoAndTelemetryStatuses();
         }

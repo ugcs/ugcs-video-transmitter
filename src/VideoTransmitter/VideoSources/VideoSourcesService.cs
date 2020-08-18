@@ -34,6 +34,22 @@ namespace VideoSources
             }
         }
 
+        public void ClearVehicleVideoSource()
+        {
+            lock (_locker)
+            {
+                var vsList = _videoSourceList.Where(v => v.Type == SourceType.VEHICLE).ToList();
+                foreach(var videoSource in vsList)
+                {
+                    _videoSourceList.Remove(videoSource);
+                }
+                if (vsList.Count > 0)
+                {
+                    SourcesChanged?.Invoke(_videoSourceList, null);
+                }
+            }
+        }
+
         public void AddOrUpdateVehicleVideoSource(VideoDeviceDTO vdd)
         {
             bool changed = false;
@@ -42,12 +58,15 @@ namespace VideoSources
                 var vs = _videoSourceList.FirstOrDefault(v => v.VehicleId == vdd.VehicleId);
                 if (vs == null)
                 {
-                    _videoSourceList.Add(vdd);
-                    changed = true;
+                    if (!string.IsNullOrEmpty(vdd.Name))
+                    {
+                        _videoSourceList.Add(vdd);
+                        changed = true;
+                    }
                 }
                 else
                 {
-                    if (string.IsNullOrEmpty(vdd.Name) && !string.IsNullOrEmpty(vs.Name))
+                    if (string.IsNullOrEmpty(vdd.Name))
                     {
                         _videoSourceList.Remove(vs);
                         changed = true;
