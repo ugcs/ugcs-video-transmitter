@@ -133,6 +133,28 @@ namespace UcsService
         {
             return GetValueOrNull<T>(telemetryValue).GetValueOrDefault();
         }
+        public static T GetTelemetryValueOrDefault<T>(Value telemetryValue) where T : struct
+        {
+            if (telemetryValue == null)
+                return default(T);
+
+            if (telemetryValue.DoubleValueSpecified)
+                return (T)Convert.ChangeType(telemetryValue.DoubleValue, typeof(T));
+
+            if (telemetryValue.BoolValueSpecified)
+                return (T)Convert.ChangeType(telemetryValue.BoolValue, typeof(T));
+
+            if (telemetryValue.FloatValueSpecified)
+                return (T)Convert.ChangeType(telemetryValue.FloatValue, typeof(T));
+
+            if (telemetryValue.IntValueSpecified)
+                return (T)Convert.ChangeType(telemetryValue.IntValue, typeof(T));
+
+            if (telemetryValue.LongValueSpecified)
+                return (T)Convert.ChangeType(telemetryValue.LongValue, typeof(T));
+
+            return default(T);
+        }
 
         private void _telemetryReceived(int vehicleId, List<Telemetry> telemetry)
         {
@@ -177,15 +199,15 @@ namespace UcsService
                     }
                     if (t.TelemetryField.Code == "heading" && t.TelemetryField.Semantic == Semantic.S_HEADING && t.TelemetryField.Subsystem == Subsystem.S_GIMBAL)
                     {
-                        _telemetryDTOList[vehicleId].ServiceTelemetryDTO.PayloadHeading = GetValueOrDefault<double>(t.Value);
+                        _telemetryDTOList[vehicleId].ServiceTelemetryDTO.PayloadHeading = Math.Round(GetTelemetryValueOrDefault<double>(t.Value), 10);
                     }
                     if (t.TelemetryField.Code == "pitch" && t.TelemetryField.Semantic == Semantic.S_PITCH && t.TelemetryField.Subsystem == Subsystem.S_GIMBAL)
                     {
-                        _telemetryDTOList[vehicleId].ServiceTelemetryDTO.PayloadPitch = GetValueOrDefault<double>(t.Value);
+                        _telemetryDTOList[vehicleId].ServiceTelemetryDTO.PayloadPitch = Math.Round(GetTelemetryValueOrDefault<double>(t.Value), 10);
                     }
                     if (t.TelemetryField.Code == "roll" && t.TelemetryField.Semantic == Semantic.S_ROLL && t.TelemetryField.Subsystem == Subsystem.S_GIMBAL)
                     {
-                        _telemetryDTOList[vehicleId].ServiceTelemetryDTO.PayloadRoll = GetValueOrDefault<double>(t.Value);
+                        _telemetryDTOList[vehicleId].ServiceTelemetryDTO.PayloadRoll = Math.Round(GetTelemetryValueOrDefault<double>(t.Value), 10);
                     }                    
                     if (t.TelemetryField.Code == "video_stream_uri" && t.TelemetryField.Semantic == Semantic.S_STRING && t.TelemetryField.Subsystem == Subsystem.S_CAMERA)
                     {
