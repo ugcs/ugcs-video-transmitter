@@ -211,6 +211,11 @@ namespace UcsService
                         new AuthorizeHciRequest()
                         {
                             ClientId = -1,
+                            ClientVersion = new ProtocolVersion()
+                            {
+                                Major = 2,
+                                Minor = 0
+                            }
                         })
                         .ClientId;
             }
