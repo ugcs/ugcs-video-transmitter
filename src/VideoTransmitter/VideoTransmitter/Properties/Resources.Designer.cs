@@ -160,6 +160,15 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Disable.
+        /// </summary>
+        public static string Disable {
+            get {
+                return ResourceManager.GetString("Disable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Do you want to close application?.
         /// </summary>
         public static string Doyouwanttocloseapplication {
@@ -174,6 +183,24 @@ namespace VideoTransmitter.Properties {
         public static string DroneOffline {
             get {
                 return ResourceManager.GetString("DroneOffline", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable.
+        /// </summary>
+        public static string Enable {
+            get {
+                return ResourceManager.GetString("Enable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable hardware decoding.
+        /// </summary>
+        public static string Enablehardwaredecoding {
+            get {
+                return ResourceManager.GetString("Enablehardwaredecoding", resourceCulture);
             }
         }
         

@@ -288,4 +288,13 @@
   <data name="DroneOffline" xml:space="preserve">
     <value>Vehicle is offline</value>
   </data>
+  <data name="Disable" xml:space="preserve">
+    <value>Disable</value>
+  </data>
+  <data name="Enable" xml:space="preserve">
+    <value>Enable</value>
+  </data>
+  <data name="Enablehardwaredecoding" xml:space="preserve">
+    <value>Enable hardware decoding</value>
+  </data>
 </root>

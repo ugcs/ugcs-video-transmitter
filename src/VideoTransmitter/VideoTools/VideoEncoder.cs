@@ -17,7 +17,6 @@ namespace Ugcs.Video.Tools
         private object _disposeSyncObj = new Object();
         private bool _isDisposed;
         private static ILog _log = LogManager.GetLogger(typeof(VideoEncoder));
-        private FrameConverter _scaler;
 
 
         /// <summary>
@@ -115,10 +114,6 @@ namespace Ugcs.Video.Tools
                 {
                     ffmpeg.av_packet_free(ptr);
                 }
-
-                if (_scaler != null)
-                    _scaler.Dispose();
-
 
                 _isDisposed = true;
             }

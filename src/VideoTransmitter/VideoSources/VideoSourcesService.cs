@@ -33,6 +33,71 @@ namespace VideoSources
                 return _videoSourceList;
             }
         }
+
+        public void ClearVehicleVideoSource()
+        {
+            lock (_locker)
+            {
+                var vsList = _videoSourceList.Where(v => v.Type == SourceType.VEHICLE).ToList();
+                foreach(var videoSource in vsList)
+                {
+                    _videoSourceList.Remove(videoSource);
+                }
+                if (vsList.Count > 0)
+                {
+                    SourcesChanged?.Invoke(_videoSourceList, null);
+                }
+            }
+        }
+
+        public void AddOrUpdateVehicleVideoSource(VideoDeviceDTO vdd)
+        {
+            bool changed = false;
+            lock (_locker)
+            {
+                var vs = _videoSourceList.FirstOrDefault(v => v.VehicleId == vdd.VehicleId);
+                if (vs == null)
+                {
+                    if (!string.IsNullOrEmpty(vdd.Name))
+                    {
+                        _videoSourceList.Add(vdd);
+                        changed = true;
+                    }
+                }
+                else
+                {
+                    if (string.IsNullOrEmpty(vdd.Name))
+                    {
+                        _videoSourceList.Remove(vs);
+                        changed = true;
+                    }
+                    else if (vs.Name != vdd.Name)
+                    {
+                        vs.Id = VideoDeviceDTO.GenerateId(vdd.Id, vdd.Name);
+                        vs.Name = vdd.Name;
+                        changed = true;
+                    }
+                }
+            }
+            if (changed)
+            {
+                SourcesChanged?.Invoke(_videoSourceList, null);
+            }
+        }
+
+        public void RemoveVehicleVideoSource(VideoDeviceDTO vdd)
+        {
+            lock (_locker)
+            {
+                var vname = _videoSourceList.FirstOrDefault(v => v.VehicleId == vdd.VehicleId);
+                if (vname != null)
+                {
+                    _videoSourceList.Remove(vname);
+                    SourcesChanged?.Invoke(_videoSourceList, null);
+                }
+            }
+        }
+
         private bool isRunning = false;
         private void getVideoSources(object source, ElapsedEventArgs e)
         {
@@ -52,7 +117,8 @@ namespace VideoSources
                     var vsd = new VideoDeviceDTO()
                     {
                         Name = VideoCaptureDevice.Name,
-                        Id = VideoCaptureDevice.MonikerString
+                        Id = VideoCaptureDevice.MonikerString,
+                        Type = SourceType.USB_CAMERA
                     };
                     exists.Add(vsd);
                 }
@@ -64,7 +130,8 @@ namespace VideoSources
                         var vsd = new VideoDeviceDTO()
                         {
                             Name = videoCaptureDevice.Name,
-                            Id = videoCaptureDevice.Id
+                            Id = videoCaptureDevice.Id,
+                            Type = SourceType.USB_CAMERA
                         };
                         _videoSourceList.Add(vsd);
                         changed = true;
@@ -72,6 +139,10 @@ namespace VideoSources
                 }
                 foreach (VideoDeviceDTO device in _videoSourceList.ToList())
                 {
+                    if (device.Type != SourceType.USB_CAMERA)
+                    {
+                        continue;
+                    }
                     if (!exists.Any(d => d.Name == device.Name))
                     {
                         _videoSourceList.Remove(device);

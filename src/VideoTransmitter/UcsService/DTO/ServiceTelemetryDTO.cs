@@ -18,5 +18,6 @@ namespace UcsService.DTO
         public double? PayloadHeading { get; set; }
         public double? PayloadPitch { get; set; }
         public double? PayloadRoll { get; set; }
+        public string VideoStreamUrl { get; set; }
     }
 }
