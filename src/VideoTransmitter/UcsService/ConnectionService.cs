@@ -213,8 +213,8 @@ namespace UcsService
                             ClientId = -1,
                             ClientVersion = new ProtocolVersion()
                             {
-                                Major = 2,
-                                Minor = 0
+                                Major = 1,
+                                Minor = 2
                             }
                         })
                         .ClientId;
