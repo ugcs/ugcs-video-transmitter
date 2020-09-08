@@ -30,7 +30,6 @@ namespace VideoTransmitter.ViewModels
 {
     public partial class MainViewModel : Caliburn.Micro.PropertyChangedBase
     {
-        private readonly long? BITRATE = null; // null - auto, example: 1 * 1024 * 1024;
         private static readonly TimeSpan BPS_MEASURE_INTERVAL = TimeSpan.FromSeconds(3);
 
         private log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MainViewModel));
