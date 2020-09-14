@@ -26,6 +26,10 @@ using VideoTransmitter.Properties;
 using VideoTransmitter.Views;
 
 
+using Interlocked = System.Threading.Interlocked;
+
+
+
 namespace VideoTransmitter.ViewModels
 {
     public partial class MainViewModel : Caliburn.Micro.PropertyChangedBase
@@ -96,7 +100,7 @@ namespace VideoTransmitter.ViewModels
             VideoSourcesService vss,
             IWindowManager manager)
         {
-            _log.Info("Application started");
+            _log.Debug("Main view model initialized");
             _iWindowManager = manager;
             _videoSourcesService = vss;
             _vehicleService = vs;
@@ -209,7 +213,8 @@ namespace VideoTransmitter.ViewModels
                 return;
             }
             isRunningMediaCheck = true;
-            if (MediaElement != null && MediaElement.MediaState == MediaPlaybackState.Close)
+            if (MediaElement != null && MediaElement.MediaState == MediaPlaybackState.Close
+                && !isNullOrEmpty(SelectedVideoSource))
             {
                 _log.Info("Try start new media");
                 await startScreenStreaming();
@@ -217,40 +222,47 @@ namespace VideoTransmitter.ViewModels
             isRunningMediaCheck = false;
         }
 
+        private bool isNullOrEmpty(VideoSource vs)
+        {
+            return vs == null || vs.Uri == EMPTY_DEVICE_URI;
+        }
+
+        private volatile int _videoServerSearchSessions = 0;
         private void OnVideoServerConnection(Object source, ElapsedEventArgs e)
         {
-            if (urtpServer == null)
+            if (urtpServer != null)
+                return;
+
+            if (!Settings.Default.VideoServerAutomatic)
+            {
+                lock (_startStopLocker)
+                {
+                    urtpServer = new Uri("urtp+connect://" + Settings.Default.VideoServerAddress + ":" + Settings.Default.VideoServerPort);
+                }
+                _log.Info(string.Format("Direct connection used to videoserver {0}", urtpServer.AbsolutePath));
+                updateVideoAndTelemetryStatuses();
+                return;
+            }
+
+            if (Interlocked.Increment(ref _videoServerSearchSessions) > 1)
+            {
+                Interlocked.Decrement(ref _videoServerSearchSessions);
+                return;
+            }
+
+            _discoveryService.TryFound(UGCS_VIDEOSERVER_URTP_ST, (location) =>
             {
                 if (Settings.Default.VideoServerAutomatic)
                 {
-                    if (!searhing)
-                    {
-                        searhing = true;
-                        _discoveryService.TryFound(UGCS_VIDEOSERVER_URTP_ST, (location) =>
-                        {
-                            if (Settings.Default.VideoServerAutomatic)
-                            {
-                                lock (_startStopLocker)
-                                {
-                                    urtpServer = location;
-                                }
-                                updateVideoAndTelemetryStatuses();
-                                _log.Info(string.Format("Found new videoserver {0}", urtpServer.AbsolutePath));
-                            }
-                            searhing = false;
-                        });
-                    }
-                }
-                else
-                {
                     lock (_startStopLocker)
                     {
-                        urtpServer = new Uri("urtp+connect://" + Settings.Default.VideoServerAddress + ":" + Settings.Default.VideoServerPort);
+                        urtpServer = location;
                     }
-                    _log.Info(string.Format("Direct connection used to videoserver {0}", urtpServer.AbsolutePath));
                     updateVideoAndTelemetryStatuses();
+                    _log.Info(string.Format("Found new videoserver {0}", urtpServer.AbsolutePath));
                 }
-            }
+                Interlocked.Decrement(ref _videoServerSearchSessions);
+            });
         }
         private void OnTelemetryTimer(Object source, ElapsedEventArgs e)
         {
@@ -337,31 +349,32 @@ namespace VideoTransmitter.ViewModels
             updateVideoAndTelemetryStatuses();
         }
 
-        private bool searhing = false;
+        private volatile int _ucsSearchSessions = 0;
         private void startUcsConnection()
         {
-            if (Settings.Default.UgcsAutomatic)
-            {
-                if (!searhing)
-                {
-                    searhing = true;
-                    _discoveryService.TryFound(UCS_SERVER_TYPE, (location) =>
-                    {
-                        if (Settings.Default.UgcsAutomatic)
-                        {
-                            _log.Info(string.Format("Found new UgCS server {0}", location.OriginalString));
-                            Connect(location);
-                        }
-                        searhing = false;
-                    });
-                }
-            }
-            else
+            if (!Settings.Default.UgcsAutomatic)
             {
                 var uri = new Uri("tcp://" + Settings.Default.UcgsAddress + ":" + Settings.Default.UcgsPort);
                 _log.Info(string.Format("Direct connection used to UgCS server {0}", uri.OriginalString));
                 Connect(uri);
+                return;
             }
+
+            if (Interlocked.Increment(ref _ucsSearchSessions) > 1)
+            {
+                Interlocked.Decrement(ref _ucsSearchSessions);
+                return;
+            }
+
+            _discoveryService.TryFound(UCS_SERVER_TYPE, (location) =>
+                {
+                    if (Settings.Default.UgcsAutomatic)
+                    {
+                        _log.Info(string.Format("Found new UgCS server {0}", location.OriginalString));
+                        Connect(location);
+                    }
+                    Interlocked.Decrement(ref _ucsSearchSessions);
+                });
         }
 
         private void ucsConnection_onConnected(object sender, EventArgs args)
@@ -709,10 +722,11 @@ namespace VideoTransmitter.ViewModels
         private async Task startScreenStreaming()
         {
             _log.Debug("startScreenStreaming called");
-            if (MediaElement == null || SelectedVideoSource == null || SelectedVideoSource.Uri == EMPTY_DEVICE_URI)
-            {
+            Debug.Assert(MediaElement != null, "MediaElement != null");
+            Debug.Assert(!isNullOrEmpty(SelectedVideoSource), "!isNullOrEmpty(SelectedVideoSource)");
+            if (MediaElement == null || isNullOrEmpty(SelectedVideoSource))
                 return;
-            }
+
             if (MediaElement != null)
             {
                 if (!await MediaElement.Open(SelectedVideoSource.Uri))
@@ -1075,8 +1089,8 @@ namespace VideoTransmitter.ViewModels
 
         private void OnMediaInitializing(object sender, MediaInitializingEventArgs e)
         {
-      //      e.Configuration.GlobalOptions.EnableReducedBuffering = true;
-       //     e.Configuration.GlobalOptions.FlagNoBuffer = true;
+            //      e.Configuration.GlobalOptions.EnableReducedBuffering = true;
+            //     e.Configuration.GlobalOptions.FlagNoBuffer = true;
 
             // Ffme subscribes on ffmpeg log. To get log messages we should subscribe after ffme. Here is a good place.
             FfmpegLog.Enable(ffmpeg.AV_LOG_INFO);

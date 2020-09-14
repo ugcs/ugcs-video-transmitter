@@ -59,8 +59,8 @@ namespace SSDPDiscoveryService
 
         public void StartListen()
         {
-            _ssdpAgent.Start();
             _ssdpAgent.NewStatus += ssdpEventHandler;
+            _ssdpAgent.Start();
         }
 
         public async Task<Uri> TryFoundAsync(string serviceType, TimeSpan? timeout = null)
