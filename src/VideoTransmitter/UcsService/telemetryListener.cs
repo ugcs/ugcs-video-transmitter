@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UcsService.DTO;
 using UGCS.Sdk.Protocol;
 using UGCS.Sdk.Protocol.Encoding;
@@ -67,11 +68,10 @@ namespace UcsService
 
         public ServiceTelemetryDTO GetTelemetryById(int vehicleId)
         {
-            if (!_telemetryDTOList.ContainsKey(vehicleId))
-            {
+            if (!_telemetryDTOList.TryGetValue(vehicleId, out ServiceActionTelemetry a))
                 return null;
-            }
-            return _telemetryDTOList[vehicleId].ServiceTelemetryDTO;
+            
+            return a.ServiceTelemetryDTO;
         }
 
         /// <summary>
@@ -133,6 +133,9 @@ namespace UcsService
         {
             return GetValueOrNull<T>(telemetryValue).GetValueOrDefault();
         }
+
+
+
         public static T GetTelemetryValueOrDefault<T>(Value telemetryValue) where T : struct
         {
             if (telemetryValue == null)
@@ -158,6 +161,10 @@ namespace UcsService
 
         private void _telemetryReceived(int vehicleId, List<Telemetry> telemetry)
         {
+            Debug.Assert(_telemetryDTOList.ContainsKey(vehicleId), "_telemetryDTOList.ContainsKey(vehicleId)");
+
+            ServiceTelemetryDTO vehicleTelemetry = _telemetryDTOList[vehicleId].ServiceTelemetryDTO;
+
             try
             {
                 foreach (Telemetry t in telemetry)
@@ -167,61 +174,66 @@ namespace UcsService
                     {
                         //case TelemetryType.TT_DOWNLINK_CONNECTED:
                         var value = GetValueOrNull<bool>(t.Value).GetValueOrDefault();
-                        _telemetryDTOList[vehicleId].ServiceTelemetryDTO.DownlinkPresent = value;
+                        vehicleTelemetry.DownlinkPresent = value;
                         _downlinkCb(vehicleId, value);
                     }
                     if (t.TelemetryField.Code == "altitude_amsl" && t.TelemetryField.Semantic == Semantic.S_ALTITUDE_AMSL && t.TelemetryField.Subsystem == Subsystem.S_FLIGHT_CONTROLLER)
                     {
                         //case TelemetryType.TT_MSL_ALTITUDE:
-                        _telemetryDTOList[vehicleId].ServiceTelemetryDTO.AltitudeAMSL = GetValueOrNull<float>(t.Value);
+                        vehicleTelemetry.AltitudeAMSL = GetValueOrNull<float>(t.Value);
                     }
                     if (t.TelemetryField.Code == "latitude" && t.TelemetryField.Semantic == Semantic.S_LATITUDE && t.TelemetryField.Subsystem == Subsystem.S_FLIGHT_CONTROLLER)
                     {
                         //case TelemetryType.TT_LATITUDE:
-                        _telemetryDTOList[vehicleId].ServiceTelemetryDTO.Latitude = GetValueOrNull<double>(t.Value);
+                        vehicleTelemetry.Latitude = GetValueOrNull<double>(t.Value);
                     }
                     if (t.TelemetryField.Code == "longitude" && t.TelemetryField.Semantic == Semantic.S_LONGITUDE && t.TelemetryField.Subsystem == Subsystem.S_FLIGHT_CONTROLLER)
                     {
                         //case TelemetryType.TT_LONGITUDE:
-                        _telemetryDTOList[vehicleId].ServiceTelemetryDTO.Longitude = GetValueOrNull<double>(t.Value);
+                        vehicleTelemetry.Longitude = GetValueOrNull<double>(t.Value);
                     }
                     if (t.TelemetryField.Code == "heading" && t.TelemetryField.Semantic == Semantic.S_HEADING && t.TelemetryField.Subsystem == Subsystem.S_FLIGHT_CONTROLLER)
                     {
-                        _telemetryDTOList[vehicleId].ServiceTelemetryDTO.Heading = GetValueOrDefault<float>(t.Value);
+                        vehicleTelemetry.Heading = GetValueOrDefault<float>(t.Value);
                     }
                     if (t.TelemetryField.Code == "pitch" && t.TelemetryField.Semantic == Semantic.S_PITCH && t.TelemetryField.Subsystem == Subsystem.S_FLIGHT_CONTROLLER)
                     {
-                        _telemetryDTOList[vehicleId].ServiceTelemetryDTO.Pitch = GetValueOrDefault<float>(t.Value);
+                        vehicleTelemetry.Pitch = GetValueOrDefault<float>(t.Value);
                     }
                     if (t.TelemetryField.Code == "roll" && t.TelemetryField.Semantic == Semantic.S_ROLL && t.TelemetryField.Subsystem == Subsystem.S_FLIGHT_CONTROLLER)
                     {
-                        _telemetryDTOList[vehicleId].ServiceTelemetryDTO.Roll = GetValueOrDefault<float>(t.Value);
+                        vehicleTelemetry.Roll = GetValueOrDefault<float>(t.Value);
                     }
                     if (t.TelemetryField.Code == "heading" && t.TelemetryField.Semantic == Semantic.S_HEADING && t.TelemetryField.Subsystem == Subsystem.S_GIMBAL)
                     {
-                        _telemetryDTOList[vehicleId].ServiceTelemetryDTO.PayloadHeading = Math.Round(GetTelemetryValueOrDefault<double>(t.Value), 10);
+                        vehicleTelemetry.PayloadHeading = Math.Round(GetTelemetryValueOrDefault<double>(t.Value), 10);
                     }
                     if (t.TelemetryField.Code == "pitch" && t.TelemetryField.Semantic == Semantic.S_PITCH && t.TelemetryField.Subsystem == Subsystem.S_GIMBAL)
                     {
-                        _telemetryDTOList[vehicleId].ServiceTelemetryDTO.PayloadPitch = Math.Round(GetTelemetryValueOrDefault<double>(t.Value), 10);
+                        vehicleTelemetry.PayloadPitch = Math.Round(GetTelemetryValueOrDefault<double>(t.Value), 10);
                     }
                     if (t.TelemetryField.Code == "roll" && t.TelemetryField.Semantic == Semantic.S_ROLL && t.TelemetryField.Subsystem == Subsystem.S_GIMBAL)
                     {
-                        _telemetryDTOList[vehicleId].ServiceTelemetryDTO.PayloadRoll = Math.Round(GetTelemetryValueOrDefault<double>(t.Value), 10);
+                        vehicleTelemetry.PayloadRoll = Math.Round(GetTelemetryValueOrDefault<double>(t.Value), 10);
                     }                    
                     if (t.TelemetryField.Code == "video_stream_uri" && t.TelemetryField.Semantic == Semantic.S_STRING && t.TelemetryField.Subsystem == Subsystem.S_CAMERA)
                     {
-                        _telemetryDTOList[vehicleId].ServiceTelemetryDTO.VideoStreamUrl = t.Value.StringValue;
-                        if (TelemetryVideoUrlChanged != null)
+                        string oldValue = vehicleTelemetry.VideoStreamUrl;
+
+                        string videoStreamUri;
+                        if (!t.Value.TryGetAsString(out videoStreamUri))
+                            videoStreamUri = null;
+
+                        if (oldValue != videoStreamUri)
                         {
-                            TelemetryVideoUrlChanged.Invoke(new VideoSourceChangedDTO()
+                            vehicleTelemetry.VideoStreamUrl = videoStreamUri;
+                            TelemetryVideoUrlChanged?.Invoke(new VideoSourceChangedDTO()
                             {
                                 VehicleId = vehicleId,
-                                VideoSourceName = t.Value.StringValue
+                                VideoSourceName = videoStreamUri
                             });
                         }
                     }     
-
                 }
             }
             catch
@@ -230,7 +242,6 @@ namespace UcsService
             }
 
         }
-
 
     }
 }
