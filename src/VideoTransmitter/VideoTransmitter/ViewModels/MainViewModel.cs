@@ -118,6 +118,7 @@ namespace VideoTransmitter.ViewModels
             _defaultVideoDevice = new VideoSource
             (
                 name: Resources.Nodevice,
+                displayName: Resources.Nodevice,
                 uri: EMPTY_DEVICE_URI
             );
             VideoSources.Add(_defaultVideoDevice);
@@ -173,6 +174,7 @@ namespace VideoTransmitter.ViewModels
                 VideoSources.Add(
                     new VideoSource(
                         name: Path.GetFileName(filePath),
+                        displayName: Path.GetFileName(filePath),
                         uri: new Uri("file://" + filePath)
                     ));
             }
@@ -184,12 +186,14 @@ namespace VideoTransmitter.ViewModels
             {
                 return new VideoSource(
                     name: device.Id,
+                    displayName: device.DisplayName,
                     uri: new Uri(device.Name));
             }
             else
             {
                 return new VideoSource(
                     name: device.Name,
+                    displayName: device.DisplayName,
                     uri: new Uri($"device://dshow/?video={device.Name}"));
             }
         }
@@ -445,12 +449,44 @@ namespace VideoTransmitter.ViewModels
         }
         private void telemetryVideo_onChanged(VideoSourceChangedDTO vsc)
         {
+            var vehicle = VehicleList.FirstOrDefault(v => v.VehicleId == vsc.VehicleId);
+            string displayName = vsc.VideoSourceName;
+            if (vehicle != null)
+            {
+                displayName = vehicle.Name;
+            }
             _videoSourcesService.AddOrUpdateVehicleVideoSource(new VideoDeviceDTO()
             {
                 Id = VideoDeviceDTO.GenerateId(vsc.VehicleId.ToString(), vsc.VideoSourceName),
                 VehicleId = vsc.VehicleId,
                 Name = vsc.VideoSourceName,
+                DisplayName = displayName,
                 Type = SourceType.VEHICLE
+            });
+        }
+
+        private void updateDisplayNameAsync(ClientVehicleDTO vehicle)
+        {
+            Task.Run(() =>
+            {
+                List<VideoDeviceDTO> vdd = _videoSourcesService.GetVideoSources();
+                var videoDevice = vdd.FirstOrDefault(v => v.VehicleId == vehicle.VehicleId);
+                if (videoDevice != null && videoDevice.DisplayName != vehicle.Name)
+                {
+                    _videoSourcesService.UpdateVehicleDisplayName(new VideoDeviceDTO()
+                    {
+                        VehicleId = videoDevice.VehicleId,
+                        DisplayName = vehicle.Name
+                    });
+                    Execute.OnUIThreadAsync(() =>
+                    {
+                        var videoSource = VideoSources.FirstOrDefault(v => v.Name == videoDevice.Id);
+                        if (videoSource != null)
+                        {
+                            videoSource.DisplayName = vehicle.Name;
+                        }
+                    });
+                }
             });
         }
 
@@ -533,6 +569,7 @@ namespace VideoTransmitter.ViewModels
                                 vh.Name = vehicle.Name;
                             }
                             mod = true;
+                            updateDisplayNameAsync(vehicle);
                             break;
                         case ModificationTypeDTO.DELETED:
                             foreach (var vInList in _vehicleList.ToList())

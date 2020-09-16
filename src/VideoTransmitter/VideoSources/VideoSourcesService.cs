@@ -75,6 +75,7 @@ namespace VideoSources
                     {
                         vs.Id = VideoDeviceDTO.GenerateId(vdd.Id, vdd.Name);
                         vs.Name = vdd.Name;
+                        vs.DisplayName = vdd.DisplayName;
                         changed = true;
                     }
                 }
@@ -82,6 +83,18 @@ namespace VideoSources
             if (changed)
             {
                 SourcesChanged?.Invoke(_videoSourceList, null);
+            }
+        }
+
+        public void UpdateVehicleDisplayName(VideoDeviceDTO vdd)
+        {
+            lock (_locker)
+            {
+                var vs = _videoSourceList.FirstOrDefault(v => v.VehicleId == vdd.VehicleId);
+                if (vs != null)
+                {
+                    vs.DisplayName = vdd.DisplayName;
+                }
             }
         }
 
@@ -117,6 +130,7 @@ namespace VideoSources
                     var vsd = new VideoDeviceDTO()
                     {
                         Name = VideoCaptureDevice.Name,
+                        DisplayName = VideoCaptureDevice.Name,
                         Id = VideoCaptureDevice.MonikerString,
                         Type = SourceType.USB_CAMERA
                     };
@@ -130,6 +144,7 @@ namespace VideoSources
                         var vsd = new VideoDeviceDTO()
                         {
                             Name = videoCaptureDevice.Name,
+                            DisplayName = videoCaptureDevice.Name,
                             Id = videoCaptureDevice.Id,
                             Type = SourceType.USB_CAMERA
                         };

@@ -51,7 +51,7 @@
                           SelectedItem="{Binding SelectedVideoSource}"
                           Height="48" 
                           x:Name="SelectedVideoSourceElement"
-                          DisplayMemberPath="Name" 
+                          DisplayMemberPath="DisplayName" 
                           SelectedValuePath="Name"    
                           IsEnabled="{Binding IsStreaming, Converter={StaticResource OppositeBool}}"
                           SelectedValue="{Binding Path=Name}"

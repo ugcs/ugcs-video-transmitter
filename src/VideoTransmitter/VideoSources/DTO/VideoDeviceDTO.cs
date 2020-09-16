@@ -12,6 +12,7 @@ namespace VideoSources.DTO
         public int VehicleId { get; set; }
         public SourceType Type { get; set; }
         public string Name { get; set; }
+        public string DisplayName { get; set; }
 
         public static string GenerateId(string Id, string name)
         {
