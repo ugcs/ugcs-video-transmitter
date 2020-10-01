@@ -1,12 +1,17 @@
-# README #
+# UgCS Video Transmitter #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+## What is Video Transmitter? ##
 
-### What is this repository for? ###
+It is a desktop app that captures video from the device connected to the PC (USB camera, for example), displays the video preview on the screen and provides the ability to transmit this video stream to a UgCS Video Server.
 
-Command Center provide the ability to transmit video from a camera, plugged-in to the PC, to UgCS video server. We have a special app for this - Video Transmitter. The app is included in the Command Center installer. [Learn more](https://sphengineering.atlassian.net/wiki/spaces/CC/pages/1788903439/Web+cam+video+transmission)
+## Supported platforms ##
 
-### How do I build on CI? ###
+Windows x64
 
-* Prerequisites: [.Net Framework 4.7.2 Developer Pack](https://dotnet.microsoft.com/download/visual-studio-sdks?utm_source=getdotnetsdk&utm_medium=referral), msbuild 15.
-* To build the solution execute `msbuild /t:restore;build /p:Configuration=Release;Version=<version>;FileVersion=<version>;AssemblyVersion=<version>` from `/src/VideoTransmitter/` directory. Where `<version>` shoudl be replaced with the actual build version.
+## How to build ##
+
+Prerequisites: [.Net Framework 4.7.2 Developer Pack](https://dotnet.microsoft.com/download/visual-studio-sdks?utm_source=getdotnetsdk&utm_medium=referral), msbuild 15.
+1. Execute `msbuild /t:restore;build /p:Configuration=Release`.
+1. Download the FFmpeg shared binaries [64-bit](https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full-shared.zip).
+1. Extract the contents of the zip file you just downloaded and go to the bin folder that got extracted. You should see 3 exe files and multiple dll files. Select and copy all .dll files.
+1. Now paste all files from the prior step onto a build output folder: `\src\VideoTransmitter\VideoTransmitter\bin\x64\Release\net4.7.2`.
