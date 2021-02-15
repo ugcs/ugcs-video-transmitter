@@ -297,4 +297,13 @@
   <data name="Enablehardwaredecoding" xml:space="preserve">
     <value>Enable hardware decoding</value>
   </data>
+  <data name="CustomVideoSourceHeader" xml:space="preserve">
+    <value>Custom video source</value>
+  </data>
+  <data name="CustomVideoSourceUri" xml:space="preserve">
+    <value>Uri</value>
+  </data>
+  <data name="InvalidCustomVideoSourceURI" xml:space="preserve">
+    <value>Invalid custom video source URI: The format of the URI could not be determined.</value>
+  </data>
 </root>

@@ -9,7 +9,8 @@
         mc:Ignorable="d"
         x:Name="SettingsWindow"
         ResizeMode="NoResize"
-        Title="{x:Static p:Resources.SettingsWindowTitle}" Height="699" Width="464"
+        WindowStartupLocation="CenterScreen"
+        Title="{x:Static p:Resources.SettingsWindowTitle}" Height="820" Width="464"
         Style="{StaticResource MainWindowStyle}"
         Loaded="Window_Loaded">
     <Grid Margin="32 0 32 0">
@@ -22,6 +23,7 @@
             <RowDefinition Height="75"></RowDefinition>
             <RowDefinition Height="64"></RowDefinition>
             <RowDefinition Height="75"></RowDefinition>
+            <RowDefinition Height="120"></RowDefinition>
             <RowDefinition Height="104"></RowDefinition>
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" VerticalAlignment="Center" Margin="0 26 0 0" Height="48">
@@ -33,7 +35,7 @@
             </Border>
         </StackPanel>
         <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0 24 0 0" Orientation="Vertical">
-            <StackPanel Height="19">
+            <StackPanel Height="23">
                 <TextBlock Text="{x:Static p:Resources.UgCSServer}" Style="{StaticResource SettingsTextBlockHeader}"></TextBlock>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Height="16" Margin="0 16 0 0">
@@ -112,7 +114,16 @@
                 <RadioButton Style="{StaticResource SettingsTextBlockRadio}" GroupName="HardwareDecoding" Content="{x:Static p:Resources.Disable}" Margin="16 0 0 0" IsChecked="{Binding HardwareDecodingDisable}" />
             </StackPanel>
         </StackPanel>
-        <StackPanel Grid.Row="8" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 32 0 0" Orientation="Horizontal">
+        <StackPanel Grid.Row="8" VerticalAlignment="Top" Margin="0 26 0 0">
+            <TextBlock Text="{x:Static p:Resources.CustomVideoSourceHeader}" Style="{StaticResource SettingsTextBlockHeader}"></TextBlock>
+            <Border Style="{StaticResource SettingsBorder}" Margin="0 16 0 0">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="{x:Static p:Resources.CustomVideoSourceUri}" Style="{StaticResource SettingsTextBlock}"></TextBlock>
+                    <TextBox Text="{Binding CustomVideoSourceUri, UpdateSourceTrigger=PropertyChanged}" MaxLength="100" Style="{StaticResource SettingsTextBox}"></TextBox>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+        <StackPanel Grid.Row="9" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 32 0 0" Orientation="Horizontal">
             <Button Content="{x:Static p:Resources.Cancel}" IsCancel="True" Margin="0 0 10 0" Click="Close_Click" Style="{StaticResource CancelButton}"></Button>
             <Button Content="{x:Static p:Resources.Apply}" IsDefault="True" Style="{StaticResource ApplyButton}">
                 <i:Interaction.Triggers>

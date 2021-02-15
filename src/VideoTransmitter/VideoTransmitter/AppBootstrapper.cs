@@ -11,6 +11,7 @@ using UcsService;
 using VideoSources;
 using System.Text.RegularExpressions;
 using log4net;
+using VideoTransmitter.Models;
 
 namespace VideoTransmitter
 {
@@ -19,6 +20,8 @@ namespace VideoTransmitter
 
         private log4net.ILog logger = log4net.LogManager.GetLogger(typeof(AppBootstrapper));
         private bool _isInitialized;
+        private AppSettingsObserver _appSettingsObserver;
+        
 
         public IKernel Kernel
         {
@@ -42,16 +45,19 @@ namespace VideoTransmitter
 
         protected override void Configure()
         {
-            Kernel = new StandardKernel();
-            Kernel.Bind<IDiscoveryService>().To<DiscoveryService>().InSingletonScope();
-            Kernel.Bind<ConnectionService>().To<ConnectionService>().InSingletonScope();
-            Kernel.Bind<IWindowManager>().To<WindowManager>().InSingletonScope();
-            Kernel.Bind<IEventAggregator>().To<EventAggregator>().InSingletonScope();
-            Kernel.Bind<MainViewModel>().ToSelf().InSingletonScope();
-            Kernel.Bind<VehicleListener>().ToSelf().InSingletonScope();
-            Kernel.Bind<TelemetryListener>().ToSelf().InSingletonScope();
-            Kernel.Bind<VehicleService>().ToSelf().InSingletonScope();
-            Kernel.Bind<VideoSourcesService>().ToSelf().InSingletonScope();
+            var k = new StandardKernel();
+            k.Bind<IDiscoveryService>().To<DiscoveryService>().InSingletonScope();
+            k.Bind<ConnectionService>().To<ConnectionService>().InSingletonScope();
+            k.Bind<IWindowManager>().To<WindowManager>().InSingletonScope();
+            k.Bind<IEventAggregator>().To<EventAggregator>().InSingletonScope();
+            k.Bind<MainViewModel>().ToSelf().InSingletonScope();
+            k.Bind<VehicleListener>().ToSelf().InSingletonScope();
+            k.Bind<TelemetryListener>().ToSelf().InSingletonScope();
+            k.Bind<VehicleService>().ToSelf().InSingletonScope();
+            k.Bind<VideoSourcesService>().ToSelf().InSingletonScope();
+            Kernel = k;
+
+            _appSettingsObserver = new AppSettingsObserver(k, Settings.Default);
 
             _isInitialized = true;
         }

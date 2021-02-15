@@ -32,6 +32,8 @@ namespace VideoTransmitter.ViewModels
             BitrateManual = !Settings.Default.BitrateAutomatic;
             HardwareDecodingEnable = Settings.Default.HardwareDecodingEnable;
             HardwareDecodingDisable = !Settings.Default.HardwareDecodingEnable;
+
+            CustomVideoSourceUri = Settings.Default.CustomVideoSourceUri;
         }        
 
         public string _tailNumber;
@@ -182,6 +184,20 @@ namespace VideoTransmitter.ViewModels
             }
         }
 
+        private string _customVideoSourceUri;
+        public string CustomVideoSourceUri
+        {
+            get { return _customVideoSourceUri; }
+            set
+            {
+                if (value != _customVideoSourceUri)
+                {
+                    _customVideoSourceUri = value;
+                    NotifyOfPropertyChange(() => CustomVideoSourceUri);
+                }
+            }
+        }
+
         public bool _bitrateAutomatic;
         public bool BitrateAutomatic
         {
@@ -294,6 +310,15 @@ namespace VideoTransmitter.ViewModels
                     return Resources.BitrateError;
                 }
             }
+
+            string customVideoSourceUri = CustomVideoSourceUri;
+            if (!String.IsNullOrWhiteSpace(CustomVideoSourceUri))
+            {
+                if (!Uri.IsWellFormedUriString(customVideoSourceUri, UriKind.Absolute))
+                    return Resources.InvalidCustomVideoSourceURI;
+            }
+
+
             return string.Empty;
         }
 
@@ -356,6 +381,13 @@ namespace VideoTransmitter.ViewModels
             {
                 Settings.Default.HardwareDecodingEnable = HardwareDecodingEnable;
                 changed.Add("HardwareDecodingEnable");
+            }
+
+            string customVideoSourceUri = CustomVideoSourceUri?.Trim();
+            if (Settings.Default.CustomVideoSourceUri != customVideoSourceUri)
+            {
+                Settings.Default.CustomVideoSourceUri = customVideoSourceUri;
+                changed.Add(nameof(Settings.CustomVideoSourceUri));
             }
 
             Settings.Default.Save();

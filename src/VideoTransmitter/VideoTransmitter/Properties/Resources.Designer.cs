@@ -151,6 +151,24 @@ namespace VideoTransmitter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Custom video source.
+        /// </summary>
+        public static string CustomVideoSourceHeader {
+            get {
+                return ResourceManager.GetString("CustomVideoSourceHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Uri.
+        /// </summary>
+        public static string CustomVideoSourceUri {
+            get {
+                return ResourceManager.GetString("CustomVideoSourceUri", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Direct IP.
         /// </summary>
         public static string DirectIP {
@@ -246,6 +264,15 @@ namespace VideoTransmitter.Properties {
         public static string Initializing {
             get {
                 return ResourceManager.GetString("Initializing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid custom video source URI: The format of the URI could not be determined..
+        /// </summary>
+        public static string InvalidCustomVideoSourceURI {
+            get {
+                return ResourceManager.GetString("InvalidCustomVideoSourceURI", resourceCulture);
             }
         }
         

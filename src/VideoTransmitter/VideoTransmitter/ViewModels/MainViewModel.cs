@@ -34,6 +34,7 @@ namespace VideoTransmitter.ViewModels
 {
     public partial class MainViewModel : Caliburn.Micro.PropertyChangedBase
     {
+        private const string CUSTOM_VS_NAME = "#custom_video_source";
         private static readonly TimeSpan BPS_MEASURE_INTERVAL = TimeSpan.FromSeconds(3);
 
         private log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MainViewModel));
@@ -91,6 +92,19 @@ namespace VideoTransmitter.ViewModels
             }
         }
 
+        private Uri _customVideoSourceUri = null;
+        public Uri CustomVideoSourceUri
+        {
+            get { return _customVideoSourceUri; }
+            set
+            {
+                if (_customVideoSourceUri == value)
+                    return;
+
+                _customVideoSourceUri = value;
+                onCustomVideoSourceUriChanged(value);
+            }
+        }
 
         public unsafe MainViewModel(DiscoveryService ds,
             ConnectionService cs,
@@ -177,6 +191,30 @@ namespace VideoTransmitter.ViewModels
                         displayName: Path.GetFileName(filePath),
                         uri: new Uri("file://" + filePath)
                     ));
+            }
+        }
+
+        private void onCustomVideoSourceUriChanged(Uri newValue)
+        {
+            VideoSource vs = VideoSources
+                .Where(x => x.Name == CUSTOM_VS_NAME)
+                .FirstOrDefault();
+
+            bool isCustomVideoSourceSelected = vs != null && vs.Equals(SelectedVideoSource);
+
+            if (vs != null)
+                VideoSources.Remove(vs);
+
+            if (newValue != null)
+            {
+                var newCusomVideoSource = new VideoSource(CUSTOM_VS_NAME, newValue.ToString(), newValue);
+                VideoSources.Add(newCusomVideoSource);
+                if (isCustomVideoSourceSelected)
+                    SelectedVideoSource = newCusomVideoSource;
+            }
+            else if (isCustomVideoSourceSelected)
+            {
+                resetDefaultVideoSeource(_defaultVideoDevice);
             }
         }
 
@@ -411,7 +449,7 @@ namespace VideoTransmitter.ViewModels
                     var added = devices.Except(VideoSources);
                     var removed = VideoSources
                                     .Skip(1)
-                                    .Where(x => x.Uri.Scheme != "file")
+                                    .Where(x => x.Uri.Scheme != "file" && x.Name != CUSTOM_VS_NAME)
                                     .Except(devices).ToList();
 
                     foreach (var d in added)

@@ -187,5 +187,17 @@ namespace VideoTransmitter.Properties {
                 this["HardwareDecodingEnable"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string CustomVideoSourceUri {
+            get {
+                return ((string)(this["CustomVideoSourceUri"]));
+            }
+            set {
+                this["CustomVideoSourceUri"] = value;
+            }
+        }
     }
 }
